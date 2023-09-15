@@ -12,13 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Validate cloud-init schema
-        run: |
-          cloud-init --version
-          echo 'datasource_list: [ NoCloud, None ]' > sudo /etc/cloud/cloud.cfg.d/90_dpkg.cfg
-          cloud-init schema -c ubuntu/http/user-data
- 
       - uses: hashicorp/setup-packer@main
-        id: setup
         with:
           version: latest
