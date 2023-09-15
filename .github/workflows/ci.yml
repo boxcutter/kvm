@@ -12,14 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup cloud-init
-        run: |
-          sudo apt-get update
-          sudo apt-get install cloud-init
-          cloud-init --version
-     
       - name: Validate cloud-init schema
         run: |
+          cloud-init --version
+          echo 'datasource_list: [ NoCloud, None ]' > /etc/cloud/cloud.cfg.d/90_dpkg.cfg
           cloud-init schema -c ubuntu/http/user-data
  
       - uses: hashicorp/setup-packer@main
