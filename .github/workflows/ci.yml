@@ -12,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
      
-      - name: Setup cloud-init
+      - name: Validate cloud-init schema
         run: |
-          cloud-init --version
+          cloud-init schema -c ubuntu/http/user-data
  
       - uses: hashicorp/setup-packer@main
         id: setup
