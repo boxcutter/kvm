@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+     
+      - name: Setup cloud-init
+        run: |
+          cloud-init --version
+ 
       - uses: hashicorp/setup-packer@main
         id: setup
         with:
