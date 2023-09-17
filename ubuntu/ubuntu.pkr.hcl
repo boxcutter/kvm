@@ -1,8 +1,18 @@
+variable "ssh_username" {
+  type    = string
+  default = "packer"
+}
+
+variable "ssh_password" {
+  type    = string
+  default = "packer"
+}
+
 source "file" "user_data" {
   content = <<EOF
 #cloud-config
-
-password: ubuntu
+user: ${var.ssh_username}
+password: ${var.ssh_password}
 chpasswd: { expire: False }
 ssh_pwauth: True
 EOF
@@ -35,6 +45,11 @@ variable "iso_url" {
   default = "http://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-amd64.img"
 }
 
+variable "vm_name" {
+  type = string
+  default = "ubuntu-22.04-x86_64"
+}
+
 source "qemu" "ubuntu" {
   disk_compression = true
   disk_image = true
@@ -44,10 +59,12 @@ source "qemu" "ubuntu" {
   qemuargs = [
     ["-cdrom", "cidata.iso"]
   ]
-  shutdown_command = "sudo shutdown -P now"
-  ssh_password = "ubuntu"
+  output_directory = "output-${var.vm_name}"
+  shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
+  ssh_password = var.ssh_password
   ssh_timeout = "120s"
-  ssh_username = "ubuntu"
+  ssh_username = var.ssh_username
+  vm_name = var.vm_name
 }
 
 build {
