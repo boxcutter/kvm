@@ -46,18 +46,18 @@ variable "iso_url" {
 }
 
 variable "vm_name" {
-  type = string
+  type    = string
   default = "ubuntu-22.04-aarch64"
 }
 
 source "qemu" "ubuntu" {
   disk_compression = true
-  disk_image = true
-  disk_size = "30G"
-  format = "qcow2"
-  iso_checksum = var.iso_checksum
-  iso_url = var.iso_url
-  qemu_binary = "qemu-system-aarch64"
+  disk_image       = true
+  disk_size        = "30G"
+  format           = "qcow2"
+  iso_checksum     = var.iso_checksum
+  iso_url          = var.iso_url
+  qemu_binary      = "qemu-system-aarch64"
   qemuargs = [
     ["-cdrom", "cidata.iso"],
     ["-cpu", "max"],
@@ -65,16 +65,16 @@ source "qemu" "ubuntu" {
     ["-monitor", "none"],
     ["-device", "virtio-gpu-pci"],
   ]
-  output_directory = "output-${var.vm_name}"
-  shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
-  ssh_password = var.ssh_password
-  ssh_timeout = "120s"
-  ssh_username = var.ssh_username
-  vm_name = var.vm_name
-  machine_type = "virt"
-  net_device = "virtio-net"
-  disk_interface = "virtio"
-  efi_boot = true
+  output_directory  = "output-${var.vm_name}"
+  shutdown_command  = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
+  ssh_password      = var.ssh_password
+  ssh_timeout       = "120s"
+  ssh_username      = var.ssh_username
+  vm_name           = var.vm_name
+  machine_type      = "virt"
+  net_device        = "virtio-net"
+  disk_interface    = "virtio"
+  efi_boot          = true
   efi_firmware_code = "/usr/share/AAVMF/AAVMF_CODE.fd"
   efi_firmware_vars = "/usr/share/AAVMF/AAVMF_VARS.fd"
 }
@@ -83,7 +83,7 @@ build {
   sources = ["source.qemu.ubuntu"]
 
   provisioner "shell" {
-    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     expect_disconnect = true
     scripts = [
       "../scripts/disable-updates.sh",

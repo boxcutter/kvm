@@ -1,15 +1,15 @@
 variable "efi_boot" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "efi_firmware_code" {
-  type = string
+  type    = string
   default = null
 }
 
 variable "efi_firmware_vars" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -61,26 +61,26 @@ variable "iso_url" {
 }
 
 variable "vm_name" {
-  type = string
+  type    = string
   default = "ubuntu-22.04-x86_64"
 }
 
 source "qemu" "ubuntu" {
   disk_compression = true
-  disk_image = true
-  disk_size = "30G"
-  iso_checksum = var.iso_checksum
-  iso_url = var.iso_url
+  disk_image       = true
+  disk_size        = "30G"
+  iso_checksum     = var.iso_checksum
+  iso_url          = var.iso_url
   qemuargs = [
     ["-cdrom", "cidata.iso"]
   ]
-  output_directory = "output-${var.vm_name}"
-  shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
-  ssh_password = var.ssh_password
-  ssh_timeout = "120s"
-  ssh_username = var.ssh_username
-  vm_name = var.vm_name
-  efi_boot = var.efi_boot
+  output_directory  = "output-${var.vm_name}"
+  shutdown_command  = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
+  ssh_password      = var.ssh_password
+  ssh_timeout       = "120s"
+  ssh_username      = var.ssh_username
+  vm_name           = var.vm_name
+  efi_boot          = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
 }
@@ -89,7 +89,7 @@ build {
   sources = ["source.qemu.ubuntu"]
 
   provisioner "shell" {
-    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     expect_disconnect = true
     scripts = [
       "../scripts/disable-updates.sh",

@@ -46,25 +46,25 @@ variable "iso_url" {
 }
 
 variable "vm_name" {
-  type = string
+  type    = string
   default = "oraclelinux-8-x86_64"
 }
 
 source "qemu" "oraclelinux" {
   disk_compression = true
-  disk_image = true
-  disk_size = "48G"
-  iso_checksum = var.iso_checksum
-  iso_url = var.iso_url
+  disk_image       = true
+  disk_size        = "48G"
+  iso_checksum     = var.iso_checksum
+  iso_url          = var.iso_url
   qemuargs = [
     ["-cdrom", "cidata.iso"]
   ]
   output_directory = "output-${var.vm_name}"
   shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
-  ssh_password = var.ssh_password
-  ssh_timeout = "120s"
-  ssh_username = var.ssh_username
-  vm_name = var.vm_name
+  ssh_password     = var.ssh_password
+  ssh_timeout      = "120s"
+  ssh_username     = var.ssh_username
+  vm_name          = var.vm_name
 }
 
 build {
