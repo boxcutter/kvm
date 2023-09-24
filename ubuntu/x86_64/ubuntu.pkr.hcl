@@ -1,3 +1,18 @@
+variable "efi_boot" {
+  type = bool
+  default = false
+}
+
+variable "efi_firmware_code" {
+  type = string
+  default = null
+}
+
+variable "efi_firmware_vars" {
+  type = string
+  default = null
+}
+
 variable "ssh_username" {
   type    = string
   default = "packer"
@@ -65,9 +80,12 @@ source "qemu" "ubuntu" {
   ssh_timeout = "120s"
   ssh_username = var.ssh_username
   vm_name = var.vm_name
-  efi_boot = true
-  efi_firmware_code = "/usr/share/OVMF/OVMF_CODE.fd"
-  efi_firmware_vars = "/usr/share/OVMF/OVMF_VARS.fd"
+  efi_boot = var.efi_boot
+  efi_firmware_code = var.efi_firmware_code
+  efi_firmware_vars = var.efi_firmware_vars
+  # efi_boot = true
+  # efi_firmware_code = "/usr/share/OVMF/OVMF_CODE.fd"
+  # efi_firmware_vars = "/usr/share/OVMF/OVMF_VARS.fd"
 }
 
 build {
