@@ -83,11 +83,17 @@ source "qemu" "ubuntu" {
   efi_boot = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
-  # efi_boot = true
-  # efi_firmware_code = "/usr/share/OVMF/OVMF_CODE.fd"
-  # efi_firmware_vars = "/usr/share/OVMF/OVMF_VARS.fd"
 }
 
 build {
   sources = ["source.qemu.ubuntu"]
+
+  provisioner "shell" {
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    expect_disconnect = true
+    scripts = [
+      "../scripts/disable-updates.sh",
+      "../scripts/qemu.sh",
+    ]
+  }
 }

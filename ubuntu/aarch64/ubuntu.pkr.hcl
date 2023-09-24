@@ -81,4 +81,13 @@ source "qemu" "ubuntu" {
 
 build {
   sources = ["source.qemu.ubuntu"]
+
+  provisioner "shell" {
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    expect_disconnect = true
+    scripts = [
+      "../scripts/disable-updates.sh",
+      "../scripts/qemu.sh",
+    ]
+  }
 }
