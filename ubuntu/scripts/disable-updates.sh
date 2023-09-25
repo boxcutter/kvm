@@ -24,6 +24,7 @@ APT::Periodic::Unattended-Upgrade "0";
 EOF
 
 # Disable snapd updates
+echo "==> Disable snap updates"
 systemctl stop snapd.service;
 systemctl stop snapd.socket;
 systemctl mask snapd.service;
