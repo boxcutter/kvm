@@ -23,7 +23,7 @@ is used for images with UEFI firmware.
 Prequisites:
 
 - Install Hashicorp Packer
-- Install QEMU/KVM with OVMF (Open Virtual Machine Firmware)/AAVMF (ARM Architecture Machine Firmware)
+- Install [QEMU/KVM with OVMF (Open Virtual Machine Firmware)/AAVMF (ARM Architecture Machine Firmware)](docs/install-qemu-kvm.md)
 
 In the root of this repo there are directories with examples for the following
 distros:
