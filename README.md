@@ -41,6 +41,8 @@ contains shared code referenced by each processor build.
 - `aarch64` - ARM64 processor architecture
 - `x86_64` - X86_64/AMD64/Intel 64 processor architecture
 
+### x86_64
+
 ```
 cd ubuntu/x86_64
 PACKER_LOG=1 packer build \
@@ -52,9 +54,12 @@ PACKER_LOG=1 packer build \
   ubuntu.pkr.hcl
 ```
 
+### aarch64
 ```
-cd ubuntu/x86_64
-
+cd ubuntu/aarch64
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-22.04-aarch64.pkrvars.hcl \
+  ubuntu.pkr.hcl
 ```
 
 ## Using the images
@@ -91,5 +96,27 @@ $ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
   -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2 \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE.fd \
-  -drive if=pflash,format=raw,unit=1,file=efivars.fd
+  -drive if=pflash,format=raw,unit=1,file=ubuntu-image-efivars.fd
+```
+
+### aarch64 UEFI
+
+```
+$ qemu-img convert -O qcow2 output-ubuntu-22.04-aarch64/ubuntu-22.04-aarch64 ubuntu-image.qcow2
+$ cp output-ubuntu-22.04-aarch64/efivars.fd ubuntu-image-efivars.fd
+$ qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+qemu-system-aarch64 \
+  -name ubuntu-image \
+  -machine accel=kvm,type=virt \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -device virtio-keyboard \
+  -device virtio-mouse \
+  -device virtio-gpu-pci \
+  -device virtio-net-pci,netdev=net0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2 \
+  -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/AAVMF/AAVMF_CODE.fd \
+  -drive if=pflash,format=raw,unit=1,file=ubuntu-image-efivars.fd
 ```
