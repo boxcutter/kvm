@@ -1,3 +1,95 @@
 # kvm
 
-Packer templates for producing KVM images written in HCL
+Packer templates for producing KVM/QEMU images written in HCL.
+
+This repo contains source code that can be used to create a
+pipeline that customizes the qcow2 base images from all of the major Linux
+distros. You can use these examples to create your own customized
+minimalizst Linux images with "Just Enough Operating System" to
+bootstrap an appliance with further automation specific to your use case.
+
+Examples are provided that create virtual machines images for both
+x86_64 and ARM64 processors with hardware acceleration. For x86_64 processors,
+examples are provided images with either the Legacy BIOS firmware or the
+Unified Extensible Firmware Interface (UEFI). Since ARM64 processors don't
+support Legacy BIOS firmware, only UEFI examples are provided for ARM64.
+
+The SeaBIOS open source implementation of a 16-bit X86 BIOS is used for the
+Legacy BIOS firmware in these images. And the TianoCore open source implentation
+is used for images with UEFI firmware.
+
+## Building the images
+
+Prequisites:
+
+- Install Hashicorp Packer
+- Install QEMU/KVM with OVMF (Open Virtual Machine Firmware)/AAVMF (ARM Architecture Machine Firmware)
+
+In the root of this repo there are directories with examples for the following
+distros:
+
+- `centos`
+- `debian`
+- `oraclinux`
+- `ubuntu`
+
+Each distro directory has a subdirectory for each processor architecture. You'll
+want to make each directory the current directory when run Hashcirop packer
+to create images for each processor. There's also a `scripts` directory that
+contains shared code referenced by each processor build.
+
+- `aarch64` - ARM64 processor architecture
+- `x86_64` - X86_64/AMD64/Intel 64 processor architecture
+
+```
+cd ubuntu/x86_64
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-22.04-bios-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-22.04-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+```
+
+```
+cd ubuntu/x86_64
+
+```
+
+## Using the images
+
+### x86_64 BIOS
+
+```
+$ qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios-x86_64 ubuntu-image.qcow2
+$ qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+$ qemu-system-x86_64 \
+  -name ubuntu-image \
+  -machine accel=kvm,type=q35 \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -device virtio-net-pci,netdev=net0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2
+```
+
+### x86_64 UEFI
+
+```
+$ qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 ubuntu-image.qcow2
+$ cp output-ubuntu-22.04-x86_64/efivars.fd ubuntu-image-efivars.fd
+$ qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+$ qemu-system-x86_64 \
+  -name ubuntu-image \
+  -machine accel=kvm,type=q35 \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -device virtio-net-pci,netdev=net0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2 \
+  -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE.fd \
+  -drive if=pflash,format=raw,unit=1,file=efivars.fd
+```
