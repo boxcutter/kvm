@@ -121,6 +121,99 @@ qemu-system-aarch64 \
   -drive if=pflash,format=raw,unit=1,file=ubuntu-image-efivars.fd
 ```
 
+### libvirt x86_64 BIOS
+
+```
+sudo qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
+sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-image \
+  --memory 2048 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk path=/var/lib/libvirt/images/ubuntu-image.qcow2,bus=virtio \
+  --import \
+  --noautoconsole \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --video model=virtio \
+  --console pty,target_type=serial
+
+virsh console ubuntu-image
+virt-viewer ubuntu-image
+
+virsh destroy ubuntu-image
+virsh undefine ubuntu-image --remove-all-storage
+```
+
+### libvirt x86_64 UEFI
+
+```
+sudo qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
+sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-image \
+  --boot uefi \
+  --memory 2048 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk path=/var/lib/libvirt/images/ubuntu-image.qcow2,bus=virtio \
+  --import \
+  --noautoconsole \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --video model=virtio \
+  --console pty,target_type=serial
+
+virsh console ubuntu-image
+virt-viewer ubuntu-image
+
+virsh destroy ubuntu-image
+virsh undefine ubuntu-image --nvram --remove-all-storage
+```
+
+### libvirt aarch64 UEFI
+
+```
+# You can get paths of the pools from /etc/libvirt/storage
+
+```
+# You can get paths of the pools from /etc/libvirt/storage
+
+
+
+### libvirt x86_64 UEFI
+
+```
+sudo qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
+sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-image \
+  --boot uefi \
+  --memory 2048 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk path=/var/lib/libvirt/images/ubuntu-image.qcow2,bus=virtio \
+  --import \
+  --noautoconsole \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --video model=virtio \
+  --console pty,target_type=serial
+
+virsh console ubuntu-image
+virt-viewer ubuntu-image
+
+virsh destroy ubuntu-image
+virsh undefine ubuntu-image --nvram --remove-all-storage
+```
+
 ### libvirt aarch64 UEFI
 
 ```
