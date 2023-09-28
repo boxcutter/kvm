@@ -120,3 +120,35 @@ qemu-system-aarch64 \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/AAVMF/AAVMF_CODE.fd \
   -drive if=pflash,format=raw,unit=1,file=ubuntu-image-efivars.fd
 ```
+
+### libvirt aarch64 UEFI
+
+```
+# You can get paths of the pools from /etc/libvirt/storage
+# /data/vms
+# /var/lib/libvirt/images
+
+qemu-img convert -O qcow2 output-ubuntu-22.04-aarch64/ubuntu-22.04-aarch64 /data/vms/ubuntu-image.qcow2
+qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-image \
+  --boot uefi \
+  --memory 2048 \
+  --vcpus 2 \
+  --os-variant ubuntu20.04 \
+  --disk path=/data/vms/ubuntu-image.qcow2,bus=virtio \
+  --import \
+  --noautoconsole \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --video model=virtio \
+  --console pty,target_type=serial
+
+virsh console ubuntu-image
+virt-viewer ubuntu-image
+
+virsh destroy ubuntu-image
+virsh undefine ubuntu-image --nvram --remove-all-storage
+```
