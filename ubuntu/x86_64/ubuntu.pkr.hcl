@@ -68,7 +68,7 @@ variable "vm_name" {
 source "qemu" "ubuntu" {
   disk_compression = true
   disk_image       = true
-  disk_size        = "30G"
+  disk_size        = "16G"
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   qemuargs = [
