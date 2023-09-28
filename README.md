@@ -64,7 +64,7 @@ PACKER_LOG=1 packer build \
 
 ## Using the images
 
-### x86_64 BIOS
+### QEMU x86_64 BIOS
 
 ```
 $ qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios-x86_64 ubuntu-image.qcow2
@@ -80,7 +80,7 @@ $ qemu-system-x86_64 \
   -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2
 ```
 
-### x86_64 UEFI
+### QEMU x86_64 UEFI
 
 ```
 $ qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 ubuntu-image.qcow2
@@ -99,7 +99,7 @@ $ qemu-system-x86_64 \
   -drive if=pflash,format=raw,unit=1,file=ubuntu-image-efivars.fd
 ```
 
-### aarch64 UEFI
+### QEMU aarch64 UEFI
 
 ```
 $ qemu-img convert -O qcow2 output-ubuntu-22.04-aarch64/ubuntu-22.04-aarch64 ubuntu-image.qcow2
