@@ -41,7 +41,7 @@ contains shared code referenced by each processor build.
 - `aarch64` - ARM64 processor architecture
 - `x86_64` - X86_64/AMD64/Intel 64 processor architecture
 
-### x86_64
+### Building x86_64 images
 
 ```
 cd ubuntu/x86_64
@@ -54,7 +54,7 @@ PACKER_LOG=1 packer build \
   ubuntu.pkr.hcl
 ```
 
-### aarch64
+### Building aarch64 images
 ```
 cd ubuntu/aarch64
 PACKER_LOG=1 packer build \
@@ -176,19 +176,10 @@ virsh destroy ubuntu-image
 virsh undefine ubuntu-image --nvram --remove-all-storage
 ```
 
-### libvirt aarch64 UEFI
-
-```
-# You can get paths of the pools from /etc/libvirt/storage
-
-```
-# You can get paths of the pools from /etc/libvirt/storage
-
-
-
 ### libvirt x86_64 UEFI
 
 ```
+# You can get paths of the pools from /etc/libvirt/storage
 sudo qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
 sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
 
