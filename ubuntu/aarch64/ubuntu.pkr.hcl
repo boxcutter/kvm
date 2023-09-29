@@ -30,6 +30,16 @@ EOF
 build {
   sources = ["sources.file.user_data", "sources.file.meta_data"]
 
+  # cloud-init may still be running when we start executing scripts
+  # To avoid race conditions, make sure cloud-init is done first
+  provisioner "shell" {
+    inline = [
+      "echo '==> Waiting for cloud-init to finish'",
+      "/usr/bin/cloud-init status --wait",
+      "echo '==> Cloud-init complete'",
+    ]
+  }
+
   provisioner "shell-local" {
     inline = ["genisoimage -output cidata.iso -input-charset utf-8 -volid cidata -joliet -r user-data meta-data"]
   }
