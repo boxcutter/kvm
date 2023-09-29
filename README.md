@@ -125,7 +125,7 @@ qemu-system-aarch64 \
 
 ```
 sudo qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
-sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/ubuntu-image.qcow2 32G
 
 virt-install \
   --connect qemu:///system \
@@ -153,7 +153,7 @@ virsh undefine ubuntu-image --remove-all-storage
 ```
 # You can get paths of the pools from /etc/libvirt/storage
 sudo qemu-img convert -O qcow2 output-ubuntu-22.04-x86_64/ubuntu-22.04-x86_64 /var/lib/libvirt/images/ubuntu-image.qcow2
-sudo qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/ubuntu-image.qcow2 32G
 
 virt-install \
   --connect qemu:///system \
@@ -185,7 +185,7 @@ virsh undefine ubuntu-image --nvram --remove-all-storage
 # /var/lib/libvirt/images
 
 qemu-img convert -O qcow2 output-ubuntu-22.04-aarch64/ubuntu-22.04-aarch64 /data/vms/ubuntu-image.qcow2
-qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+qemu-img resize -f qcow2 /data/vms/ubuntu-image.qcow2 32G
 
 virt-install \
   --connect qemu:///system \
