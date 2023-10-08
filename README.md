@@ -128,6 +128,19 @@ sudo qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios
 sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/ubuntu-image.qcow2 32G
 
 virt-install \
+  --name ubuntu-image \
+  --memory 2048 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk path=/var/lib/libvirt/images/ubuntu-image.qcow2,bus=virtio \
+  --import \
+  --noautoconsole \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --video model=virtio \
+  --console pty,target_type=serial
+
+virt-install \
   --connect qemu:///system \
   --name ubuntu-image \
   --memory 2048 \
@@ -170,6 +183,18 @@ virt-install \
   --video model=virtio \
   --console pty,target_type=serial
 
+sudo rm 50-cloud-init.yaml
+sudo vi /etc/netplan/00-installer-config.yaml
+network:
+  ethernets:
+    enp1s0:
+      dhcp4: true
+  version: 2
+
+sudo vi /etc/hosts
+127.0.0.1 localhost ubuntu-cloud
+
+sudo netplan apply
 virsh console ubuntu-image
 virt-viewer ubuntu-image
 
