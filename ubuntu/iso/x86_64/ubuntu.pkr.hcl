@@ -60,6 +60,18 @@ build {
   sources = ["sources.file.user_data", "sources.file.meta_data"]
 }
 
+variable "boot_command" {
+  type = list(string)
+  default = [
+    "c<wait>",
+    "linux /casper/vmlinuz autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/' ---",
+    "<enter>",
+    "initrd /casper/initrd",
+    "<enter>",
+    "boot<enter><wait>",
+  ]
+}
+
 variable "efi_boot" {
   description = "Boot in EFI mode instead of BIOS."
   type        = bool
@@ -99,19 +111,12 @@ variable "vm_name" {
 source "qemu" "ubuntu" {
   # Ubuntu 20.04 image default timeout is 5s, so we need to be fast
   boot_wait = "5s"
-  boot_command = [
-    "c<wait>",
-    "linux /casper/vmlinuz autoinstall 'ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/' ---",
-    "<enter>",
-    "initrd /casper/initrd",
-    "<enter>",
-    "boot<enter><wait>",
-  ]
+  boot_command = var.boot_command
   accelerator       = "kvm"
   cpus              = 2
   disk_interface    = "virtio-scsi"
   disk_size         = "16G"
-  disk_compression  = true 
+  disk_compression  = true
   format            = "qcow2"
   headless          = false
   http_directory    = var.http_directory
@@ -129,7 +134,7 @@ source "qemu" "ubuntu" {
   efi_boot          = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
-  qemuargs          = [
+  qemuargs = [
     ["-cpu", "host"]
   ]
 }
