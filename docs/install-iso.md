@@ -111,15 +111,6 @@ NOTE: When you install Ubuntu interactively and choose default partitioning, onl
 HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
 
 ```
-$ virsh vol-create-as default ubuntu-image.qcow2 20G --format qcow2
-Vol ubuntu-image.qcow2 created
-
-$ virsh vol-info --pool default ubuntu-image.qcow2
-Name:           ubuntu-image.qcow2
-Type:           file
-Capacity:       20.00 GiB
-Allocation:     196.00 KiB
-
 virt-install \
   --connect qemu:///system \
   --name ubuntu-image \
