@@ -28,6 +28,8 @@ $ virt-host-validate qemu
   QEMU: Checking for secure guest support                                    : WARN (Unknown if this platform has Secure Guest support)
 ```
 
+An x86_64 machine will like display a warning about cgroup devices controller
+support not being enabled.
 To add cgroup 'devices' controller support, edit `/etc/default/grub`
 and change the line that looks like `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"`
 to:
