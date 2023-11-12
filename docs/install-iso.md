@@ -6,7 +6,10 @@ By default a clean KVM install does not define any storage pools.
 
 ```
 # Create the storage pool definition
-$ virsh pool-define-as --name iso --type dir --target /var/lib/libvirt/iso
+$ virsh pool-define-as \
+    --name iso \
+    --type dir \
+    --target /var/lib/libvirt/iso
 Pool iso defined
 
 # Verify the storage pool is listed
@@ -24,51 +27,85 @@ total 8
 drwx--x--x  2 root root 4096 Oct  7 14:47 .
 drwxr-xr-x 10 root root 4096 Oct  7 14:47 ..
 
-$ virsh vol-list --pool iso --details
- Name   Path   Type   Capacity   Allocation
----------------------------------------------
-
 # Start the storage pool
 $ virsh pool-start iso
 Pool iso started
 
+$ virsh vol-list --pool iso --details
+ Name   Path   Type   Capacity   Allocation
+---------------------------------------------
+
 $ virsh pool-list --all
- Name           State    Autostart
-------------------------------------
- boot-scratch   active   yes
- default        active   yes
- iso            active   no
+ Name   State    Autostart
+----------------------------
+ iso    active   no
 
 # Turn on autostart
 $ virsh pool-autostart iso
 Pool iso marked as autostarted
 
 $ virsh pool-list --all
- Name           State    Autostart
-------------------------------------
- boot-scratch   active   yes
- default        active   yes
- iso            active   yes
+ Name   State    Autostart
+----------------------------
+ iso    active   yes
 
 # Verify the storage pool configuration
 $ virsh pool-info iso
 Name:           iso
-UUID:           a5110ddc-1142-4a49-9652-0232280cf5a7
+UUID:           7de2281d-2fda-41e4-900f-3819ba3407e7
 State:          running
 Persistent:     yes
 Autostart:      yes
 Capacity:       960.65 GiB
-Allocation:     131.41 GiB
-Available:      829.24 GiB
+Allocation:     12.49 GiB
+Available:      948.16 GiB
 
 $ sudo ls -ld /var/lib/libvirt/iso
-drwx--x--x 2 root root 4096 Oct  7 14:47 /var/lib/libvirt/iso
+drwx--x--x 2 root root 4096 Nov 12 08:41 /var/lib/libvirt/iso
 
-$ sudo curl -L https://releases.ubuntu.com/22.04.3/ubuntu-22.04.3-live-server-amd64.iso -o /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
+$ sudo curl \
+    -L https://releases.ubuntu.com/22.04.3/ubuntu-22.04.3-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
 
 $ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
 a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd  /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
 ```
+
+## Create a storage pool for images
+
+```
+# Create the storage pool definition
+$ virsh pool-define-as \
+    --name default \
+    --type dir \
+    --target /var/lib/libvirt/images
+
+# Create the local directory
+$ virsh pool-build default
+Pool default built
+
+# Start the storage pool
+$ virsh pool-start default
+Pool default started
+
+$ virsh pool-list --all
+ Name      State    Autostart
+-------------------------------
+ default   active   no
+ iso       active   yes
+
+# Turn on autostart
+$ virsh pool-autostart default
+Pool default marked as autostarted
+
+$ virsh pool-list --all
+ Name      State    Autostart
+-------------------------------
+ default   active   yes
+ iso       active   yes
+```
+
+## Create a volume in a storage pool and start the install
 
 ```
 $ virsh vol-create-as default ubuntu-image.qcow2 20G --format qcow2
