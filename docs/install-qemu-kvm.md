@@ -49,7 +49,8 @@ Reboot and then everything in `virt-host-validate` should pass. The tool
 can't validate secure guest support on Intel chips, only on AMD or IBM
 processors, so the warning is accurate there: https://stackoverflow.com/questions/65207563/qemu-warn-unknown-if-this-platform-has-secure-guest-support
 
-Install the packages with the UEFI firmware:
+Also make sure that the packages with the UEFI firmware are present - on Ubuntu these should be
+installed automatically when `qemu-kvm` is installed:
 ```
 # Open Virtual Machine Firmware for X86-64 processors
 # Files are in /usr/share/OVMF
