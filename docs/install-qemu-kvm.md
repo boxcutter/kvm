@@ -5,6 +5,8 @@ Install QEMU/KVM and libvirtd
 ```
 sudo apt-get update
 sudo apt-get install qemu-kvm libvirt-daemon-system
+# if you want to install images from ISOs with virt-install
+sudo apt-get install virtinst
 ```
 
 Make sure the current user is a member of the libvirt and kvm groups
