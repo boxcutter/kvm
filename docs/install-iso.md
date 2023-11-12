@@ -1,15 +1,19 @@
+# Installing an OS from an ISO without automation
+
+## Create a storage pool for ISOs
+Create a storage pool for your ISOs, so that virsh has permission to access them.
+By default a clean KVM install does not define any storage pools.
+
 ```
 # Create the storage pool definition
-$ virsh pool-define-as iso dir - - - - "/var/lib/libvirt/iso"
+$ virsh pool-define-as --name iso --type dir --target /var/lib/libvirt/iso
 Pool iso defined
 
 # Verify the storage pool is listed
 $ virsh pool-list --all
- Name           State      Autostart
---------------------------------------
- boot-scratch   active     yes
- default        active     yes
- iso            inactive   no
+ Name   State      Autostart
+------------------------------
+ iso    inactive   no
 
 # Create the local directory
 $ virsh pool-build iso
