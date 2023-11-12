@@ -107,6 +107,9 @@ $ virsh pool-list --all
 
 ## Create a volume in a storage pool and start the install
 
+NOTE: When you install Ubuntu interactively and choose default partitioning, only
+HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
+
 ```
 $ virsh vol-create-as default ubuntu-image.qcow2 20G --format qcow2
 Vol ubuntu-image.qcow2 created
@@ -208,3 +211,4 @@ virt-install \
   --graphics spice \
   --video model=virtio \
   --console pty,target_type=serial
+```
