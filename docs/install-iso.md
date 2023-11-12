@@ -142,8 +142,8 @@ $ virsh domblklist ubuntu-image
 $ virsh change-media ubuntu-image sda --eject
 error: The disk device 'sda' doesn't have media
 
-
 $ virsh detach-disk ubuntu-image sda --config
+Disk detached successfully
 
 $ virsh domblklist ubuntu-image
  Target   Source
