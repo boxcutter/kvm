@@ -7,6 +7,15 @@ sudo apt-get update
 sudo apt-get install qemu-kvm libvirt-daemon-system
 ```
 
+Make sure the current user is a member of the libvirt and kvm groups
+
+```
+$ sudo adduser $(id -un) libvirt
+Adding user '<username>' to group 'libvirt' ...
+$ sudo adduser $(id -un) kvm
+Adding user '<username>' to group 'kvm' ...
+```
+
 Run `virt-host-validate` to check your setup:
 
 ```
