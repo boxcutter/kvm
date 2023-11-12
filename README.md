@@ -64,6 +64,22 @@ PACKER_LOG=1 packer build \
 
 ## Using the images
 
+Ironically on Linux, it's easiest to use Docker or Podman to load the required
+dependencies for the Vagrant Libvirt plugin for Vagrant. For more information
+refer to the [Vagrant Libvirt Documentation](https://vagrant-libvirt.github.io/vagrant-libvirt/installation#requirements).
+
+```
+docker run --interactive --tty --rm \
+  --env LIBVIRT_DEFAULT_URI \
+  --mount type=bind,source=/var/run/libvirt/,target=/var/run/libvirt/ \
+  --mount type=bind,source=$HOME/.vagrant.d,target=/.vagrant.d \
+  --mount type=bind,source=$(realpath "${PWD}"),target=${PWD} \
+  --workdir "${PWD}" \
+  --network host \
+  vagrantlibvirt/vagrant-libvirt:latest \
+    vagrant status
+```
+
 ### QEMU x86_64 BIOS
 
 ```
