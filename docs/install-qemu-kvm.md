@@ -3,7 +3,7 @@
 Install QEMU/KVM and libvirtd
 
 ```
-sudo apt-get install update
+sudo apt-get update
 sudo apt-get install qemu-kvm libvirt-daemon-system
 ```
 
