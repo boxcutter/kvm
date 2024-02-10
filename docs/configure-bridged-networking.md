@@ -110,6 +110,67 @@ network:
   renderer: NetworkManager
 ```
 
+### Configuring bridged networking with systemd-networkd via Netplan
+
+```
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+ens33            UP             00:0c:29:b6:83:61 <BROADCAST,MULTICAST,UP,LOWER_UP>
+```
+
+```
+$ ls /etc/netplan
+00-installer-config.yaml
+$ cat /etc/netplan/00-installer-config.yaml
+# This is the network config written by 'subiquity'
+network:
+  ethernets:
+    ens33:
+      dhcp4: true
+  version: 2
+```
+
+```
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens33:
+      dhcp4: no
+  bridges:
+    br0:
+      interfaces:
+        - ens33
+      dhcp4: yes
+      parameters:
+        stp: false
+        forward-delay: 0
+```
+
+```
+$ sudo netplan try
+br0: reverting custom parameters for bridges and bonds is not supported
+
+Please carefully review the configuration and use 'netplan apply' directly.
+```
+
+```
+$ sudo netplan apply
+$ networkctl
+IDX LINK  TYPE     OPERATIONAL SETUP
+  1 lo    loopback carrier     unmanaged
+  2 ens33 ether    enslaved    configured
+  3 br0   bridge   routable    configured
+
+3 links listed.
+
+$ ip -brief addr
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+ens33            UP
+br0              UP             172.25.0.112/22 metric 100 fe80::f4d4:91ff:feed:5e12/64
+```
+
 ### Configuring bridged networking with NetworkManager
 
 ```
