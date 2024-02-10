@@ -15,7 +15,11 @@ the same network.
 ### Determine how the networking is configured on Ubuntu
 
 Ubuntu has multiple methods for persisting network configurations, so first you need to
-determine how the networking on your machine is configured.
+determine how the networking on your machine is configured. First check the current
+configuration with the `ip link` command to get an overview of how the networking is
+configured. Ultimiately everything in Linux is configured with the `ip` command, but
+unfortunately there is not one standard way to persist a network configuration across
+reboots.
 
 On Ubuntu, determine if the host interface is managed by `systemd-networkd` or `NetworkManager`.
 Usually if you are using Ubuntu Desktop, it's `NetworkManager`, and if you are using
