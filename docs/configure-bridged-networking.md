@@ -92,7 +92,7 @@ network:
 
 On the other hand, if a `NetworkManager` configuration is being managed by `netplan`,
 it will include a `renderer` stanza that says `renderer: NetworkManager`. It's not
-unusual for there to be any configuration in the netplan file, because currently,
+unusual for there to be zero configuration in the actual netplan file, because currently,
 NetworkManager isn't very well integrated into netplan on Ubuntu. You can't use
 `netplan try` to experiment with new configurations, for example.
 
