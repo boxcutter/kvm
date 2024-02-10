@@ -109,3 +109,124 @@ network:
   version: 2
   renderer: NetworkManager
 ```
+
+### Configuring bridged networking with NetworkManager
+
+```
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens33            UP             00:0c:29:25:7e:47 <BROADCAST,MULTICAST,UP,LOWER_UP>
+
+$ nmcli connection show --active
+NAME                UUID                                  TYPE      DEVICE 
+Wired connection 1  779e47c2-776a-3c0a-a498-ebffcbe374c4  ethernet  ens33
+```
+
+```
+# Create the brdige br0 with STP disable to avoid the bridge being advertised on the network
+$ sudo nmcli connection add type bridge ifname br0 stp no
+# Swing the ethernet interface to the bridge
+$ sudo nmcli connection add type bridge-slave ifname ens33 master br0
+```
+
+```
+$ nmcli connection show
+NAME                UUID                                  TYPE      DEVICE 
+bridge-br0          5eb86a64-f791-4c32-a421-a256e2f1cdb2  bridge    br0    
+Wired connection 1  779e47c2-776a-3c0a-a498-ebffcbe374c4  ethernet  ens33  
+bridge-slave-ens33  0222534a-92a7-4b57-bd14-32e5bc44b73b  ethernet  --
+```
+
+```
+# Bring the existing connection down
+$ sudo nmcli connection down 'Wired connection 1'
+# Bring the new bridge up
+$ sudo nmcli connection up bridge-br0
+$ sudo nmcli connection up bridge-slave-ens33
+```
+
+```
+$ nmcli connection show --active
+NAME                UUID                                  TYPE      DEVICE 
+bridge-br0          5eb86a64-f791-4c32-a421-a256e2f1cdb2  bridge    br0    
+bridge-slave-ens33  0222534a-92a7-4b57-bd14-32e5bc44b73b  ethernet  ens33
+
+$ ip addr show br0
+3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 0a:b1:59:e4:c8:e8 brd ff:ff:ff:ff:ff:ff
+    inet 172.25.0.217/22 brd 172.25.3.255 scope global dynamic noprefixroute br0
+       valid_lft 86293sec preferred_lft 86293sec
+    inet6 fe80::524c:23ad:bd19:2d38/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+
+$ ip addr show ens33
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:25:7e:47 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+```
+
+### Configuring bridged networking with the ip command
+
+It can be helpful to configure bridged networking with the iproute2 `ip` command.
+iproute2 is now the default networking toolkit in Linux, replacing `net-tools` commands
+like `ifconfig`, `brctl` and `route` with a more unified interface.
+
+The configuration will not be persist across reboots without putting the commands in
+a script, but it's a great way to test the bridged networking setup initially so
+that you can sort out any issues.
+
+NOTE: It's difficult to configure bridge networking on a remote server interactively.
+Be careful about trying to run these commands on a remote server. You may inadvertently
+disconnect yourself from the remote server during configuration and you may not be able
+to recover without power cycling the remote machine.
+
+First, list all your network interfaces with `ip -brief link` and decide what interface
+you want to use for your VMs to have connectivity to the outside world. This interface
+will act as the default gateway for a group of virtual machines. It needs to be an
+interface whose state is `up`. Here's an example of what the output looks like.
+
+```
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+ens33            UP             00:0c:29:b6:83:61 <BROADCAST,MULTICAST,UP,LOWER_UP>
+```
+
+Create the bridge:
+
+```
+# create a network bridge interface named br0 and change its state to up
+$ sudo ip link add name br0 type bridge
+$ sudo ip link set dev br0 up
+$ ip link show br0
+$ sudo ip link set eno1 master br0
+```
+
+Assign a network address to the bridge and swing the ethernet interface to the bridge.
+
+```
+$ ip route show default
+default via 172.25.0.1 dev ens33 proto dhcp src 172.25.3.252 metric 100
+$ ip -brief addr show ens33
+ens33            UP             172.25.3.252/22 metric 100 fe80::20c:29ff:feb6:8361/64
+$ sudo ip address add 172.25.3.252/22 dev br0
+$ sudo ip route append default via 172.25.0.1 dev br0
+$ sudo ip link set ens33 master br0
+$ sudo ip address del 172.25.3.252/22 dev ens33
+# Now you should see that ens01 is getting an IP address through br0
+$ ip addr show ens33
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:b6:83:61 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+    inet6 fe80::20c:29ff:feb6:8361/64 scope link
+       valid_lft forever preferred_lft forever
+$ ip addr show br0
+3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether f6:d4:91:ed:5e:12 brd ff:ff:ff:ff:ff:ff
+    inet 172.25.3.252/22 scope global br0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::f4d4:91ff:feed:5e12/64 scope link
+       valid_lft forever preferred_lft forever
+```
+
+References:
+Arch wiki: https://wiki.archlinux.org/title/network_bridge
