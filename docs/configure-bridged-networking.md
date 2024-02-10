@@ -171,6 +171,73 @@ ens33            UP
 br0              UP             172.25.0.112/22 metric 100 fe80::f4d4:91ff:feed:5e12/64
 ```
 
+### Configuring bridged networking with NetworkManager via Netplan
+
+```
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+ens33            UP             00:0c:29:25:7e:47 <BROADCAST,MULTICAST,UP,LOWER_UP>
+
+$ nmcli connection show --active
+NAME                UUID                                  TYPE      DEVICE 
+Wired connection 1  779e47c2-776a-3c0a-a498-ebffcbe374c4  ethernet  ens33 
+```
+
+```
+$ ls /etc/netplan
+01-network-manager-all.yaml
+$ cat /etc/netplan/01-network-manager-all.yaml 
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+```
+
+```
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    ens33:
+      dhcp4: no
+  bridges:
+    br0:
+      interfaces:
+        - ens33
+      dhcp4: yes
+      parameters:
+        stp: false
+        forward-delay: 0
+```
+
+```
+$ sudo netplan try
+br0: reverting custom parameters for bridges and bonds is not supported
+
+Please carefully review the configuration and use 'netplan apply' directly.
+```
+
+```
+$ sudo netplan apply
+$ nmcli connection show --active
+NAME           UUID                                  TYPE      DEVICE 
+netplan-br0    00679506-5c05-3c3d-bdfe-474849762078  bridge    br0    
+netplan-ens33  14f59568-5076-387a-aef6-10adfcca2e26  ethernet  ens33
+
+$ ip addr show br0
+3: br0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 0a:b1:59:e4:c8:e8 brd ff:ff:ff:ff:ff:ff
+    inet 172.25.0.217/22 brd 172.25.3.255 scope global dynamic noprefixroute br0
+       valid_lft 86334sec preferred_lft 86334sec
+    inet6 fe80::8b1:59ff:fee4:c8e8/64 scope link 
+       valid_lft forever preferred_lft forever
+$ ip addr show ens33
+2: ens33: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether 00:0c:29:25:7e:47 brd ff:ff:ff:ff:ff:ff
+    altname enp2s1
+```
+
 ### Configuring bridged networking with NetworkManager
 
 ```
