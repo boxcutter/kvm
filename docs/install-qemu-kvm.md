@@ -70,3 +70,39 @@ sudo apt-get install ovmf
 # Files are in /usr/share/AAVMF
 sudo apt-get install qemu-efi-aarch64
 ```
+
+## Configure bridged networking
+
+All the networking options for kvm are just different configurations for a virtual networking
+switch, also known as a bridge network interface.
+
+The default network created when libvirt is used is called `default` and uses NAT. It normally
+is configured to use a bridge network interface called `virbr0`. When a virtual machine is
+on a NAT network, it is on a separate subnet that prevents outside access to the VM directly,
+nwhile the VM itself can access any network the host can access.
+
+With bridged networking, the VM will be on the same network as the host. It can be accessed
+by all computers on your host network as if it were another computer directly connected to
+the same network.
+
+On Ubuntu, determine if the host interface is managed by `systemd-networkd` or `NetworkManager`.
+Usually if you are using Ubuntu Desktop, it's `NetworkManager`, and if you are using
+Ubuntu Server, it's `systemd-networkd`, but it can vary.
+
+Running `networkctl` will tell you is `systemd-networkd` is running and if an interface
+is being managed. The default configuration on Ubuntu Desktop should show that
+`systemd-networkd` is not running and the interfaces are not being managed (by `systemd-networkd`).
+
+```
+$ networkctl
+WARNING: systemd-networkd is not running, output will be incomplete.
+
+IDX LINK      TYPE     OPERATIONAL SETUP    
+  1 lo        loopback n/a         unmanaged
+  2 eno1      ether    n/a         unmanaged
+  3 wlp0s20f3 wlan     n/a         unmanaged
+  4 virbr0    bridge   n/a         unmanaged
+  5 docker0   bridge   n/a         unmanaged
+
+5 links listed.
+```
