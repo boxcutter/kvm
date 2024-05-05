@@ -75,12 +75,89 @@ virbr0              d0da1989-df49-44dc-9c48-aa3c978fbb90  bridge    virbr0
 ```
 
 But you're not done yet, you also need to check if netplan is being used to
-render configurations in `systemd-networkd` or `NetworkManager`. In Ubuntu
- 24.04, there will be a command called `netplan status` to check this. As of
-this writing, you are unlikely to be using this, so instead the best way to
-check is to see if there are configuration files in `/etc/netplan`. If
-`netplan` is being used on your system, it's probably easiest to add the
-configuration for the bridge configuration through netplan.
+render configurations in `systemd-networkd` or `NetworkManager`.
+
+#### Checking render configurations, Ubuntu 24.04 and higher
+
+In ubuntu 24.04 and higher, you can check the render configurations with the
+`netplan status` command.
+
+```
+$ netplan status
+     Online state: online
+    DNS Addresses: 127.0.0.53 (stub)
+       DNS Search: lan
+
+●  1: lo ethernet UNKNOWN/UP (unmanaged)
+      MAC Address: 00:00:00:00:00:00
+        Addresses: 127.0.0.1/8
+                   ::1/128
+
+●  2: enp1s0 ethernet UP (NetworkManager: enp1s0)
+      MAC Address: 52:54:00:11:d4:ee (Red Hat, Inc.)
+        Addresses: 192.168.107.86/24 (dhcp)
+                   fda2:8d37:bed8:93ee:1d25:641d:cd12:73c/64
+                   fda2:8d37:bed8:93ee:5054:ff:fe11:d4ee/64
+                   fe80::5054:ff:fe11:d4ee/64 (link)
+    DNS Addresses: 192.168.107.1
+       DNS Search: lan
+           Routes: default via 192.168.107.1 from 192.168.107.86 metric 100
+(dhcp)
+                   192.168.107.0/24 from 192.168.107.86 metric 100 (link)
+                   fda2:8d37:bed8:93ee::/64 metric 256
+                   fe80::/64 metric 256
+
+2 inactive interfaces hidden. Use "--all" to show all.
+```
+
+You can also use the `--all` parameter to show any unmanaged interfaces,
+like the bridge interfaces created by libvirtd or docker:
+
+```
+$ netplan status --all
+     Online state: online
+    DNS Addresses: 127.0.0.53 (stub)
+       DNS Search: lan
+
+●  1: lo ethernet UNKNOWN/UP (unmanaged)
+      MAC Address: 00:00:00:00:00:00
+        Addresses: 127.0.0.1/8
+                   ::1/128
+
+●  2: enp1s0 ethernet UP (NetworkManager: enp1s0)
+      MAC Address: 52:54:00:11:d4:ee (Red Hat, Inc.)
+        Addresses: 192.168.107.86/24 (dhcp)
+                   fda2:8d37:bed8:93ee:1d25:641d:cd12:73c/64
+                   fda2:8d37:bed8:93ee:5054:ff:fe11:d4ee/64
+                   fe80::5054:ff:fe11:d4ee/64 (link)
+    DNS Addresses: 192.168.107.1
+       DNS Search: lan
+           Routes: default via 192.168.107.1 from 192.168.107.86 metric 100
+(dhcp)
+                   192.168.107.0/24 from 192.168.107.86 metric 100 (link)
+                   fda2:8d37:bed8:93ee::/64 metric 256
+                   fe80::/64 metric 256
+
+●  3: virbr0 bridge DOWN/UP (unmanaged)
+      MAC Address: 52:54:00:c3:32:6c
+        Addresses: 192.168.122.1/24
+           Routes: 192.168.122.0/24 from 192.168.122.1 (link)
+
+●  4: docker0 bridge DOWN/UP (unmanaged)
+      MAC Address: 02:42:93:88:a7:7c
+        Addresses: 172.17.0.1/16
+                   fe80::42:93ff:fe88:a77c/64 (link)
+           Routes: 172.17.0.0/16 from 172.17.0.1 (link)
+                   fe80::/64 metric 256
+```
+
+#### Checking render configurations, Ubuntu 22.04 and lower
+
+Prior to Ubuntu 24.04, on Ubuntu 22.04 and lower, there is no `netplan status`
+command, so instead the best way to check is to see if there are configuration
+files in `/etc/netplan`. If `netplan` is being used on your system, it's
+probably easiest to add the configuration for the bridge configuration through
+netplan.
 
 Here's an example of a `systemd-networkd` configuration managed by `netplan`.
 It may or may not include a `renderer` stanza that says `renderer: networkd`,
