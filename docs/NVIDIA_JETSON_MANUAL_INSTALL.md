@@ -1,5 +1,8 @@
 # Nvidia Jetson Embedded Computing Board Manual Setup
 
+Nvidia Jetson embedded computer boards are used on robots and drones to
+behave as smart cameras.
+
 Helpful video from JetsonHacks YouTube channel on unboxing and setup
 
 https://www.youtube.com/watch?v=LUxyNyCl4ro
