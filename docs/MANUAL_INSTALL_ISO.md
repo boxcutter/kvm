@@ -243,7 +243,7 @@ virsh undefine ubuntu-server --nvram --remove-all-storage
 ### Installing Ubuntu 24.04 Desktop on a headless Ubuntu Server using VNC
 
 ```
-virsh vol-create-as default ubuntu-desktop-2404.qcow2 64G --format qcow2
+virsh vol-create-as default ubuntu-desktop-2404.qcow2 50G --format qcow2
 
 virt-install \
   --connect qemu:///system \
