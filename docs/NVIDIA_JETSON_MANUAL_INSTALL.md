@@ -1,6 +1,6 @@
 # Nvidia Jetson Embedded Computing Board Manual Setup
 
-Helpful video on unboxing and setup
+Helpful video from JetsonHacks YouTube channel on unboxing and setup
 
 https://www.youtube.com/watch?v=LUxyNyCl4ro
 
