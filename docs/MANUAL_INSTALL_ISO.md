@@ -12,37 +12,26 @@ $ virsh pool-define-as \
     --target /var/lib/libvirt/iso
 Pool iso defined
 
+# Create the local directory
+$ virsh pool-build iso
+
+# Start the storage pool
+$ virsh pool-start iso
+Pool iso started
+
+# Turn on autostart
+$ virsh pool-autostart iso
+Pool iso marked as autostarted
+
 # Verify the storage pool is listed
 $ virsh pool-list --all
  Name   State      Autostart
 ------------------------------
  iso    inactive   no
 
-# Create the local directory
-$ virsh pool-build iso
-Pool iso built
-
-$ sudo ls -la /var/lib/libvirt/iso
-total 8
-drwx--x--x  2 root root 4096 Oct  7 14:47 .
-drwxr-xr-x 10 root root 4096 Oct  7 14:47 ..
-
-# Start the storage pool
-$ virsh pool-start iso
-Pool iso started
-
 $ virsh vol-list --pool iso --details
  Name   Path   Type   Capacity   Allocation
 ---------------------------------------------
-
-$ virsh pool-list --all
- Name   State    Autostart
-----------------------------
- iso    active   no
-
-# Turn on autostart
-$ virsh pool-autostart iso
-Pool iso marked as autostarted
 
 $ virsh pool-list --all
  Name   State    Autostart
