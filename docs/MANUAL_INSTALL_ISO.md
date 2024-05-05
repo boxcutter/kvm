@@ -69,6 +69,11 @@ $ sudo curl \
 
 $ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
 a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd  /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
 ```
 
 ## Create a storage pool for images
@@ -218,8 +223,6 @@ virt-install \
 ### Installing Ubuntu 24.04 Server on a headless Ubuntu Server using VNC
 
 ```
-virsh vol-create-as default ubuntu-server.qcow2 64G --format qcow2
-
 virt-install \
   --connect qemu:///system \
   --name ubuntu-server \
