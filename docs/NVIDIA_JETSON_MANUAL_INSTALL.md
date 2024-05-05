@@ -32,4 +32,4 @@ You’ll need a second x86_64 intel PC running Ubuntu 20.04 to install and
 Flash the OS in the NVidia Target device (because we’re still using
 JetPack 5.x):
 
-![SDKManager](https://github.com/boxcutter/kvm/raw/docs/images/jetson/Jan2021-developer-sdkm-landing-page-web-diagram.jpg "jetson-images")
+![SDKManager](https://github.com/boxcutter/kvm/blob/fbafdfaad9aa7cf641cc7cc2c288e3f8c717cb5a/docs/images/jetson/Jan2021-developer-sdkm-landing-page-web-diagram.jpg)
