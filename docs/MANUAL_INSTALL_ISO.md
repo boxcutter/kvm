@@ -232,6 +232,12 @@ $ virsh vncdisplay ubuntu-server
 $ virsh dumpxml ubuntu-server | grep "graphics type='vnc'"
     <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
 
+# vnc to server on port  to complete install
+# Get the IP address of the default host interface
+ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
+# Use a vnc client to connect to `vnc://<host_ip>:5900`
+# When the install is complete the VM will be shut down
+
 # enable serial service in VM
 sudo systemctl enable --now serial-getty@ttyS0.service
 
@@ -266,6 +272,9 @@ $ virsh dumpxml ubuntu-desktop-2404 | grep "graphics type='vnc'"
     <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
 
 # vnc to server on port  to complete install
+# Get the IP address of the default host interface
+ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
+# Use a vnc client to connect to `vnc://<host_ip>:5900`
 # When the install is complete the VM will be shut down
 
 # Reconfigure VNC
