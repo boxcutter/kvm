@@ -1,33 +1,36 @@
 ## Configure bridged networking
 
-All the networking options for kvm are just different configurations for a virtual networking
-switch, also known as a bridge network interface.
+All the networking options for kvm are just different configurations for a
+virtual networking switch, also known as a bridge network interface.
 
-The default network created when libvirt is used is called `default` and uses NAT. It normally
-is configured to use a bridge network interface called `virbr0`. When a virtual machine is
-on a NAT network, it is on a separate subnet that prevents outside access to the VM directly,
-nwhile the VM itself can access any network the host can access.
+The default network created when libvirt is used is called `default` and uses
+NAT. It normally is configured to use a bridge network interface called
+`virbr0`. When a virtual machine is on a NAT network, it is on a separate
+subnet that prevents outside access to the VM directly, while the VM itself can
+access any network the host can access.
 
-With bridged networking, the VM will be on the same network as the host. It can be accessed
-by all computers on your host network as if it were another computer directly connected to
-the same network.
+With bridged networking, the VM will be on the same network as the host. It can
+be accessed by all computers on your host network as if it were another
+computer directly connected to the same network.
 
 ### Determine how the networking is configured on Ubuntu
 
-Ubuntu has multiple methods for persisting network configurations, so first you need to
-determine how the networking on your machine is configured. First check the current
-configuration with the `ip link` command to get an overview of how the networking is
-configured. Ultimiately everything in Linux is configured with the `ip` command, but
-unfortunately there is not one standard way to persist a network configuration across
-reboots.
+Ubuntu has multiple methods for persisting network configurations, so first you
+need to determine how the networking on your machine is configured. First check
+the current configuration with the `ip link` command to get an overview of how
+the networking is configured. Ultimiately everything in Linux is configured
+with the `ip` command, but unfortunately there is not one standard way to
+persist a network configuration across reboots.
 
-On Ubuntu, determine if the host interface is managed by `systemd-networkd` or `NetworkManager`.
-Usually if you are using Ubuntu Desktop, it's `NetworkManager`, and if you are using
-Ubuntu Server, it's `systemd-networkd`, but it can vary.
+On Ubuntu, determine if the host interface is managed by `systemd-networkd` or
+`NetworkManager`. Usually if you are using Ubuntu Desktop, it's
+`NetworkManager`, and if you are using Ubuntu Server, it's `systemd-networkd`,
+but it can vary.
 
-Running `networkctl` will tell you is `systemd-networkd` is running and if an interface
-is being managed. The default configuration on Ubuntu Desktop should show that
-`systemd-networkd` is not running and the interfaces are not being managed (by `systemd-networkd`).
+Running `networkctl` will tell you is `systemd-networkd` is running and if an
+interface is being managed. The default configuration on Ubuntu Desktop should
+show that `systemd-networkd` is not running and the interfaces are not being
+managed (by `systemd-networkd`).
 
 ```
 $ networkctl
@@ -43,8 +46,8 @@ IDX LINK      TYPE     OPERATIONAL SETUP
 5 links listed.
 ```
 
-By comparison, if `systemd-networkd` is running and interfaces are being managed, the
-output of `networkctl` looks more like this:
+By comparison, if `systemd-networkd` is running and interfaces are being
+managed, the output of `networkctl` looks more like this:
 
 ```
 $ networkctl
@@ -55,9 +58,9 @@ IDX LINK  TYPE     OPERATIONAL SETUP
 2 links listed.
 ```
 
-You can check to see if NetworkManager is being used by using `nmcli`. If the network
-interfaces are being managed by NetworkManager, the output will look something like
-this:
+You can check to see if NetworkManager is being used by using `nmcli`. If the
+network interfaces are being managed by NetworkManager, the output will look
+something like this:
 
 ```
 $ nmcli general
@@ -71,16 +74,17 @@ docker0             80651a82-b1af-4ed7-a4bb-e0a802d6f012  bridge    docker0
 virbr0              d0da1989-df49-44dc-9c48-aa3c978fbb90  bridge    virbr0
 ```
 
-But you're not done yet, you also need to check if netplan is being used to render
-configurations in `systemd-networkd` or `NetworkManager`. In Ubuntu 24.04, there will
-be a command called `netplan status` to check this. As of this writing, you are unlikely
-to be using this, so instead the best way to check is to see if there are configuration
-files in `/etc/netplan`. If `netplan` is being used on your system, it's probably
-easiest to add the configuration for the bridge configuration through netplan.
+But you're not done yet, you also need to check if netplan is being used to
+render configurations in `systemd-networkd` or `NetworkManager`. In Ubuntu
+ 24.04, there will be a command called `netplan status` to check this. As of
+this writing, you are unlikely to be using this, so instead the best way to
+check is to see if there are configuration files in `/etc/netplan`. If
+`netplan` is being used on your system, it's probably easiest to add the
+configuration for the bridge configuration through netplan.
 
-Here's an example of a `systemd-networkd` configuration managed by `netplan`. It may
-or may not include a `renderer` stanza that says `renderer: networkd`, because it is
-the default:
+Here's an example of a `systemd-networkd` configuration managed by `netplan`.
+It may or may not include a `renderer` stanza that says `renderer: networkd`,
+because it is the default:
 
 ```
 $ ls /etc/netplan
@@ -94,11 +98,12 @@ network:
   version: 2
 ```
 
-On the other hand, if a `NetworkManager` configuration is being managed by `netplan`,
-it will include a `renderer` stanza that says `renderer: NetworkManager`. It's not
-unusual for there to be zero configuration in the actual netplan file, because currently,
-NetworkManager isn't very well integrated into netplan on Ubuntu. You can't use
-`netplan try` to experiment with new configurations, for example.
+On the other hand, if a `NetworkManager` configuration is being managed by
+`netplan`, it will include a `renderer` stanza that says
+`renderer: NetworkManager`. It's not unusual for there to be zero
+configuration in the actual netplan file, because currently, NetworkManager
+isn't very well integrated into netplan on Ubuntu. You can't use `netplan try`
+to experiment with new configurations, for example.
 
 ```
 $ ls /etc/netplan/
@@ -295,23 +300,26 @@ $ ip addr show ens33
 
 ### Configuring bridged networking with the ip command
 
-It can be helpful to configure bridged networking with the iproute2 `ip` command.
-iproute2 is now the default networking toolkit in Linux, replacing `net-tools` commands
-like `ifconfig`, `brctl` and `route` with a more unified interface.
+It can be helpful to configure bridged networking with the iproute2 `ip`
+command. iproute2 is now the default networking toolkit in Linux, replacing
+`net-tools` commands like `ifconfig`, `brctl` and `route` with a more unified
+interface.
 
-The configuration will not be persist across reboots without putting the commands in
-a script, but it's a great way to test the bridged networking setup initially so
-that you can sort out any issues.
+The configuration will not be persist across reboots without putting the
+commands in a script, but it's a great way to test the bridged networking setup
+initially so that you can sort out any issues.
 
-NOTE: It's difficult to configure bridge networking on a remote server interactively.
-Be careful about trying to run these commands on a remote server. You may inadvertently
-disconnect yourself from the remote server during configuration and you may not be able
-to recover without power cycling the remote machine.
+NOTE: It's difficult to configure bridge networking on a remote server
+interactively.  Be careful about trying to run these commands on a remote
+server. You may inadvertently disconnect yourself from the remote server
+during configuration and you may not be able to recover without power cycling
+the remote machine.
 
-First, list all your network interfaces with `ip -brief link` and decide what interface
-you want to use for your VMs to have connectivity to the outside world. This interface
-will act as the default gateway for a group of virtual machines. It needs to be an
-interface whose state is `up`. Here's an example of what the output looks like.
+First, list all your network interfaces with `ip -brief link` and decide what
+interface you want to use for your VMs to have connectivity to the outside
+world. This interface will act as the default gateway for a group of virtual
+machines. It needs to be an interface whose state is `up`. Here's an example of
+what the output looks like.
 
 ```
 $ ip -brief link
@@ -329,7 +337,8 @@ $ ip link show br0
 $ sudo ip link set eno1 master br0
 ```
 
-Assign a network address to the bridge and swing the ethernet interface to the bridge.
+Assign a network address to the bridge and swing the ethernet interface to the
+bridge.
 
 ```
 $ ip route show default
