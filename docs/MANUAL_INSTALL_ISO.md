@@ -288,6 +288,10 @@ virsh restart ubuntu-desktop-2404
 # enable serial service in VM
 sudo systemctl enable --now serial-getty@ttyS0.service
 
+# Optional - user setup
+# passwordless sudo
+echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
+
 # Snapshots
 virsh snapshot-create ubuntu-desktop-2404 
 virsh snapshot-list ubuntu-desktop-2404
