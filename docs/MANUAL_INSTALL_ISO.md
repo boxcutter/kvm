@@ -289,10 +289,16 @@ virsh restart ubuntu-desktop-2404
 sudo systemctl enable --now serial-getty@ttyS0.service
 
 # Optional - user setup
+# Add User
+# Settings > Power > Blank Screen: None
+# Display Resolution 1440 x 900 (16:10)
 # passwordless sudo
 echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
 
 # Snapshots
+# Named snapshot
+virsh snapshot-create-as --domain ubuntu-desktop-2404 --name clean --description "Initial install"
+# Nameless snapshot
 virsh snapshot-create ubuntu-desktop-2404 
 virsh snapshot-list ubuntu-desktop-2404
 virsh snapshot-revert ubuntu-desktop-2404 <name>
