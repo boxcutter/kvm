@@ -149,4 +149,4 @@ After the flashing step finishes and the device reboots, it will again prompt fo
 
 ![Device Type Again](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2011.02.41.png)
 
-Now you’ll need to set up a monitor and configure the username/password. Make sure you use our automation provisioning user:
+Now you’ll need to set up a monitor and configure the username/password and the rest of Ubuntu.
