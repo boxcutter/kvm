@@ -3,8 +3,7 @@
 Nvidia Jetson embedded computer boards are used on robots and drones to
 behave as smart cameras.
 
-Helpful video from JetsonHacks YouTube channel on unboxing and setup
-
+Helpful video from JetsonHacks YouTube channel on unboxing and setup:
 https://www.youtube.com/watch?v=LUxyNyCl4ro
 
 The base still leaves most of the carrier board exposed. StereoLabs sells a
