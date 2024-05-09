@@ -33,8 +33,7 @@ adequate storage.
 Make sure that you installed the right version of the OS - because JetPack 6.x is
 still in beta, we currently prefer Ubuntu 20.04 with JetPack 5.1.x.
 
-```
-
+```bash
 automat@agx01:~/Downloads$ cat /etc/os-release 
 NAME="Ubuntu"
 VERSION="20.04.6 LTS (Focal Fossa)"
@@ -73,7 +72,8 @@ Description-md5: ad1462289bdbc54909ae109d1d32c0a8
 
 ### Verify that the boot drive is the NVMe device
 
-```
+```bash
+# Install efibootmgr if it is not already installed
 $ sudo apt-get update
 $ sudo apt-get install efibootmgr
 # NVMe should be first in the boot order
