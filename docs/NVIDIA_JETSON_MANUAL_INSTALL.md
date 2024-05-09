@@ -23,7 +23,76 @@ kit when it ships to basically run Ubuntu server instead of desktop:
 
 https://nvidia-ai-iot.github.io/jetson-min-disk/step1.html
 
-## First steps - install an NVMe drive and flash with SDK Manager
+## First steps - verify the Jetson is booting off NVMe and has at least 2TB of storage
+
+### Verify that JetPack 5.1.x is present
+If you think your Jetson Developer Kit has already been configured, double
+check to make sure the system has the desired JetPack version and there is
+adequate storage.
+
+Make sure that you installed the right version of the OS - because JetPack 6.x is
+still in beta, we currently prefer Ubuntu 20.04 with JetPack 5.1.x.
+
+```
+
+automat@agx01:~/Downloads$ cat /etc/os-release 
+NAME="Ubuntu"
+VERSION="20.04.6 LTS (Focal Fossa)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 20.04.6 LTS"
+VERSION_ID="20.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=focal
+UBUNTU_CODENAME=focal
+
+automat@agx01:~/Downloads$ cat /etc/nv_tegra_release 
+# R35 (release), REVISION: 4.1, GCID: 33958178, BOARD: t186ref, EABI: aarch64, DATE: Tue Aug  1 19:57:35 UTC 2023
+
+automat@agx01:~/Downloads$ sudo apt-cache show nvidia-jetpack
+Package: nvidia-jetpack
+Version: 5.1.2-b104
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 5.1.2-b104), nvidia-jetpack-dev (= 5.1.2-b104)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_5.1.2-b104_arm64.deb
+Size: 29304
+SHA256: fda2eed24747319ccd9fee9a8548c0e5dd52812363877ebe90e223b5a6e7e827
+SHA1: 78c7d9e02490f96f8fbd5a091c8bef280b03ae84
+MD5sum: 6be522b5542ab2af5dcf62837b34a5f0
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+```
+
+### Verify that the boot drive is the NVMe device
+
+```
+$ sudo apt-get update
+$ sudo apt-get install efibootmgr
+# NVMe should be first in the boot order
+$ efibootmgr
+BootCurrent: 0001
+Timeout: 5 seconds
+BootOrder: 0001,0000,0002,0003,0004,0005,0006,0007,0008
+Boot0000* Enter Setup
+Boot0001* UEFI Samsung SSD 990 PRO 4TB S7KGNJ0WC15702M 1
+Boot0002* UEFI eMMC Device
+Boot0003* UEFI PXEv4 (MAC:48B02DDCCCA5)
+Boot0004* UEFI PXEv6 (MAC:48B02DDCCCA5)
+Boot0005* UEFI HTTPv4 (MAC:48B02DDCCCA5)
+Boot0006* UEFI HTTPv6 (MAC:48B02DDCCCA5)
+Boot0007* BootManagerMenuApp
+Boot0008* UEFI Shell 
+```
+
+## Remedy - install an NVMe drive and flash with SDK Manager
 
 The Jetson Developer Kits are configured to boot and run the OS off the
 built-in eMMC drive. The eMMC drive is fairly small, and eMMC is slow. So
