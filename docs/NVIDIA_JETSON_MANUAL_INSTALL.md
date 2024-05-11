@@ -220,6 +220,43 @@ on the NVMe drive:
 
 After the flashing step finishes and the device reboots, it will again prompt for the device type. Choose accordingly and click on OK.
 
-![Device Type Again](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2011.02.41.png)
+![Device Type Again]([https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2011.02.41.png](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG))
 
-Now you’ll need to set up a monitor and configure the username/password and the rest of Ubuntu.
+Now you’ll need hop over to the Jetson, set up a monitor on the Jetson,
+and complete the system configuration for Ubuntu.
+
+Accept the license terms:
+
+![Terms and Conditions](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5019.PNG)
+
+Choose the language:
+
+![Language](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5020.PNG)
+
+Choose the keyboard:
+
+![Keyboard](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5021.PNG)
+
+Choose the time zone:
+
+![Time Zone](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5022.PNG)
+
+Set up the default user:
+
+![User prompt](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5023.PNG)
+
+Here's the values we normally use for the user account. We
+use the provisioning user name `automat` and the hostname
+`agx0x1`:
+
+![automat](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5025.PNG)
+
+Choose whether or not to install the Chromium browser. You'll
+need to make sure there's a working network connection if you
+do choose to install:
+
+![chromium](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5026.PNG)
+
+Then the system configuration completes and you'll need to
+go through the standard Ubuntu desktop user setup:
+
