@@ -196,6 +196,8 @@ https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/de
 3. Press and hold (2) "Force recovery button" (the middle button) while also
    pressing the (1) "Power button" (the left button). Then release both buttons.
 
+![Force Recovery](https://github.com/boxcutter/kvm/blob/ac9385b0b1e7772127945f21f23491f22184d7e4/docs/images/jetpack6/Screenshot%202024-05-11%20at%2018.15.07.png)
+
 Once the device is in recovery mode (either through manual or automatic methods), once you refresh it should allow you to choose “Pre-config” or “Runtime” configuration. Choose Runtime configuration:
 https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html
 
