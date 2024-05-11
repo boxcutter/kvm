@@ -137,53 +137,58 @@ It will pop up a separate web browser for you to login with your account
 
 ![NVIDIA login in SDK Manager](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4866.PNG)
 
-Once you are authenticated, you can close the login window and use SDK Manager.
+Once you are authenticated, you can close the login window and use SDK
+Manager.
 
-Over in the SDK Manager app a private notice will be displayed, make a selection
-and click on the "OK" button.
+Over in the SDK Manager app a private notice will be displayed, make a
+selection and click on the "OK" button.
 
 ![Privacy Notice](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4868.PNG)
 
-You’ll need to run a USB-C cable from the Ubuntu 20.04 Intel host machine to the Nvidia Jetson. Connect the USB-C cable for the intel host machine to the USB-C port on the side with the 40-pin connector (as it supports both upstream and downstream data):
+You’ll need to run a USB-C cable from the Ubuntu 20.04 Intel host machine
+to the Nvidia Jetson. Connect the USB-C cable for the intel host machine
+to the USB-C port on the side with the 40-pin connector (as it supports
+both upstream and downstream data):
 
 https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/developer_kit_layout.html
 
-![Flahing port](https://github.com/boxcutter/kvm/blob/bc9414424f13147a6de3cd41e130a2f11c426f6b/docs/images/jetpack6/2024-02-03_08-55-58.png)
+![Flashing port](https://github.com/boxcutter/kvm/blob/bc9414424f13147a6de3cd41e130a2f11c426f6b/docs/images/jetpack6/2024-02-03_08-55-58.png)
 
 Connect to the target hardware from your host to the flashing port with a USB-C cable.
 
-When you run SDK Manager with `/opt/nvidia/sdkmanager/sdkmanager` it may detect the target hardware automatically:
+When you run SDK Manager with `/opt/nvidia/sdkmanager/sdkmanager` it may detect the
+target hardware automatically:
 
 ![SDK Manager detected device](https://github.com/boxcutter/kvm/blob/8b5793a6120ba6bda748dbf65c8ea937de4f86fb/docs/images/jetpack6/IMG_4876.PNG)
 
-In Step One - System Configuration, verify that the Host Machine is Ubuntu 20.04 - x86_64 - if not, make sure you’re running on a machine with this configuration! And then make sure the correct target hardware is configured.
-Choose the JetPack version to install. Click on the "Continue to Step 02" button.
+In Step One - System Configuration, verify that the Host Machine is Ubuntu 20.04
+- x86_64 - if not, make sure you’re running on a machine with this configuration!
+- And then make sure the correct target hardware is configured. Choose the JetPack
+- version to install. Click on the "Continue to Step 02" button.
 
 ![Step One](https://github.com/boxcutter/kvm/blob/1eaaaffd694ede36c3ba680bc0e675780010a325/docs/images/jetpack6/IMG_4877.PNG)
 
-Choose the appropriate SDK components in Step Two. You can also choose to download now and install later and store the install files on a shared drive if you want to configure multiple Jetsons:
+Choose the appropriate SDK components in Step Two. You can also choose to download
+now and install later and store the install files on a shared drive. Click on the
+"Continue to Step 03" button.
 
-![Host Components](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.15.37.png)
+![Step Two](https://github.com/boxcutter/kvm/blob/8c035a3f137df1e665c5bd3b0b4cf9c94fa90cb7/docs/images/jetpack6/IMG_5006.PNG)
 
-It may prompt you to create the download folder
-
-![The specified folders don't exist](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.15.57.png)
-
-And it may prompt you to enter in an administrative password
-
-![Enter your password to perform administrative tasks](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.16.48.png)
-
-It will then proceed to download the files for the JetPack version you created - will take 15-20 minutes or more depending on the speed of your internet connection:
-
-![Setup Process](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.17.34.png)
+It will then proceed to download the files for the JetPack version you created -
+will take 15-20 minutes or more depending on the speed of your internet connection:
 
 Once the download is complete you’ll need to put the Jetson target hardware into recovery mode to proceed:
 
-![SDK Manager is about to flash your Jetson AGX Orin module](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.28.30.png)
+![SDK Manager is about to flash your Jetson AGX Orin module](https://github.com/boxcutter/kvm/blob/8c035a3f137df1e665c5bd3b0b4cf9c94fa90cb7/docs/images/jetpack6/IMG_5008.PNG)
 
 Follow the instructions displayed in the dialog accordingly.
 
-I usually prefer to use manual mode (but automatic mode is fine as well) - if you’re in automatic mode, then you’ll need to hook up a monitor to the Jetson to get its IP address (and it has to have an OS already installed)
+I usually prefer to use manual mode (but automatic mode is fine as well) - if
+you’re in automatic mode, then you’ll need to hook up a monitor to the Jetson
+to get its IP address (and it has to have an OS already installed).
+
+To put the device into target recovery mode, first power off the device by holding
+down the power button for 10-15 seconds.
 
 Power off the target device. And then on the target device, hit the “Force recovery” button on the front (the middle button) then hold the force recovery button down and hit the “Power button”:
 
