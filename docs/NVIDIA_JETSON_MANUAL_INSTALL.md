@@ -131,21 +131,20 @@ Then start the SDK Manager with:
 
 Login with your NVIDIA Developer login again to access the OS boot files:
 
-![NVIDIA Developer Login](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_09-18-37.png)
+![NVIDIA Developer Login](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4865.PNG)
 
 It will pop up a separate web browser for you to login with your account
 
-![NVIDIA login](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_09-19-51.png)
+![NVIDIA login in SDK Manager](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4866.PNG)
 
-Once you are authenticated it will tell you that you can close the window and use SDK Manager
+Once you are authenticated, you can close the login window and use SDK Manager.
 
-![Thank You For Using NVDIA SDK Manager](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_09-21-53.png)
+Over in the SDK Manager app a private notice will be displayed, make a selection
+and click on the "OK" button.
 
-Over in the SDK Manager app it should display a privacy notice, get past this screen:
+![Privacy Notice](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4868.PNG)
 
-![Privacy Notice](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_09-22-20.png)
-
-You’ll need to run a USB-C cable from the Ubuntu 20.04 intel host machine to the Nvidia Jetson. Connect the USB-C cable for the intel host machine to the USB-C port on the side with the 40-pin connector (as it supports both upstream and downstream data):
+You’ll need to run a USB-C cable from the Ubuntu 20.04 Intel host machine to the Nvidia Jetson. Connect the USB-C cable for the intel host machine to the USB-C port on the side with the 40-pin connector (as it supports both upstream and downstream data):
 
 https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/developer_kit_layout.html
 
