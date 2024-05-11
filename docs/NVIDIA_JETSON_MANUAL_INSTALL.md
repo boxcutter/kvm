@@ -154,7 +154,7 @@ Connect to the target hardware from your host to the flashing port with a USB-C 
 
 When you run SDK Manager with `/opt/nvidia/sdkmanager/sdkmanager` it may detect the target hardware automatically:
 
-![SDK Manager detected device](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.09.58.png)
+![SDK Manager detected device](https://github.com/boxcutter/kvm/blob/8b5793a6120ba6bda748dbf65c8ea937de4f86fb/docs/images/jetpack6/IMG_4876.PNG)
 
 In Step one - System Configuration, verify that the Host Machine is Ubuntu 20.04 - x86_64 - if not, make sure you’re running on a machine with this configuration! And then make sure the correct target hardware is configured:
 
