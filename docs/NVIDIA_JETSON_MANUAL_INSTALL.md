@@ -113,8 +113,9 @@ JetPack 5.x. We work with both versions of JetPack:
 Go to the Nvidia SDK Manager web site:
 https://developer.nvidia.com/sdk-manager
 
-Choose to download the NVIDIA SDK Manager:
-![Download SDKManager](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_08-58-50.png)
+Choose to download the NVIDIA SDK Manager .deb package:
+
+![Download SDKManager deb](https://github.com/boxcutter/kvm/blob/95f24225a425a77e38073caf3544e9c694b0ef3c/docs/images/jetpack6/IMG_4862.PNG)
 
 You’ll need to create an NVDIA account to download:
 ![Sign up for an NVIDIA account](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2008.59.51.png)
