@@ -99,9 +99,10 @@ it is better to just reconfigure the system so it boots off the secondary
 NVMe drive exclusively and ignores the eMMC device. (However the eMMC can
 be used as a secondary boot partition for disaster recovery).
 
-You’ll need a second x86_64 intel PC running NVIDIA SDK Manager to flash
-the device install JetPack on NVMe drive: https://developer.nvidia.com/sdk-manager
-![SDKManager](https://github.com/boxcutter/kvm/blob/76539fc95a510bc34bbc9a78a75d097d69c99572/docs/images/jetpack6/Screenshot%202024-05-11%20at%2016.51.27.png)
+You’ll need a second x86_64 intel PC running [NVIDIA SDK Manager](https://developer.nvidia.com/sdk-manager)
+to flash the device and install JetPack on NVMe drive:
+
+![SDKManager](https://github.com/boxcutter/kvm/blob/86f958179b356a7bf7b73f1fb381fdec8a67b52b/docs/images/jetpack6/Jan2021-developer-sdkm-landing-page-web-diagram.jpg)
 
 The second x86_64 intel PC should be running Ubuntu 20.04. An Ubuntu 20.04
 host system can flash a target NVIDIA device with either JetPack 6.x or
