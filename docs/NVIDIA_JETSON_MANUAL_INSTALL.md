@@ -156,21 +156,10 @@ When you run SDK Manager with `/opt/nvidia/sdkmanager/sdkmanager` it may detect 
 
 ![SDK Manager detected device](https://github.com/boxcutter/kvm/blob/8b5793a6120ba6bda748dbf65c8ea937de4f86fb/docs/images/jetpack6/IMG_4876.PNG)
 
-In Step one - System Configuration, verify that the Host Machine is Ubuntu 20.04 - x86_64 - if not, make sure you’re running on a machine with this configuration! And then make sure the correct target hardware is configured:
+In Step One - System Configuration, verify that the Host Machine is Ubuntu 20.04 - x86_64 - if not, make sure you’re running on a machine with this configuration! And then make sure the correct target hardware is configured.
+Choose the JetPack version to install. Click on the "Continue to Step 02" button.
 
-![Step Two](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.11.35.png)
-
-In Step one - SDK version, choose JetPack 5.1.3 (we’re not currently using JetPack 6.0 because it is in “developer preview” DP mode, a.k.a. beta):
-
-![SDK Version](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.12.33.png)
-
-JetPack 5.x won’t be an option unless you are running it on Ubuntu 20.04:
-
-![JetPack 5.1.2](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.13.23.png)
-
-JetPack 5.x won’t be an option unless you are running SDK Manager on Ubuntu 20.04:
-
-![Support Host Operating System](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.24.32.png)
+![Step One](https://github.com/boxcutter/kvm/blob/1eaaaffd694ede36c3ba680bc0e675780010a325/docs/images/jetpack6/IMG_4877.PNG)
 
 Choose the appropriate SDK components in Step Two. You can also choose to download now and install later and store the install files on a shared drive if you want to configure multiple Jetsons:
 
