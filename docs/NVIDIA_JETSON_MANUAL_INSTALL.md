@@ -202,6 +202,8 @@ Once the host detects the device in recovery mode, you'll need to choose the
 target device type again:
 ![Force Recovery Device Detected](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG)
 
+## Ubuntu Configuration on Target Device 
+
 After the device is detected and refreshed, choose "Runtime configuration".
 When you select Runtime configuration, you'll be able to manually complete
 the Ubuntu System Configuration, selecting the default username, time zone,
@@ -260,3 +262,26 @@ do choose to install:
 Then the system configuration completes and you'll need to
 go through the standard Ubuntu desktop user setup:
 
+Choose whether or not to connect online accounts:
+
+![online accounts](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5033.PNG)
+
+Choose whether or not to enable Ubuntu Pro:
+
+![Ubuntu Pro](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5034.PNG)
+
+Choose whether or not to help improve Ubuntu:
+
+![Help improve Ubuntu](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5035.PNG)
+
+Choose whether or not to enable location services:
+
+![Location services](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5037.PNG)
+
+Click to get past the final step:
+
+![Ready to go](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5038.PNG)
+
+And finally you should see the Ubuntu desktop:
+
+![Desktop](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5039.PNG)
