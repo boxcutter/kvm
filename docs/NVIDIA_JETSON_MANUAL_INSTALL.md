@@ -198,22 +198,25 @@ https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/de
 
 ![Force Recovery](https://github.com/boxcutter/kvm/blob/ac9385b0b1e7772127945f21f23491f22184d7e4/docs/images/jetpack6/Screenshot%202024-05-11%20at%2018.15.07.png)
 
-Once the device is in recovery mode (either through manual or automatic methods), once you refresh it should allow you to choose “Pre-config” or “Runtime” configuration. Choose Runtime configuration:
+Once the host detects the device in recovery mode, you'll need to choose the
+target device type again:
+![Force Recovery Device Detected](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG)
+
+After the device is detected and refreshed, choose "Runtime configuration".
+When you select Runtime configuration, you'll be able to manually complete
+the Ubuntu System Configuration, selecting the default username, time zone,
+etc.
+
+Choose the NVMe drive as the target storage device and click on the "Flash"
+button to continue:
 https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html
 
-![OEM Configuration](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.49.05.png)
+![Runtime configuration](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_5015.PNG)
 
-Then choose the NVMe drive as the storage device to configure:
+SDK Manager will then continue to flash the device and install the Ubuntu
+on the NVMe drive:
 
-![Storage Device](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.49.49.png)
-
-Once “Runtime” and “NVMe” are selected, then click on the “Flash” button
-
-![Flash](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.50.31.png)
-
-SDK Manager will then continue to flash the device and install the Ubuntu 20.04 OS on the NVMe drive:
-
-![Installing](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2010.51.36.png)
+![Installing](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_5017.PNG)
 
 After the flashing step finishes and the device reboots, it will again prompt for the device type. Choose accordingly and click on OK.
 
