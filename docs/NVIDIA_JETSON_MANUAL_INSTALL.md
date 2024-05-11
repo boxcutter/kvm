@@ -222,7 +222,7 @@ on the NVMe drive:
 
 After the flashing step finishes and the device reboots, it will again prompt for the device type. Choose accordingly and click on OK.
 
-![Device Type Again]([https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2011.02.41.png](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG))
+![Device Type Again](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG)
 
 Now you’ll need hop over to the Jetson, set up a monitor on the Jetson,
 and complete the system configuration for Ubuntu.
@@ -285,3 +285,32 @@ Click to get past the final step:
 And finally you should see the Ubuntu desktop:
 
 ![Desktop](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5039.PNG)
+
+## Install SDK Components
+
+Hop on back over to your Intel provisioning host to complete the final
+step of the install. This step is optional.
+
+You may get prompted for the target device type again, choose accordingly:
+
+![Device Type Again](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG)
+
+You'll be prompted with the instructions to prepare for the SDK component
+install. Make sure you completed the System Configuration over on the
+target Jetson and the OS login screen is displayed:
+
+![SDK component install preparation](https://github.com/boxcutter/kvm/blob/aed72289dda5435ff693119ea74afb4ea311fbf0/docs/images/jetpack6/IMG_5041.PNG)
+
+Enter in the username/password for the user you configured in Ubuntu over
+on the target Jetson device, so SDK Manager can login remotely. Then click
+on the "Install" button:
+
+![SDK component install](https://github.com/boxcutter/kvm/blob/aed72289dda5435ff693119ea74afb4ea311fbf0/docs/images/jetpack6/IMG_5042.PNG)
+
+SDK Manager will verify target system readiness:
+
+![Verifying readiness](https://github.com/boxcutter/kvm/blob/aed72289dda5435ff693119ea74afb4ea311fbf0/docs/images/jetpack6/IMG_5043.PNG)
+
+And then the SDK install will start:
+
+![SDK Install](https://github.com/boxcutter/kvm/blob/aed72289dda5435ff693119ea74afb4ea311fbf0/docs/images/jetpack6/IMG_5044.PNG)
