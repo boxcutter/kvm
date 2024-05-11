@@ -118,7 +118,8 @@ Choose to download the NVIDIA SDK Manager .deb package:
 ![Download SDKManager deb](https://github.com/boxcutter/kvm/blob/95f24225a425a77e38073caf3544e9c694b0ef3c/docs/images/jetpack6/IMG_4862.PNG)
 
 You’ll need to create an NVDIA account to download:
-![Sign up for an NVIDIA account](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/Screenshot%202024-02-03%20at%2008.59.51.png)
+
+![Log in or sign up for an NVIDIA account](https://github.com/boxcutter/kvm/blob/2a2647f3636bdeb0dddd626075c43ee745f65d07/docs/images/jetpack6/IMG_4864.PNG)
 
 Install the SDK Manager:
 
