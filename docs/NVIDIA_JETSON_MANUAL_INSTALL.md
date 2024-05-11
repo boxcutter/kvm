@@ -187,14 +187,14 @@ I usually prefer to use manual mode (but automatic mode is fine as well) - if
 you’re in automatic mode, then you’ll need to hook up a monitor to the Jetson
 to get its IP address (and it has to have an OS already installed).
 
-To put the device into target recovery mode, first power off the device by holding
-down the power button for 10-15 seconds.
+To put the device into target recovery mode:
+https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/developer_kit_layout.html
 
-Power off the target device. And then on the target device, hit the “Force recovery” button on the front (the middle button) then hold the force recovery button down and hit the “Power button”:
-
-![Force Recovery](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_10-30-23.png)
-
-![Power](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_10-35-19.png)
+1. Power off the device holding down the (1) Power button for 10-15 seconds.
+2. Make sure the device is powered off, but still connected to the host PC by
+   the USB-C cable.
+3. Press and hold (2) "Force recovery button" (the middle button) while also
+   pressing the (1) "Power button" (the left button). Then release both buttons.
 
 Once the device is in recovery mode (either through manual or automatic methods), once you refresh it should allow you to choose “Pre-config” or “Runtime” configuration. Choose Runtime configuration:
 https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html
