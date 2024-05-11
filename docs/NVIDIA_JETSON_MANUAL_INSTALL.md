@@ -148,7 +148,7 @@ You’ll need to run a USB-C cable from the Ubuntu 20.04 Intel host machine to t
 
 https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/developer_kit_layout.html
 
-![Flahing port](https://github.com/boxcutter/kvm/blob/c3936088301e5608263873b137a54350b7c4130c/docs/images/jetson/2024-02-03_08-55-58.png)
+![Flahing port](https://github.com/boxcutter/kvm/blob/bc9414424f13147a6de3cd41e130a2f11c426f6b/docs/images/jetpack6/2024-02-03_08-55-58.png)
 
 Connect to the target hardware from your host to the flashing port with a USB-C cable.
 
