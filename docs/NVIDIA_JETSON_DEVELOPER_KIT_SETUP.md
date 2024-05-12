@@ -314,3 +314,7 @@ SDK Manager will verify target system readiness:
 And then the SDK install will start:
 
 ![SDK Install](https://github.com/boxcutter/kvm/blob/aed72289dda5435ff693119ea74afb4ea311fbf0/docs/images/jetpack6/IMG_5044.PNG)
+
+Click on the "Finish" button once the install is complete.
+
+![SDK Install Complete](https://github.com/boxcutter/kvm/blob/a02cb5f3866f48bf3e0334f5919117c1b81762fb/docs/images/jetpack6/IMG_5046.PNG)
