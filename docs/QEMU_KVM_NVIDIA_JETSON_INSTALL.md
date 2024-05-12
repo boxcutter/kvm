@@ -36,19 +36,12 @@ $ virt-host-validate qemu
   QEMU: Checking for device assignment IOMMU support                         : WARN (Unknown if this platform has IOMMU support)
   QEMU: Checking for secure guest support                                    : WARN (Unknown if this platform has Secure Guest support)
 
-# Enable cgroup controllers
-sudo cp /boot/extlinux/extlinux.conf /boot/extlinux/extlinux.conf.orig
-sudo vi /boot/extlinux/extlinux.conf
-# Add cgroup statements to the end of APPEND statement
-APPEND root=/dev/sda1 rw cgroup_enable=memory,cgroup_enable=cpu,cgroup_enable=devices cgroup_memory=1
+# The vhost_net module does not appear to be present in the default Linux for Tegra kernel
 
-
-sudo vi /etc/default/grub
-# Add or modify the GRUB_CMDLINE_LINUX line to include the necessary cgroup settings
-GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
-# Update GRUB and reboot
-sudo update-grub
-sudo reboot
+# There's no grub on arm64, boot options are controlled by /boot/extlinux/extlinux.conf
+# But doesn't appear that it's possible to enable devices support
+# sudo cp /boot/extlinux/extlinux.conf /boot/extlinux/extlinux.conf.orig
+# APPEND root=/dev/sda1 rw cgroup_enable=memory,cgroup_enable=cpu,cgroup_enable=devices cgroup_memory=1
 ```
 
 Reboot to restart the QEMU/KVM daemon
