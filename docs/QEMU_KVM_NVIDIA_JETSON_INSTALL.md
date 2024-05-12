@@ -49,3 +49,50 @@ Reboot to restart the QEMU/KVM daemon
 ```bash
 sudo restart
 ```
+
+Configure bridged networking
+
+```
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO> 
+wlan0            UP             b4:8c:9d:1c:59:cb <BROADCAST,MULTICAST,UP,LOWER_UP> 
+eth0             UP             48:b0:2d:dc:cc:a5 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+l4tbr0           DOWN           3e:c7:e7:79:f3:87 <BROADCAST,MULTICAST> 
+usb0             DOWN           4a:cc:c0:ee:72:85 <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+usb1             DOWN           4a:cc:c0:ee:72:87 <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+virbr0           DOWN           52:54:00:db:7e:78 <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+docker0          DOWN           02:42:92:48:71:3d <NO-CARRIER,BROADCAST,MULTICAST,UP>
+
+$ nmcli connection show
+NAME                UUID                                  TYPE      DEVICE  
+Wired connection 1  bde1a0a0-8fd9-3eb3-acb5-17fe609b124e  ethernet  eth0    
+Dreamfall           266ae331-63c7-4f90-9f8b-68ce24868245  wifi      wlan0   
+docker0             1f351718-5833-46fe-a8ad-ba119dd90723  bridge    docker0 
+virbr0              bde3a162-949a-4665-a88f-fe2e65e5e07b  bridge    virbr0
+```
+
+```
+# Network Manager
+sudo nmcli con show
+sudo nmcli device status
+# Add a new bridge
+sudo nmcli con add ifname br0 type bridge con-name br0
+# Bring the bridge interface up
+sudo nmcli con up br0
+# Attach network interfaces to the bridge
+sudo nmcli con add type bridge-slave ifname eth0 master br0
+# Bring up the bridge-slave connection
+sudo nmcli con up br0
+# Use DHCP
+sudo nmcli con modify br0 ipv4.method auto
+sudo nmcli con up br0
+# set forward delay
+sudo nmcli con modify br0 bridge.stp no
+sudo nmcli con modify br0 bridge.forward-delay 3
+#
+sudo nmcli con down "Wired connection 1"
+sudo nmcli con up br0
+sudo reboot
+```
