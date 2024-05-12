@@ -318,3 +318,132 @@ And then the SDK install will start:
 Click on the "Finish" button once the install is complete.
 
 ![SDK Install Complete](https://github.com/boxcutter/kvm/blob/a02cb5f3866f48bf3e0334f5919117c1b81762fb/docs/images/jetpack6/IMG_5046.PNG)
+
+## Verify and complete setup
+
+Once the SDK Manager install is complete, you can disconnect the USB-C
+provisioning cable from the target and host PCs.
+
+### Configure passwordless sudo and authorized keys
+
+```bash
+echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
+
+sudo apt-get update
+sudo apt-get install openssh-server
+
+touch ~/.ssh/authorized_keys
+chmod 0600 ~/.ssh/authorized_keys
+tee -a ~/.ssh/authorized_keys<<EOF
+<keys>
+EOF
+```
+
+### Set the timezone to UTC
+
+http://yellerapp.com/posts/2015-01-12-the-worst-server-setup-you-can-make.html
+```bash
+sudo timedatectl set-timezone UTC
+```
+
+### Install Nomachine
+
+Install Nomachine for ARM https://downloads.nomachine.com/linux/?id=30&distro=Arm
+
+SSH keys
+```bash
+mkdir -p $HOME/.nx/config
+touch $HOME/.nx/config/authorized.crt
+chmod 0600 $HOME/.nx/config/authorized.crt
+tee -a $HOME/.nx/config/authorized.crt<<EOF
+<keys>
+EOF
+```
+
+### Verify that that the desired version of JetPack is present
+
+Check `/etc/os-release` for the Ubuntu version:
+
+```bash
+automat@agx01:~$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 22.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.4 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=jammy
+```
+
+Check `/etc/nv_tegra_release` for the JetPack version:
+
+```bash
+automat@agx01:~$ cat /etc/nv_tegra_release
+# R36 (release), REVISION: 3.0, GCID: 36106755, BOARD: generic, EABI: aarch64, DATE: Thu Apr 25 03:14:05 UTC 2024
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
+
+automat@agx01:~$ sudo apt-cache show nvidia-jetpack
+[sudo] password for automat: 
+Package: nvidia-jetpack
+Source: nvidia-jetpack (6.0)
+Version: 6.0+b87
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 6.0+b87), nvidia-jetpack-dev (= 6.0+b87)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.0+b87_arm64.deb
+Size: 29298
+SHA256: 70be95162aad864ee0b0cd24ac8e4fa4f131aa97b32ffa2de551f1f8f56bc14e
+SHA1: 36926a991855b9feeb12072694005c3e7e7b3836
+MD5sum: 050cb1fd604a16200d26841f8a59a038
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+```
+
+### Verify that the boot drive is the NVMe device
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install efibootmgr
+# NVMe should be first in the boot order
+$ efibootmgr
+BootCurrent: 0001
+Timeout: 5 seconds
+BootOrder: 0001,0000,0002,0003,0004,0005,0006,0007,0008
+Boot0000* Enter Setup
+Boot0001* UEFI Samsung SSD 990 PRO 4TB S7KGNJ0WC15702M 1
+Boot0002* UEFI eMMC Device
+Boot0003* UEFI PXEv4 (MAC:48B02DDCCCA5)
+Boot0004* UEFI PXEv6 (MAC:48B02DDCCCA5)
+Boot0005* UEFI HTTPv4 (MAC:48B02DDCCCA5)
+Boot0006* UEFI HTTPv6 (MAC:48B02DDCCCA5)
+Boot0007* BootManagerMenuApp
+Boot0008* UEFI Shell
+```
+
+### Set the power mode to MAX
+
+```bash
+# Should be power mode 0
+$ sudo nvpmodel -q
+NV Power Mode: MODE_30W
+2
+
+# If not, set it to 0 - will require reboot
+$ sudo nvpmodel -m 0
+NVPM WARN: Golden image context is already created
+NVPM WARN: Reboot required for changing to this power mode: 0
+NVPM WARN: DO YOU WANT TO REBOOT NOW? enter YES/yes to confirm:
+yes
+NVPM WARN: rebooting
+```
