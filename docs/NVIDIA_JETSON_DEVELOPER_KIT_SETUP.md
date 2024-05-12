@@ -324,6 +324,15 @@ Click on the "Finish" button once the install is complete.
 Once the SDK Manager install is complete, you can disconnect the USB-C
 provisioning cable from the target and host PCs.
 
+### Disable screen blanking
+
+```bash
+# Prevent the screen from blanking
+gsettings set org.gnome.desktop.session idle-delay 0
+# Prevent the screen from locking
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+```
+
 ### Configure passwordless sudo and authorized keys
 
 ```bash
