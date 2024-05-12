@@ -10,7 +10,7 @@ sudo apt-get update
 sudo apt-get install qemu-kvm libvirt-daemon-system
 # if you want to install images from ISOs with virt-install
 sudo apt-get install virtinst
-# Ubuntu 22.04 missing dependency
+# Ubuntu 22.04 missing dependency in qemu-kvm
 sudo apt-get install seabios
 ```
 
