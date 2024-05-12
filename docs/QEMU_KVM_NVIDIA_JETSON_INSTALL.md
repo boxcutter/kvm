@@ -1,6 +1,8 @@
 # QEMU/KVM Install for NVDIA Jetson Platform
 
-Install QEMU/KVM and libvirtd 
+## Setup
+
+### Install QEMU/KVM and libvirtd 
 
 ```bash
 apt-get update
@@ -10,7 +12,7 @@ sudo apt-get install qemu-kvm libvirt-daemon-system
 sudo apt-get install virtinst
 ```
 
-Make sure the current user is a member of the libvirt and kvm groups
+### Make sure the current user is a member of the libvirt and kvm groups
 
 ```bash
 $ sudo adduser $(id -un) libvirt
@@ -19,7 +21,7 @@ $ sudo adduser $(id -un) kvm
 Adding user '<username>' to group 'kvm' ...
 ```
 
-Run `virt-host-validate` to check the setup:
+### Run `virt-host-validate` to check the setup:
 
 ```bash
 $ virt-host-validate qemu
@@ -44,13 +46,16 @@ $ virt-host-validate qemu
 # APPEND root=/dev/sda1 rw cgroup_enable=memory,cgroup_enable=cpu,cgroup_enable=devices cgroup_memory=1
 ```
 
-Reboot to restart the QEMU/KVM daemon
+### Reboot to restart the QEMU/KVM daemon
 
 ```bash
 sudo restart
 ```
 
-Configure bridged networking
+### Configure bridged networking
+
+Out of the box, Linux for Tegra doesn't come configured with netplan,
+is configured with a Linux Desktop, and uses NetManager directly
 
 ```
 $ ip -brief link
@@ -97,7 +102,8 @@ bridge-slave-eth0   8be31a75-923c-47ed-8256-bc9d82d4aa12  ethernet  eth0
 Wired connection 1  bde1a0a0-8fd9-3eb3-acb5-17fe609b124e  ethernet  --  
 ```
 
-Add bridged interface to DOCKER-USER chain
+Because the default NVIDIA install installs Docker, sdd bridged
+interface to DOCKER-USER chain
 ```
 # https://serverfault.com/questions/963759/docker-breaks-libvirt-bridge-network
 # https://docs.docker.com/network/packet-filtering-firewalls/
@@ -110,26 +116,4 @@ sudo apt-get install iptables-persistent
 sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null
 ```
 
-```
-# Network Manager
-sudo nmcli con show
-sudo nmcli device status
-# Add a new bridge
-sudo nmcli con add ifname br0 type bridge con-name br0
-# Bring the bridge interface up
-sudo nmcli con up br0
-# Attach network interfaces to the bridge
-sudo nmcli con add type bridge-slave ifname eth0 master br0
-# Bring up the bridge-slave connection
-sudo nmcli con up br0
-# Use DHCP
-sudo nmcli con modify br0 ipv4.method auto
-sudo nmcli con up br0
-# set forward delay
-sudo nmcli con modify br0 bridge.stp no
-sudo nmcli con modify br0 bridge.forward-delay 3
-#
-sudo nmcli con down "Wired connection 1"
-sudo nmcli con up br0
-sudo reboot
-```
+## Manual install ISO
