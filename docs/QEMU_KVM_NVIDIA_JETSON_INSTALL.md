@@ -74,6 +74,43 @@ virbr0              bde3a162-949a-4665-a88f-fe2e65e5e07b  bridge    virbr0
 ```
 
 ```
+# Create the bridge br0 with STP disabled to avoid the bridge being advertised on the network
+$ sudo nmcli connection add type bridge ifname br0 stp no
+# Swing the ethernet interface to the bridge
+$ sudo nmcli connection add type bridge-slave ifname eth0 master br0
+```
+
+```
+# Bring the existing connection down
+$ sudo nmcli connection down 'Wired connection 1'
+# Bring the new bridge up
+$ sudo nmcli connection up bridge-br0
+$ sudo nmcli connection up bridge-slave-eth0
+
+$ nmcli c
+NAME                UUID                                  TYPE      DEVICE  
+bridge-br0          27c2851c-e0d1-4606-91ba-526c79316273  bridge    br0     
+Dreamfall           266ae331-63c7-4f90-9f8b-68ce24868245  wifi      wlan0   
+docker0             1f351718-5833-46fe-a8ad-ba119dd90723  bridge    docker0 
+virbr0              bde3a162-949a-4665-a88f-fe2e65e5e07b  bridge    virbr0  
+bridge-slave-eth0   8be31a75-923c-47ed-8256-bc9d82d4aa12  ethernet  eth0    
+Wired connection 1  bde1a0a0-8fd9-3eb3-acb5-17fe609b124e  ethernet  --  
+```
+
+Add bridged interface to DOCKER-USER chain
+```
+# https://serverfault.com/questions/963759/docker-breaks-libvirt-bridge-network
+# https://docs.docker.com/network/packet-filtering-firewalls/
+sudo iptables -I DOCKER-USER -i br0 -o br0 -j ACCEPT
+# verify chain
+sudo iptables -L DOCKER-USER -v -n
+# verify it works, then save the rules
+sudo apt-get update
+sudo apt-get install iptables-persistent
+sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null
+```
+
+```
 # Network Manager
 sudo nmcli con show
 sudo nmcli device status
