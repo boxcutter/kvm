@@ -367,7 +367,7 @@ $ virsh shutdown ubuntu-image
 # "Force off" the VM - doesn't actually remove the VM
 $ virsh destroy ubuntu-image
 # Optionally add --remove-all-storage to remove the storage pool
-$ virsh undefine ubuntu-image --nvram
+$ virsh undefine ubuntu-image --nvram --remove-all-storage
 $ virsh vol-delete --pool default ubuntu-image.qcow2
 Vol ubuntu-image.qcow2 deleted
 ```
