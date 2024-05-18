@@ -235,35 +235,6 @@ $ virsh pool-list --all
  iso       active   yes
 ```
 
-### Create a volume in a storage pool and start the install
-
-NOTE: When you install Ubuntu interactively and choose default partitioning, only
-HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
-
-```
-
-$ virsh domblklist ubuntu-image
- Target   Source
---------------------------------------------------------
- vda      /var/lib/libvirt/images/ubuntu-image-1.qcow2
- sda      -
-
-$ virsh change-media ubuntu-image sda --eject
-error: The disk device 'sda' doesn't have media
-
-$ virsh detach-disk ubuntu-image sda --config
-Disk detached successfully
-
-$ virsh domblklist ubuntu-image
- Target   Source
---------------------------------------------------------
- vda      /var/lib/libvirt/images/ubuntu-image-1.qcow2
-
-# Install acpi or qemu-guest-agent in the vm so that
-# 'virsh shutdown <image>' works
-$ sudo apt-get update
-$ sudo apt-get install qemu-guest-agent
-```
 ### Installing Ubuntu 20.04 Server on a graphical head
 
 NOTE: When you install Ubuntu interactively and choose default partitioning, only
@@ -303,69 +274,91 @@ virsh destroy ubuntu-server-2004
 virsh undefine ubuntu-server-2004 --nvram --remove-all-storage
 ```
 
-
 ### Installing Ubuntu 24.04 Server on a graphical head
 
 NOTE: When you install Ubuntu interactively and choose default partitioning, only
 HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
 
 ```
-# Be patient, this will take awhile to display anything
+# Using "--graphics spice" is problematic because at the end of manual install it
+# won't display the prompt to eject the DVD install and reboot, you'll have to hop
+# over to the serial console to enter a key, so just use it for the install in the
+# first place
 virt-install \
   --connect qemu:///system \
-  --name ubuntu-server \
+  --name ubuntu-server-2404 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-arm64.iso \
+  --cdrom /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso \
   --memory 4096 \
   --vcpus 2 \
-  --os-variant ubuntu22.04 \
+  --os-variant ubuntu20.04 \
   --disk pool=default,size=50,bus=virtio,format=qcow2 \
   --network network=host-network,model=virtio \
-  --graphics spice \
   --debug
 
-$ virsh vncdisplay ubuntu-server
-:0
-$ virsh dumpxml ubuntu-server | grep "graphics type='vnc'"
-    <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
+$ virsh domblklist ubuntu-server-2404
+ Target   Source
+-------------------------------------------------------------------
+ vda      /var/lib/libvirt/images/ubuntu-server-2404.qcow2
+ sda      /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso
 
-# vnc to server on port  to complete install
-# Get the IP address of the default host interface
-ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
-# Use a vnc client to connect to `vnc://<host_ip>:5900`
-# When the install is complete the VM will be shut down
+$ virsh change-media ubuntu-server-2404 sda --eject
+Successfully ejected media.
 
-# enable serial service in VM
-sudo systemctl enable --now serial-getty@ttyS0.service
+# Install acpi or qemu-guest-agent in the vm so that
+# 'virsh shutdown <image>' works
+$ sudo apt-get update
+$ sudo apt-get install qemu-guest-agent
 
+# Extend partition to use all availabe disk space
+# Identify the logical volume
+sudo vgdisplay
+sudo lvdisplay
+# Extend the logical volume
+# Replace /dev/ubuntu-vg/ubuntu-lv with your actual volume group and logical volume names.
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+# Resize the filesystem
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+# Verify the changes
+df -h
 
-virsh destroy ubuntu-server
-virsh undefine ubuntu-server --nvram --remove-all-storage
+# Remove
+virsh destroy ubuntu-server-2404
+virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
 ```
 
-### Installing Ubuntu 24.04 Desktop on a headless Ubuntu Server using VNC
+### Installing Ubuntu 24.04 Server on a headless Ubuntu Server using VNC
+
+NOTE: If you install `ubuntu-desktop` it does not come with the correct drivers for the Jetson.
+
+NOTE: When you install Ubuntu interactively and choose default partitioning, only
+HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
 
 ```
-virsh vol-create-as default ubuntu-desktop-2404.qcow2 50G --format qcow2
+virsh vol-create-as default ubuntu-server-2404.qcow2 50G --format qcow2
 
 virt-install \
   --connect qemu:///system \
-  --name ubuntu-desktop-2404 \
+  --name ubuntu-server-2404 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-24.04-desktop-amd64.iso \
-  --memory 16384 \
-  --vcpus 4 \
-  --os-variant ubuntu22.04 \
-  --disk vol=default/ubuntu-desktop-2404.qcow2,bus=virtio \
-  --network bridge=br0,model=virtio \
+  --cdrom /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu20.04 \
+  --disk vol=default/ubuntu-server-2404.qcow2,bus=virtio \
+  --network network=host-network,model=virtio \
   --graphics vnc,listen=0.0.0.0,password=foobar \
   --noautoconsole \
   --console pty,target_type=serial \
   --debug
 
-$ virsh vncdisplay ubuntu-desktop-2404
+# Connect via serial console, not VNC, as there will be similar difficulty at
+# the end of the install doing a reboot
+virsh console ubuntu-server-2404
+
+$ virsh vncdisplay ubuntu-server-2404
 :0
-$ virsh dumpxml ubuntu-desktop-2404 | grep "graphics type='vnc'"
+$ virsh dumpxml ubuntu-server-2404 | grep "graphics type='vnc'"
     <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
 
 # vnc to server on port  to complete install
@@ -375,34 +368,61 @@ ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 # When the install is complete the VM will be shut down
 
 # Reconfigure VNC
-virsh edit ubuntu-desktop-2404
+virsh edit ubuntu-server-2404
 <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' passwd='foobar'/>
 <graphics type='none'/>
-virsh restart ubuntu-desktop-2404
+virsh restart ubuntu-server-2404
 
 # Optional - Enable serial console access
 # https://ravada.readthedocs.io/en/latest/docs/config_console.html
 # enable serial service in VM
 sudo systemctl enable --now serial-getty@ttyS0.service
 
+$ virsh domblklist ubuntu-server-2404
+ Target   Source
+-------------------------------------------------------------------
+ vda      /var/lib/libvirt/images/ubuntu-desktop-2404.qcow2
+ sda      /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso
+
+$ virsh change-media ubuntu-server-2404 sda --eject
+Successfully ejected media.
+
+$ virsh destroy ubuntu-server-2404
+$ virsh start ubuntu-server-2404
+
+# Install acpi or qemu-guest-agent in the vm so that
+# 'virsh shutdown <image>' works
+$ sudo apt-get update
+$ sudo apt-get install qemu-guest-agent
+
+# Extend partition to use all availabe disk space
+# Identify the logical volume
+sudo vgdisplay
+sudo lvdisplay
+# Extend the logical volume
+# Replace /dev/ubuntu-vg/ubuntu-lv with your actual volume group and logical volume names.
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+# Resize the filesystem
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+# Verify the changes
+df -h
+
 # Optional - user setup
-# Add User
-# Settings > Power > Blank Screen: None
-# Display Resolution 1440 x 900 (16:10)
 # passwordless sudo
 echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
 
 # Snapshots
 # Named snapshot
-virsh snapshot-create-as --domain ubuntu-desktop-2404 --name clean --description "Initial install"
-# Nameless snapshot
-virsh snapshot-create ubuntu-desktop-2404 
-virsh snapshot-list ubuntu-desktop-2404
-virsh snapshot-revert ubuntu-desktop-2404 <name>
-virsh snapshot-delete ubuntu-desktop-2404 <name>
+virsh snapshot-create-as --domain ubuntu-server-2404 --name clean --description "Initial install" --disk-only --atomic
 
-virsh destroy ubuntu-desktop-2404
-virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
+# Nameless snapshot
+virsh snapshot-create ubuntu-server-2404 --disk-only --atomic
+virsh snapshot-list ubuntu-server-2404
+virsh snapshot-revert ubuntu-server-2404 <name>
+virsh snapshot-delete ubuntu-server-2404 <name>
+
+virsh destroy ubuntu-server-2404
+virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
 ```
 
 ### Removing and deleting a VM
