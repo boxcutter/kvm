@@ -202,8 +202,8 @@ virsh snapshot-revert ubuntu-server-2404 <name>
 virsh snapshot-delete ubuntu-server-2404 <name>
 
 
-virsh destroy ubuntu-server
-virsh undefine ubuntu-server --nvram --remove-all-storage
+virsh destroy ubuntu-server-2404
+virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
 ```
 
 ### Installing Ubuntu 24.04 Desktop on a headless Ubuntu Server using VNC
@@ -237,6 +237,15 @@ ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 # Use a vnc client to connect to `vnc://<host_ip>:5900`
 # When the install is complete the VM will be shut down
 
+$ virsh domblklist ubuntu-desktop-2404
+ Target   Source
+---------------------------------------------------------------
+ vda      /var/lib/libvirt/images/ubuntu-desktop-2404.qcow2
+ sda      /var/lib/libvirt/iso/ubuntu-24.04-desktop-amd64.iso
+
+$ virsh change-media ubuntu-desktop-2404 sda --eject
+Successfully ejected media.
+
 # Reconfigure VNC
 virsh edit ubuntu-desktop-2404
 <graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' passwd='foobar'/>
@@ -247,6 +256,11 @@ virsh restart ubuntu-desktop-2404
 # https://ravada.readthedocs.io/en/latest/docs/config_console.html
 # enable serial service in VM
 sudo systemctl enable --now serial-getty@ttyS0.service
+
+# Install acpi or qemu-guest-agent in the vm so that
+# 'virsh shutdown <image>' works
+$ sudo apt-get update
+$ sudo apt-get install qemu-guest-agent
 
 # Optional - user setup
 # Add User
