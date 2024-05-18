@@ -14,29 +14,20 @@ Pool iso defined
 
 # Create the local directory
 $ virsh pool-build iso
-
 # Start the storage pool
 $ virsh pool-start iso
-Pool iso started
-
 # Turn on autostart
 $ virsh pool-autostart iso
-Pool iso marked as autostarted
 
 # Verify the storage pool is listed
-$ virsh pool-list --all
- Name   State      Autostart
-------------------------------
- iso    inactive   no
-
-$ virsh vol-list --pool iso --details
- Name   Path   Type   Capacity   Allocation
----------------------------------------------
-
 $ virsh pool-list --all
  Name   State    Autostart
 ----------------------------
  iso    active   yes
+
+$ virsh vol-list --pool iso --details
+ Name   Path   Type   Capacity   Allocation
+---------------------------------------------
 
 # Verify the storage pool configuration
 $ virsh pool-info iso
@@ -76,17 +67,10 @@ $ virsh pool-define-as \
 
 # Create the local directory
 $ virsh pool-build default
-Pool default built
-
 # Start the storage pool
 $ virsh pool-start default
-Pool default started
-
-$ virsh pool-list --all
- Name      State    Autostart
--------------------------------
- default   active   no
- iso       active   yes
+# Turn on autostart
+$ virsh pool-autostart default
 
 # Turn on autostart
 $ virsh pool-autostart default
