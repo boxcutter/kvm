@@ -1,4 +1,4 @@
-# QEMU cloud images on the NVDIA Jetson Platform
+# QEMU cloud images on the NVIDIA Jetson Platform
 
 ## Install cloud image utils
 
