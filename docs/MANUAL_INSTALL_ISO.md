@@ -83,7 +83,7 @@ $ virsh pool-list --all
  iso       active   yes
 ```
 
-## Create a volume in a storage pool and start the install
+## Installing Ubuntu 24.04 Server on a graphical head
 
 NOTE: When you install Ubuntu interactively and choose default partitioning, only
 HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
