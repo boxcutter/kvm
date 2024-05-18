@@ -2,6 +2,143 @@
 
 ## Setup
 
+### Install QEMU/KVM and libvirtd
+
+```
+sudo apt-get update
+sudo apt-get install qemu-kvm libvirt-daemon-system
+# if you want to install images from ISOs with virt-install
+sudo apt-get install virtinst
+```
+
+### Make sure the current user is a member of the libvirt and kvm groups
+
+```
+$ sudo adduser $(id -un) libvirt
+Adding user '<username>' to group 'libvirt' ...
+$ sudo adduser $(id -un) kvm
+Adding user '<username>' to group 'kvm' ...
+```
+
+### Run `virt-host-validate` to check your setup:
+
+```
+$ virt-host-validate qemu
+  QEMU: Checking for hardware virtualization                                 : PASS
+  QEMU: Checking if device /dev/kvm exists                                   : PASS
+  QEMU: Checking if device /dev/kvm is accessible                            : PASS
+  QEMU: Checking if device /dev/vhost-net exists                             : PASS
+  QEMU: Checking if device /dev/net/tun exists                               : PASS
+  QEMU: Checking for cgroup 'cpu' controller support                         : PASS
+  QEMU: Checking for cgroup 'cpuacct' controller support                     : PASS
+  QEMU: Checking for cgroup 'cpuset' controller support                      : PASS
+  QEMU: Checking for cgroup 'memory' controller support                      : PASS
+  QEMU: Checking for cgroup 'devices' controller support                     : WARN (Enable 'devices' in kernel Kconfig file or mount/enable cgroup controller in your system)
+  QEMU: Checking for cgroup 'blkio' controller support                       : PASS
+  QEMU: Checking for device assignment IOMMU support                         : WARN (No ACPI DMAR table found, IOMMU either disabled in BIOS or not supported by this hardware platform)
+  QEMU: Checking for secure guest support                                    : WARN (Unknown if this platform has Secure Guest support)
+```
+
+X86_64-based machines will likely display a warning about cgroup devices controller
+support not being enabled. This allos you to apply resource management to virtual
+machines. For more information refer to [this doc](https://libvirt.org/cgroups.html).
+To add cgroup 'devices' controller support, edit `/etc/default/grub`
+and change the line that looks like `GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"`
+to:
+```
+# GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on systemd.unified_cgroup_hierarchy=0"
+```
+
+And then run `update-grub` to update your boot options:
+
+```
+sudo update-grub
+```
+
+Reboot and then everything in `virt-host-validate` should pass. The tool
+can't validate secure guest support on Intel chips, only on AMD or IBM
+processors, so the warning is accurate there: https://stackoverflow.com/questions/65207563/qemu-warn-unknown-if-this-platform-has-secure-guest-support
+
+Also make sure that the packages with the UEFI firmware are present - on Ubuntu these should be
+installed automatically when `qemu-kvm` is installed:
+```
+# Open Virtual Machine Firmware for X86-64 processors
+# Files are in /usr/share/OVMF
+sudo apt-get install ovmf
+# ARM Architecture Virtual Machine firmware
+# Files are in /usr/share/AAVMF
+sudo apt-get install qemu-efi-aarch64
+```
+
+### Reboot to restart the QEMU/KVM daemon
+
+```bash
+sudo reboot
+```
+
+### Configure bridged networking
+
+```bash
+$ sudo netplan get
+
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp1s0:
+      dhcp4: true
+
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+enp1s0           UP             52:54:00:06:be:23 <BROADCAST,MULTICAST,UP,LOWER_UP>
+virbr0           DOWN           52:54:00:be:01:10 <NO-CARRIER,BROADCAST,MULTICAST,UP>
+```
+
+```
+vi /etc/netplan/host-bridge.yaml
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp1s0:
+      dhcp4: false
+  bridges:
+    br0:
+      interfaces: [enp1s0]
+      dhcp4: yes
+      parameters:
+        stp: false
+```
+
+```
+$ sudo netplan get
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp1s0:
+      dhcp4: false
+  bridges:
+    br0:
+      dhcp4: true
+      accept-ra: false
+      link-local: []
+      interfaces:
+      - enp1s0
+      parameters:
+        stp: false
+```
+
+```
+$ sudo netplan apply
+$ ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp1s0           UP
+virbr0           DOWN           192.168.122.1/24
+br0              UP             192.168.107.166/24 fda2:8d37:bed8:93ee:fae5:b754:611f:1b75/64 fda2:8d37:bed8:93ee:4455:46ff:fee4:1d6f/64 fe80::4455:46ff:fee4:1d6f/64
+```
+
 ### Create a definition for the bridge network in libvirt
 
 ```
@@ -68,17 +205,22 @@ Available:      948.16 GiB
 $ sudo ls -ld /var/lib/libvirt/iso
 drwx--x--x 2 root root 4096 Nov 12 08:41 /var/lib/libvirt/iso
 
-$ sudo curl \
-    -L https://releases.ubuntu.com/22.04.3/ubuntu-22.04.3-live-server-amd64.iso \
-    -o /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
+# Install curl
+$ sudo apt-get update
+$ sudo apt-get install ca-certificates curl
 
-$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
-a4acfda10b18da50e2ec50ccaf860d7f20b389df8765611142305c0e911d16fd  /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso
+$ sudo curl \
+    -L https://releases.ubuntu.com/22.04.4/ubuntu-22.04.4-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso
+
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso
+45f873de9f8cb637345d6e66a583762730bbea30277ef7b32c9c3bd6700a32b2 *ubuntu-22.04.4-live-server-amd64.iso
 
 $ sudo curl \
     -L https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso \
     -o /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
 $ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
+8762f7e74e4d64d72fceb5f70682e6b069932deedb4949c6975d0f0fe0a91be3 *ubuntu-24.04-live-server-amd64.iso
 ```
 
 ### Create a storage pool for images
@@ -97,10 +239,6 @@ $ virsh pool-start default
 # Turn on autostart
 $ virsh pool-autostart default
 
-# Turn on autostart
-$ virsh pool-autostart default
-Pool default marked as autostarted
-
 $ virsh pool-list --all
  Name      State    Autostart
 -------------------------------
@@ -116,12 +254,12 @@ HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bu
 ```
 virt-install \
   --connect qemu:///system \
-  --name ubuntu-image \
+  --name ubuntu-server-2404 \
   --memory 4096 \
   --vcpus 2 \
   --disk pool=default,size=20,format=qcow2 \
-  --cdrom /var/lib/libvirt/iso/ubuntu-22.04.3-live-server-amd64.iso \
-  --os-variant ubuntu22.04 \
+  --cdrom /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso \
+  --os-variant ubuntu24.04 \
   --network network=default,model=virtio \
   --boot uefi \
   --debug \
@@ -131,6 +269,37 @@ virt-install \
 # 'virsh shutdown <image>' works
 $ sudo apt-get update
 $ sudo apt-get install qemu-guest-agent
+
+# enable serial service in VM
+sudo systemctl enable --now serial-getty@ttyS0.service
+
+# Extend partition to use all availabe disk space
+# Identify the logical volume
+sudo vgdisplay
+sudo lvdisplay
+# Extend the logical volume
+# Replace /dev/ubuntu-vg/ubuntu-lv with your actual volume group and logical volume names.
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+# Resize the filesystem
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+# Verify the changes
+df -h
+
+# Optional - user setup
+# passwordless sudo
+echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
+
+# Snapshots
+# Named snapshot
+virsh snapshot-create-as --domain ubuntu-server-2404 --name clean --description "Initial install"
+# Nameless snapshot
+virsh snapshot-create ubuntu-server-2404
+virsh snapshot-list ubuntu-server-2404
+virsh snapshot-revert ubuntu-server-2404 <name>
+virsh snapshot-delete ubuntu-server-2404 <name>
+
+virsh destroy ubuntu-server-2404
+virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
 ```
 
 ### Installing Ubuntu 24.04 Server on a headless Ubuntu Server using VNC
@@ -220,7 +389,7 @@ virt-install \
   --vcpus 4 \
   --os-variant ubuntu22.04 \
   --disk vol=default/ubuntu-desktop-2404.qcow2,bus=virtio \
-  --network bridge=br0,model=virtio \
+  --network network=host-network,model=virtio \
   --graphics vnc,listen=0.0.0.0,password=foobar \
   --noautoconsole \
   --console pty,target_type=serial \
@@ -252,6 +421,8 @@ virsh edit ubuntu-desktop-2404
 <graphics type='none'/>
 virsh restart ubuntu-desktop-2404
 
+$ virsh start ubuntu-desktop-2404
+
 # Optional - Enable serial console access
 # https://ravada.readthedocs.io/en/latest/docs/config_console.html
 # enable serial service in VM
@@ -265,6 +436,10 @@ $ sudo apt-get install qemu-guest-agent
 # Optional - user setup
 # Add User
 # Settings > Power > Blank Screen: None
+# Prevent the screen from blanking
+gsettings set org.gnome.desktop.session idle-delay 0
+# Prevent the screen from locking
+gsettings set org.gnome.desktop.screensaver lock-enabled false
 # Display Resolution 1440 x 900 (16:10)
 # passwordless sudo
 echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-$USER-for-sudo-password"
