@@ -286,6 +286,19 @@ virt-install \
   --network network=host-network,model=virtio \
   --debug
 
+# Extend partition to use all availabe disk space
+# Identify the logical volume
+sudo vgdisplay
+sudo lvdisplay
+# Extend the logical volume
+# Replace /dev/ubuntu-vg/ubuntu-lv with your actual volume group and logical volume names.
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+# Resize the filesystem
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+# Verify the changes
+df -h
+
+# Remove
 virsh destroy ubuntu-server-2004
 virsh undefine ubuntu-server-2004 --nvram --remove-all-storage
 ```
