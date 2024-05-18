@@ -1,4 +1,4 @@
-# QEMU/KVM Install for the NVDIA Jetson Platform
+# Libvirt Install for the NVDIA Jetson Platform
 
 ## Setup
 
@@ -235,45 +235,6 @@ $ virsh pool-list --all
  iso       active   yes
 ```
 
-### Installing Ubuntu 20.04 Server on a graphical head
-
-NOTE: When you install Ubuntu interactively and choose default partitioning, only
-HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
-
-```
-# Using "--graphics spice" is problematic because at the end of manual install it
-# won't display the prompt to eject the DVD install and reboot, you'll have to hop
-# over to the serial console to enter a key, so just use it for the install in the
-# first place
-virt-install \
-  --connect qemu:///system \
-  --name ubuntu-server-2004 \
-  --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-20.04.5-live-server-arm64.iso \
-  --memory 4096 \
-  --vcpus 2 \
-  --os-variant ubuntu20.04 \
-  --disk pool=default,size=50,bus=virtio,format=qcow2 \
-  --network network=host-network,model=virtio \
-  --debug
-
-# Extend partition to use all availabe disk space
-# Identify the logical volume
-sudo vgdisplay
-sudo lvdisplay
-# Extend the logical volume
-# Replace /dev/ubuntu-vg/ubuntu-lv with your actual volume group and logical volume names.
-sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
-# Resize the filesystem
-sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
-# Verify the changes
-df -h
-
-# Remove
-virsh destroy ubuntu-server-2004
-virsh undefine ubuntu-server-2004 --nvram --remove-all-storage
-```
-
 ### Installing Ubuntu 24.04 Server on a graphical head
 
 NOTE: When you install Ubuntu interactively and choose default partitioning, only
@@ -283,7 +244,7 @@ HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bu
 # Using "--graphics spice" is problematic because at the end of manual install it
 # won't display the prompt to eject the DVD install and reboot, you'll have to hop
 # over to the serial console to enter a key, so just use it for the install in the
-# first place
+# first place. Also "--noreboot" doesn't seem to help.
 virt-install \
   --connect qemu:///system \
   --name ubuntu-server-2404 \
