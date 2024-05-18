@@ -5,7 +5,6 @@
 ### Install QEMU/KVM and libvirtd 
 
 ```bash
-apt-get update
 sudo apt-get update
 sudo apt-get install qemu-kvm libvirt-daemon-system
 # if you want to install images from ISOs with virt-install
@@ -51,7 +50,7 @@ $ virt-host-validate qemu
 ### Reboot to restart the QEMU/KVM daemon
 
 ```bash
-sudo restart
+sudo reboot
 ```
 
 ### Configure bridged networking
@@ -88,11 +87,11 @@ $ sudo nmcli connection add type bridge-slave ifname eth0 master br0
 ```
 
 ```
-# Bring the existing connection down
-$ sudo nmcli connection down 'Wired connection 1'
 # Bring the new bridge up
 $ sudo nmcli connection up bridge-br0
 $ sudo nmcli connection up bridge-slave-eth0
+# Bring the existing connection down
+$ sudo nmcli connection down 'Wired connection 1'
 
 $ nmcli c
 NAME                UUID                                  TYPE      DEVICE  
@@ -111,7 +110,11 @@ interface to DOCKER-USER chain
 # https://docs.docker.com/network/packet-filtering-firewalls/
 sudo iptables -I DOCKER-USER -i br0 -o br0 -j ACCEPT
 # verify chain
-sudo iptables -L DOCKER-USER -v -n
+automat@agx01:~$ sudo iptables -L DOCKER-USER -v -n
+Chain DOCKER-USER (1 references)
+ pkts bytes target     prot opt in     out     source               destination         
+    0     0 ACCEPT     all  --  br0    br0     0.0.0.0/0            0.0.0.0/0           
+    0     0 RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0
 # verify it works, then save the rules
 sudo apt-get update
 sudo apt-get install iptables-persistent
@@ -155,14 +158,10 @@ Pool iso defined
 
 # Create the local directory
 $ virsh pool-build iso
-
 # Start the storage pool
 $ virsh pool-start iso
-Pool iso started
-
 # Turn on autostart
 $ virsh pool-autostart iso
-Pool iso marked as autostarted
 
 # Verify the storage pool is listed
 $ virsh pool-list --all
@@ -187,6 +186,17 @@ Available:      948.16 GiB
 
 $ sudo ls -ld /var/lib/libvirt/iso
 drwx--x--x 2 root root 4096 Nov 12 08:41 /var/lib/libvirt/iso
+
+# Install curl
+$ sudo apt-get update
+$ sudo apt-get install ca-certificates curl
+
+$ sudo curl \
+    -L https://cdimage.ubuntu.com/releases/20.04.5/release/ubuntu-20.04.5-live-server-arm64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-20.04.5-live-server-arm64.iso
+
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-20.04.5-live-server-arm64.iso
+e42d6373dd39173094af5c26cbf2497770426f42049f8b9ea3e60ce35bebdedf *ubuntu-20.04.5-live-server-arm64.iso
 
 $ sudo curl \
     -L https://cdimage.ubuntu.com/releases/22.04.4/release/ubuntu-22.04.4-live-server-arm64.iso \
@@ -213,15 +223,10 @@ $ virsh pool-define-as \
 
 # Create the local directory
 $ virsh pool-build default
-Pool default built
-
 # Start the storage pool
 $ virsh pool-start default
-Pool default started
-
 # Turn on autostart
 $ virsh pool-autostart default
-Pool default marked as autostarted
 
 $ virsh pool-list --all
  Name      State    Autostart
@@ -259,6 +264,32 @@ $ virsh domblklist ubuntu-image
 $ sudo apt-get update
 $ sudo apt-get install qemu-guest-agent
 ```
+### Installing Ubuntu 20.04 Server on a graphical head
+
+NOTE: When you install Ubuntu interactively and choose default partitioning, only
+HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
+
+```
+# Using "--graphics spice" is problematic because at the end of manual install it
+# won't display the prompt to eject the DVD install and reboot, you'll have to hop
+# over to the serial console to enter a key, so just use it for the install in the
+# first place
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2004 \
+  --boot uefi \
+  --cdrom /var/lib/libvirt/iso/ubuntu-20.04.5-live-server-arm64.iso \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu20.04 \
+  --disk pool=default,size=50,bus=virtio,format=qcow2 \
+  --network network=host-network,model=virtio \
+  --debug
+
+virsh destroy ubuntu-server-2004
+virsh undefine ubuntu-server-2004 --nvram --remove-all-storage
+```
+
 
 ### Installing Ubuntu 24.04 Server on a graphical head
 
