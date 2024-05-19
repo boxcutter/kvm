@@ -4,7 +4,6 @@
 # Add Hashicorp's official GPG key
 sudo apt-get update
 sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
 # Add the repository to Apt sources
