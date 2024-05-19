@@ -44,7 +44,8 @@ contains shared code referenced by each processor build.
 ### Building x86_64 images
 
 ```
-cd ubuntu/x86_64
+cd ubuntu/iso/x86_64
+packer init .
 PACKER_LOG=1 packer build \
   -var-file ubuntu-22.04-bios-x86_64.pkrvars.hcl \
   ubuntu.pkr.hcl
