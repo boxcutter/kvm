@@ -23,7 +23,7 @@ is used for images with UEFI firmware.
 Prequisites:
 
 - Install [Hashicorp Packer](docs/INSTALL_PACKER.md)
-- Install [QEMU/KVM](docs/install-qemu-kvm.md)
+- Install [QEMU/KVM](docs/INSTALL_QEMU_KVM.md)
 
 In the root of this repo there are directories with examples for the following
 distros:
