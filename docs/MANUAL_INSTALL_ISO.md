@@ -149,11 +149,11 @@ vi /tmp/host-network.xml
   <bridge name="br0" />
 </network>
 
-sudo virsh net-define /tmp/host-network.xml
-sudo virsh net-start host-network
-sudo virsh net-autostart host-network
-sudo virsh net-list --all
-$ sudo virsh net-list --all
+virsh net-define /tmp/host-network.xml
+virsh net-start host-network
+virsh net-autostart host-network
+virsh net-list --all
+$ virsh net-list --all
  Name           State    Autostart   Persistent
 -------------------------------------------------
  default        active   yes         yes
