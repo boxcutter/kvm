@@ -114,7 +114,7 @@ network:
 ```
 
 ```
-$ sudo netplan apply
+$ sudo netplan --debug apply
 $ ip -br a
 lo               UNKNOWN        127.0.0.1/8 ::1/128
 enp1s0           UP
