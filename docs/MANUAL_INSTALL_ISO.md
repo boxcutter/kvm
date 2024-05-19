@@ -107,25 +107,8 @@ network:
     br0:
       interfaces: [enp1s0]
       dhcp4: yes
-      parameters:
-        stp: false
-```
-
-```
-$ sudo netplan get
-network:
-  version: 2
-  renderer: NetworkManager
-  ethernets:
-    enp1s0:
-      dhcp4: false
-  bridges:
-    br0:
-      dhcp4: true
       accept-ra: false
       link-local: []
-      interfaces:
-      - enp1s0
       parameters:
         stp: false
 ```
@@ -137,6 +120,26 @@ lo               UNKNOWN        127.0.0.1/8 ::1/128
 enp1s0           UP
 virbr0           DOWN           192.168.122.1/24
 br0              UP             192.168.107.166/24 fda2:8d37:bed8:93ee:fae5:b754:611f:1b75/64 fda2:8d37:bed8:93ee:4455:46ff:fee4:1d6f/64 fe80::4455:46ff:fee4:1d6f/64
+```
+
+```
+$ sudo netplan get
+
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp1s0:
+      dhcp4: false
+  bridges:
+    br0:
+      dhcp4: true
+      accept-ra: false
+      interfaces:
+      - enp1s0
+      parameters:
+        stp: false
+      link-local: []
 ```
 
 ### Create a definition for the bridge network in libvirt
