@@ -1,4 +1,4 @@
-# Install QEMU/KVM on Ubuntu 22.04
+# Install QEMU/KVM on Ubuntu 24.04
 
 Install QEMU/KVM and libvirtd
 
@@ -21,7 +21,6 @@ Adding user '<username>' to group 'kvm' ...
 Run `virt-host-validate` to check your setup:
 
 ```
-virt-host-validate qemu
 $ virt-host-validate qemu
   QEMU: Checking for hardware virtualization                                 : PASS
   QEMU: Checking if device /dev/kvm exists                                   : PASS
