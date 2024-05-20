@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
+
 variable "ssh_username" {
   description = "The username to connect to SSH with."
   type        = string
@@ -40,9 +49,9 @@ autoinstall:
     install-server: yes
     allow-pw: yes
   late-commands:
-    - echo '${var.ssh_username} ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/${var.ssh_username}
+    - echo '${var.ssh_username} ALL=(ALL:ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/${var.ssh_username}
     - |
-      if [ -d /sys/firmware/efi ]; then
+      if [ -d /target/sys/firmware/efi ]; then
         apt-get install -y efibootmgr
         efibootmgr -o $(efibootmgr | sed -n 's/Boot\(.*\)\* ubuntu/\1/p')
       fi
@@ -145,10 +154,9 @@ build {
   # cloud-init may still be running when we start executing scripts
   # To avoid race conditions, make sure cloud-init is done first
   provisioner "shell" {
-    inline = [
-      "echo '==> Waiting for cloud-init to finish'",
-      "/usr/bin/cloud-init status --wait",
-      "echo '==> Cloud-init complete'",
+    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    scripts = [
+      "../scripts/cloud-init-wait.sh",
     ]
   }
 
