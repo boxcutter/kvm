@@ -70,6 +70,9 @@ dependencies for the Vagrant Libvirt plugin for Vagrant. For more information
 refer to the [Vagrant Libvirt Documentation](https://vagrant-libvirt.github.io/vagrant-libvirt/installation#requirements).
 
 ```
+# Create $HOME/.vagrant.d if it doesn't exist
+mkdir -p $HOME/.vagrant.d
+
 docker run --interactive --tty --rm \
   --env LIBVIRT_DEFAULT_URI \
   --mount type=bind,source=/var/run/libvirt/,target=/var/run/libvirt/ \
