@@ -166,6 +166,94 @@ $ sudo dmesg | grep vfio | grep add
 [    5.987086] vfio_pci: add [10de:1ad7[ffffffff:ffffffff]] class 0x000000/00000000
 ```
 
+## Ubuntu 24.04 Server
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name gpu-ubuntu-server-2204 \
+  --boot uefi \
+  --memory 16384 \
+  --vcpus 4 \
+  --disk pool=default,size=50,bus=virtio,format=qcow2 \
+  --cdrom /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso \
+  --os-variant ubuntu22.04 \
+  --network network=host-bridge,model=virtio \
+  --graphics vnc,listen=0.0.0.0,password=foobar \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --cpu host-passthrough \
+  --machine q35 \
+  --host-device 41:00.0 \
+  --features kvm_hidden=on \
+  --virt-type kvm \
+  --debug \
+  --noreboot
+
+$ virsh vncdisplay gpu-ubuntu-server-2204
+:0
+$ virsh dumpxml gpu-ubuntu-server-2204 | grep "graphics type='vnc'"
+    <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
+
+# vnc to server on port  to complete install
+# Get the IP address of the default host interface
+ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
+# Use a vnc client to connect to `vnc://<host_ip>:5900`
+# When the install is complete the VM will be shut down
+
+$ virsh domblklist gpu-ubuntu-server-2204
+ Target   Source
+---------------------------------------------------------------------
+ vda      /var/lib/libvirt/images/gpu-ubuntu-server-2204.qcow2
+ sda      /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso
+
+$ virsh change-media gpu-ubuntu-server-2204 sda --eject
+Successfully ejected media.
+
+# Reconfigure VNC
+virsh edit gpu-ubuntu-server-2204
+<graphics type='vnc' port='-1' autoport='yes' listen='127.0.0.1' passwd='foobar'/>
+<graphics type='none'/>
+virsh restart ubuntu-desktop-2204
+
+# Install acpi or qemu-guest-agent in the vm so that
+# 'virsh shutdown <image>' works
+$ sudo apt-get update
+$ sudo apt-get install qemu-guest-agent
+
+# enable serial service in VM
+sudo systemctl enable --now serial-getty@ttyS0.service
+
+$ sudo lshw -C display
+  *-display
+       description: Display controller
+       product: bochs-drmdrmfb
+       physical id: 1
+       bus info: pci@0000:00:01.0
+       logical name: /dev/fb0
+       version: 02
+       width: 32 bits
+       clock: 33MHz
+       capabilities: pciexpress bus_master cap_list rom fb
+       configuration: depth=32 driver=bochs-drm latency=0 resolution=1024,768
+       resources: irq:0 memory:c0000000-c0ffffff memory:c348f000-c348ffff memory:80200000-80207fff
+  *-display UNCLAIMED
+       description: VGA compatible controller
+       product: TU102GL [Quadro RTX 6000/8000]
+       vendor: NVIDIA Corporation
+       physical id: 0
+       bus info: pci@0000:05:00.0
+       version: a1
+       width: 64 bits
+       clock: 33MHz
+       capabilities: pm msi pciexpress vga_controller bus_master cap_list
+       configuration: latency=0
+       resources: iomemory:80-7f iomemory:80-7f memory:c1000000-c1ffffff memory:800000000-80fffffff memory:810000000-811ffffff ioport:e000(size=128)
+
+# nVidia Quadro RTX 8000
+sudo apt-get install nvidia-driver-535 nvidia-dkms-535
+```
+
 
 References:
 https://github.com/lateralblast/kvm-nvidia-passthrough
