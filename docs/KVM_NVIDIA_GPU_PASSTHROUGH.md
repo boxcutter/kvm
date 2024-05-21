@@ -178,7 +178,7 @@ virt-install \
   --disk pool=default,size=50,bus=virtio,format=qcow2 \
   --cdrom /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso \
   --os-variant ubuntu22.04 \
-  --network network=host-bridge,model=virtio \
+  --network network=host-network,model=virtio \
   --graphics vnc,listen=0.0.0.0,password=foobar \
   --noautoconsole \
   --console pty,target_type=serial \
