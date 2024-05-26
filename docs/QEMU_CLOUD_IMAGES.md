@@ -94,7 +94,83 @@ qemu-system-x86_64 \
 ssh ubuntu@localhost -p 2222
 ```
 
+#
+#
+#
+
+```
+touch network-config
+touch meta-data
+cat >user-data <<EOF
+#cloud-config
+password: password
+chpasswd:
+  expire: False
+ssh_pwauth: True
+EOF
+```
+
+```
+sudo apt-get update
+sudo apt-get install genisoimage
+#     -input-charset utf-8 \
+genisoimage \
+    -output seed.img \
+    -volid cidata -rational-rock -joliet \
+    user-data meta-data network-config
+```
+
+```
+curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+```
+
+```
+qemu-system-x86_64 \
+  -m 1024 \
+  -net nic \
+  -net user \
+  -hda jammy-server-cloudimg-amd64.img \
+  -hdb seed.img
+```
+
+```
+qemu-system-x86_64 \
+  -net nic \
+  -net user \
+  -machine accel=kvm:tcg \
+  -cpu host \
+  -m 1024 \
+  -hda jammy-server-cloudimg-amd64.img \
+  -hdb seed.img
+```
+
+```
+qemu-system-x86_64 \
+  -m 1024 \
+  -net nic \
+  -net user \
+  -machine accel=kvm:tcg \
+  -cpu host \
+  -hda jammy-server-cloudimg-amd64.img \
+  -drive file=seed.img,format=raw,index=1,media=disk \
+  -bios /usr/share/OVMF/OVMF_CODE.fd
+```
+
+```
+# CTRL+A c quit
+qemu-system-x86_64 \
+  -m 1024 \
+  -net nic \
+  -net user \
+  -hda jammy-server-cloudimg-amd64.img \
+  -drive file=seed.img,format=raw,index=1,media=disk \
+  -nographic
+```
+
+
 ## References
 
 [How to run cloud-init locally](https://cloudinit.readthedocs.io/en/latest/howto/run_cloud_init_locally.html)
+
 [Launching Ubuntu Cloud Images with QEMU](https://powersj.io/posts/ubuntu-qemu-cli/)
