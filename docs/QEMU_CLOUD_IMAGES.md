@@ -96,4 +96,5 @@ ssh ubuntu@localhost -p 2222
 
 ## References
 
+[How to run cloud-init locally](https://cloudinit.readthedocs.io/en/latest/howto/run_cloud_init_locally.html)
 [Launching Ubuntu Cloud Images with QEMU](https://powersj.io/posts/ubuntu-qemu-cli/)
