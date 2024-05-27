@@ -69,6 +69,20 @@ $ virsh domblklist ubuntu-server-2204
 
 $ virsh change-media ubuntu-server-2204 sda --eject
 Successfully ejected media.
+
+$ sudo rm /var/lib/libvirt/images/ubuntu-server-2204/seed.img
+$ sudo virsh edit sudo virsh edit $VM_NAME
+# remove entry for the seed.iso
+<disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/var/lib/libvirt/images/ubuntu-server-2204/seed.iso'/>
+      <target dev='sda' bus='sata'/>
+      <readonly/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+</disk>
+
+# disable cloud-init
+sudo touch /etc/cloud/cloud-init.disabled
 ```
 
 ```
