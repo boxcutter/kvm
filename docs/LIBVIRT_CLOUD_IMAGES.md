@@ -97,8 +97,10 @@ virt-install \
 
 References:
 
-https://blog.programster.org/create-ubuntu-22-kvm-guest-from-cloud-image
+Create Ubuntu 22.04 KVM Guest From Cloud Image https://blog.programster.org/create-ubuntu-22-kvm-guest-from-cloud-image
 
 qemu-img Backing Files: A Poor Man's Sanpshot/Rollback: https://dustymabe.com/2015/01/11/qemu-img-backing-files-a-poor-mans-snapshotrollback/
 
 QCOW2 backing files & overlays: https://kashyapc.fedorapeople.org/virt/lc-2012/snapshots-handout.html
+
+Using Cloud Images With KVM https://serverascode.com/2018/06/26/using-cloud-images.html
