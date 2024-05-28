@@ -104,3 +104,7 @@ qemu-img Backing Files: A Poor Man's Sanpshot/Rollback: https://dustymabe.com/20
 QCOW2 backing files & overlays: https://kashyapc.fedorapeople.org/virt/lc-2012/snapshots-handout.html
 
 Using Cloud Images With KVM https://serverascode.com/2018/06/26/using-cloud-images.html
+
+Cloud-Init - Getting Started https://blog.while-true-do.io/cloud-init-getting-started/
+
+How-To: Make Ubuntu Autoinstall ISO with Cloud-init https://www.pugetsystems.com/labs/hpc/how-to-make-ubuntu-autoinstall-iso-with-cloud-init-2213/
