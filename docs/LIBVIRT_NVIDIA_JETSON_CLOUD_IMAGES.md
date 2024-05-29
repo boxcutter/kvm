@@ -82,3 +82,7 @@ $ virsh edit ubuntu-server-2204
 # disable cloud-init
 sudo touch /etc/cloud/cloud-init.disabled
 ```
+
+## References
+
+Cloud Images with cloud-init Demystified https://packetpushers.net/blog/cloud-init-demystified/
