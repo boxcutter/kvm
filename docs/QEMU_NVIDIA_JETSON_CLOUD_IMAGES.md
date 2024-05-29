@@ -10,7 +10,11 @@ sudo apt-get install cloud-image-utils
 ## Download the Ubuntu Cloud Image
 
 ```bash
-curl -LO https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-arm64.img
+# JetPack 5.x
+curl -LO https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-arm64.img
+
+# JetPack 6.x
+curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-arm64.img
 ```
 
 ## Create a cloud-init configuration
@@ -43,10 +47,20 @@ cloud-localds cloud-init.iso user-data meta-data
 ## Create a QCOW2 image from the ubuntu cloud image
 
 ```
-# Convert the image to QCOW2 format, which supports snapshots
-qemu-img convert -O qcow2 noble-server-cloudimg-arm64.img noble-server-cloudimg-arm64.qcow2
+$ qemu-img info jammy-server-cloudimg-arm64.img 
+image: jammy-server-cloudimg-arm64.img
+file format: qcow2
+virtual size: 2.2 GiB (2361393152 bytes)
+disk size: 594 MiB
+cluster_size: 65536
+Format specific information:
+    compat: 0.10
+    refcount bits: 16
+
+qemu-img convert -O qcow2 jammy-server-cloudimg-arm64.img jammy-server-cloudimg-arm64.qcow2
+
 # Resize the image
-qemu-img resize -f qcow2 noble-server-cloudimg-arm64.qcow2 32G
+qemu-img resize -f qcow2 jammy-server-cloudimg-arm64.qcow2 32G
 ```
 
 ## Create firmware image
@@ -74,7 +88,7 @@ qemu-system-aarch64 \
   -device virtio-gpu-pci \
   -device virtio-net-pci,netdev=net0 \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-  -drive file=noble-server-cloudimg-arm64.qcow2,if=virtio,format=qcow2 \
+  -drive file=jammy-server-cloudimg-arm64.qcow2,if=virtio,format=qcow2 \
   -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=flash0.img \
   -drive if=pflash,format=raw,unit=1,file=flash1.img
