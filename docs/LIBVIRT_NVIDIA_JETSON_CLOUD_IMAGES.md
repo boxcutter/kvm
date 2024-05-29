@@ -86,3 +86,5 @@ sudo touch /etc/cloud/cloud-init.disabled
 ## References
 
 Cloud Images with cloud-init Demystified https://packetpushers.net/blog/cloud-init-demystified/
+
+Add nodes to your private cloud using Cloud-init https://opensource.com/article/20/5/create-simple-cloud-init-service-your-homelab
