@@ -235,7 +235,7 @@ $ virsh pool-list --all
  iso       active   yes
 ```
 
-### Installing Ubuntu 24.04 Server on a graphical head
+### Installing Ubuntu 22.04 Server on a graphical head
 
 NOTE: When you install Ubuntu interactively and choose default partitioning, only
 HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bug/1907128
@@ -247,9 +247,9 @@ HALF the disk space is used by default: https://bugs.launchpad.net/subiquity/+bu
 # first place. Also "--noreboot" doesn't seem to help.
 virt-install \
   --connect qemu:///system \
-  --name ubuntu-server-2404 \
+  --name ubuntu-server-2204 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso \
+  --cdrom /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-arm64.iso \
   --memory 4096 \
   --vcpus 2 \
   --os-variant ubuntu20.04 \
@@ -257,13 +257,13 @@ virt-install \
   --network network=host-network,model=virtio \
   --debug
 
-$ virsh domblklist ubuntu-server-2404
+$ virsh domblklist ubuntu-server-2204
  Target   Source
--------------------------------------------------------------------
- vda      /var/lib/libvirt/images/ubuntu-server-2404.qcow2
- sda      /var/lib/libvirt/iso/ubuntu-24.04-live-server-arm64.iso
+---------------------------------------------------------------------
+ vda      /var/lib/libvirt/images/ubuntu-server-2204.qcow2
+ sda      /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-arm64.iso
 
-$ virsh change-media ubuntu-server-2404 sda --eject
+$ virsh change-media ubuntu-server-2204 sda --eject
 Successfully ejected media.
 
 # Install acpi or qemu-guest-agent in the vm so that
@@ -284,8 +284,8 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 df -h
 
 # Remove
-virsh destroy ubuntu-server-2404
-virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
+virsh destroy ubuntu-server-2204
+virsh undefine ubuntu-server-2204 --nvram --remove-all-storage
 ```
 
 ### Installing Ubuntu 24.04 Server on a headless Ubuntu Server using VNC
