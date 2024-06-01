@@ -1010,3 +1010,6 @@ Using Cloud Images With KVM https://serverascode.com/2018/06/26/using-cloud-imag
 Cloud-Init - Getting Started https://blog.while-true-do.io/cloud-init-getting-started/
 
 How-To: Make Ubuntu Autoinstall ISO with Cloud-init https://www.pugetsystems.com/labs/hpc/how-to-make-ubuntu-autoinstall-iso-with-cloud-init-2213/
+
+https://austinsnerdythings.com/2021/08/30/how-to-create-a-proxmox-ubuntu-cloud-init-image/
+
