@@ -97,6 +97,157 @@ virt-install \
 
 12345678901234567890123456789012345678901234567890123456789012345678901234567890
 
+## Ubuntu Server 22.04 cloud image cloud-init
+
+```
+$ ls -l /etc/cloud
+total 20
+-rw-r--r-- 1 root root   36 Jun  1 02:11 build.info
+drwxr-xr-x 2 root root 4096 Mar 27 13:36 clean.d
+-rw-r--r-- 1 root root 3766 Mar 27 13:36 cloud.cfg
+drwxr-xr-x 2 root root 4096 Jun  1 02:10 cloud.cfg.d
+drwxr-xr-x 2 root root 4096 Jun  1 02:10 templates
+```
+
+```
+$ cat /etc/cloud/build.info 
+build_name: server
+serial: 20240601
+```
+
+```
+$ ls -l /etc/cloud/clean.d
+total 0
+```
+
+```
+$ ls -l /etc/cloud/cloud.cfg.d
+total 12
+-rw-r--r-- 1 root root 2071 Mar 27 13:14 05_logging.cfg
+-rw-r--r-- 1 root root  333 Jun  1 02:10 90_dpkg.cfg
+-rw-r--r-- 1 root root  167 Mar 27 13:14 README
+```
+
+```
+$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg 
+## This yaml formatted config file handles setting
+## logger information.  The values that are necessary to be set
+## are seen at the bottom.  The top '_log' are only used to remove
+## redundancy in a syslog and fallback-to-file case.
+##
+## The 'log_cfgs' entry defines a list of logger configs
+## Each entry in the list is tried, and the first one that
+## works is used.  If a log_cfg list entry is an array, it will
+## be joined with '\n'.
+_log:
+ - &log_base |
+   [loggers]
+   keys=root,cloudinit
+   
+   [handlers]
+   keys=consoleHandler,cloudLogHandler
+   
+   [formatters]
+   keys=simpleFormatter,arg0Formatter
+   
+   [logger_root]
+   level=DEBUG
+   handlers=consoleHandler,cloudLogHandler
+   
+   [logger_cloudinit]
+   level=DEBUG
+   qualname=cloudinit
+   handlers=
+   propagate=1
+   
+   [handler_consoleHandler]
+   class=StreamHandler
+   level=WARNING
+   formatter=arg0Formatter
+   args=(sys.stderr,)
+   
+   [formatter_arg0Formatter]
+   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
+   
+   [formatter_simpleFormatter]
+   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
+ - &log_file |
+   [handler_cloudLogHandler]
+   class=FileHandler
+   level=DEBUG
+   formatter=arg0Formatter
+   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
+ - &log_syslog |
+   [handler_cloudLogHandler]
+   class=handlers.SysLogHandler
+   level=DEBUG
+   formatter=simpleFormatter
+   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
+
+log_cfgs:
+# Array entries in this list will be joined into a string
+# that defines the configuration.
+#
+# If you want logs to go to syslog, uncomment the following line.
+# - [ *log_base, *log_syslog ]
+#
+# The default behavior is to just log to a file.
+# This mechanism that does not depend on a system service to operate.
+ - [ *log_base, *log_file ]
+# A file path can also be used.
+# - /etc/log.conf
+
+# This tells cloud-init to redirect its stdout and stderr to
+# 'tee -a /var/log/cloud-init-output.log' so the user can see output
+# there without needing to look on the console.
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+```
+
+```
+$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
+# to update this file, run dpkg-reconfigure cloud-init
+datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, Akamai, WSL, None ]
+```
+
+```
+$ cat /etc/cloud/cloud.cfg.d/README 
+# All files with the '.cfg' extension in this directory will be read by
+# cloud-init. They are read in lexical order. Later files overwrite values in
+# earlier files.
+```
+
+```
+$ sudo netplan get
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      match:
+        macaddress: "52:54:00:a7:a3:60"
+      dhcp4: true
+      dhcp6: true
+      set-name: "enp1s0"
+```
+
+```
+$ sudo cat /etc/netplan/50-cloud-init.yaml 
+# This file is generated from information provided by the datasource.  Changes
+# to it will not persist across an instance reboot.  To disable cloud-init's
+# network configuration capabilities, write a file
+# /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
+# network: {config: disabled}
+network:
+    ethernets:
+        enp1s0:
+            dhcp4: true
+            dhcp6: true
+            match:
+                macaddress: 52:54:00:a7:a3:60
+            set-name: enp1s0
+    version: 2
+```
+
+
 > **Note:**
 > All of the subiquity-based installers make use of cloud-init
 
