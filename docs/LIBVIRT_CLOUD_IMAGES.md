@@ -117,32 +117,34 @@ virt-viewer ubuntu-server-2204
 $ cloud-init status
 status: data
 
-sudo touch /etc/cloud/cloud-init.disabled
+# Disable cloud-init
+$ sudo touch /etc/cloud/cloud-init.disabled
+
+$ sudo shutdown -h now
 
 
 
 $ virsh domblklist ubuntu-server-2204
  Target   Source
-----------------------------------------------------------------------
- vda      /var/lib/libvirt/images/ubuntu-server-2204/root-disk.qcow2
- sda      /var/lib/libvirt/images/ubuntu-server-2204/seed.iso
+-------------------------------------------------------------------
+ vda      /var/lib/libvirt/images/ubuntu-server-2204.qcow2
+ sda      /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso
 
 $ virsh change-media ubuntu-server-2204 sda --eject
 Successfully ejected media.
 
-$ sudo rm /var/lib/libvirt/images/ubuntu-server-2204/seed.img
-$ sudo virsh edit sudo virsh edit $VM_NAME
-# remove entry for the seed.iso
-<disk type='file' device='cdrom'>
+$ sudo rm /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso
+$ virsh edit ubuntu-server-2204
+# remove entry for the cloud-init.iso
+<!--
+    <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file='/var/lib/libvirt/images/ubuntu-server-2204/seed.iso'/>
+      <source file='/var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso'/>
       <target dev='sda' bus='sata'/>
       <readonly/>
       <address type='drive' controller='0' bus='0' target='0' unit='0'/>
-</disk>
-
-# disable cloud-init
-sudo touch /etc/cloud/cloud-init.disabled
+    </disk>
+-->
 ```
 
 ```
