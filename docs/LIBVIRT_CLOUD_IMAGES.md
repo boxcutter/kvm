@@ -1,5 +1,52 @@
 # Libvirt cloud images
 
+## Create a storage pool for cloud-init boot images
+
+> **Note:**
+> There is a `--cloud-init` parameter for `virt-install` to auto-generate the
+> cloud-init ISO. It creates a pool called `boot-scratch` in
+> `/var/lib/libvirt/boot`. However oftentimes it's just easier to control the
+> lifecycle of these images manually
+
+```
+# Create the storage pool definition
+$ virsh pool-define-as \
+    --name boot-scratch \
+    --type dir \
+    --target /var/lib/libvirt/boot
+Pool iso defined
+
+# Create the local directory
+$ virsh pool-build boot-scratch
+# Start the storage pool
+$ virsh pool-start boot-scratch
+# Turn on autostart
+$ virsh pool-autostart boot-scratch
+
+# Verify the storage pool is listed
+$ virsh pool-list --all
+ Name           State    Autostart
+------------------------------------
+ boot-scratch   active   yes
+ default        active   yes
+ iso            active   yes
+
+$ virsh vol-list --pool boot-scratch --details
+ Name   Path   Type   Capacity   Allocation
+---------------------------------------------
+
+# Verify the storage pool configuration
+$ virsh pool-info boot-scratch
+Name:           boot-scratch
+UUID:           a683c9a8-83c3-442c-83fc-1e15aaba902e
+State:          running
+Persistent:     yes
+Autostart:      yes
+Capacity:       1.15 TiB
+Allocation:     33.26 GiB
+Available:      1.12 TiB
+```
+
 ```
 wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 
