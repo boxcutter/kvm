@@ -1,6 +1,8 @@
-# Libvirt cloud images
+# Install from a cloud image with libvirt
 
-## Create a storage pool for cloud-init boot images
+## Setup
+
+### Create a storage pool for cloud-init boot images
 
 > **Note:**
 > There is a `--cloud-init` parameter for `virt-install` to auto-generate the
@@ -46,6 +48,10 @@ Capacity:       1.15 TiB
 Allocation:     33.26 GiB
 Available:      1.12 TiB
 ```
+
+## Install using a cloud image without automation
+
+### Install Ubuntu 22.04 Server
 
 ```
 curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
@@ -157,9 +163,9 @@ virt-install \
   --cloud-init user-data="$(pwd)/user-data,meta-data=$(pwd)/meta-data,network-config=$(pwd)/network-config"
 ```
 
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
+## Reference: Default cloud-init configs
 
-## Ubuntu Server 22.04 cloud image cloud-init
+### Ubuntu Server 22.04 cloud image cloud-init
 
 ```
 $ ls -l /etc/cloud
@@ -313,7 +319,7 @@ network:
 > **Note:**
 > All of the subiquity-based installers make use of cloud-init
 
-## Ubuntu Server 24.04 ISO cloud-init
+### Ubuntu Server 24.04 ISO cloud-init
 
 ```
 $ ls -l /etc/cloud
@@ -499,7 +505,7 @@ $ cat /etc/cloud/cloud.cfg.d/README
 # earlier files.
 ```
 
-## Ubuntu Server 22.04 ISO cloud-init
+### Ubuntu Server 22.04 ISO cloud-init
 
 ```
 $ ls -l /etc/cloud
@@ -687,7 +693,7 @@ $ sudo cat /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg
 network: {config: disabled}
 ```
 
-## Ubuntu Server 20.04 ISO cloud-init
+### Ubuntu Server 20.04 ISO cloud-init
 
 ```
 $ ls -l /etc/cloud
