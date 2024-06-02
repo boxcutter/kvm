@@ -48,7 +48,7 @@ Available:      1.12 TiB
 ```
 
 ```
-wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 
 $ qemu-img info jammy-server-cloudimg-amd64.img 
 image: jammy-server-cloudimg-amd64.img
@@ -61,14 +61,18 @@ Format specific information:
     compression type: zlib
     refcount bits: 16
 
-sudo mkdir -p /var/lib/libvirt/images/ubuntu-server-2204
-sudo qemu-img convert -f qcow2 -O qcow2 jammy-server-cloudimg-amd64.img /var/lib/libvirt/images/ubuntu-server-2204/root-disk.qcow2
-sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/ubuntu-server-2204/root-disk.qcow2 32G
+sudo qemu-img convert -f qcow2 -O qcow2 jammy-server-cloudimg-amd64.img /var/lib/libvirt/images/ubuntu-server-2204.qcow2
+sudo qemu-img resize -f qcow2 /var/lib/libvirt/images/ubuntu-server-2204.qcow2 32G
 ```
 
 ```
 touch network-config
-touch meta-data
+
+cat >meta-data <<EOF
+instance-id: ubuntu-server-2204
+local-hostname: ubuntu-server-2204
+EOF
+
 cat >user-data <<EOF
 #cloud-config
 password: password
@@ -83,10 +87,11 @@ sudo apt-get update
 sudo apt-get install genisoimage
 #     -input-charset utf-8 \
 genisoimage \
-    -output seed.img \
+    -input-charset utf-8 \
+    -output ubuntu-server-2204-cloud-init.img \
     -volid cidata -rational-rock -joliet \
     user-data meta-data network-config
-sudo cp seed.img /var/lib/libvirt/images/ubuntu-server-2204/seed.iso
+sudo cp ubuntu-server-2204-cloud-init.img /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso
 ```
 
 ```
@@ -97,8 +102,8 @@ virt-install \
   --memory 2048 \
   --vcpus 2 \
   --os-variant ubuntu22.04 \
-  --disk /var/lib/libvirt/images/ubuntu-server-2204/root-disk.qcow2,bus=virtio \
-  --disk /var/lib/libvirt/images/ubuntu-server-2204/seed.iso,device=cdrom \
+  --disk /var/lib/libvirt/images/ubuntu-server-2204.qcow2,bus=virtio \
+  --disk /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso,device=cdrom \
   --network network=host-network,model=virtio \
   --graphics spice \
   --noautoconsole \
@@ -107,6 +112,14 @@ virt-install \
   --debug
 
 virt-viewer ubuntu-server-2204
+
+# login with ubuntu user
+$ cloud-init status
+status: data
+
+sudo touch /etc/cloud/cloud-init.disabled
+
+
 
 $ virsh domblklist ubuntu-server-2204
  Target   Source
