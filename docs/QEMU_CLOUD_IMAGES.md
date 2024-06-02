@@ -94,6 +94,52 @@ qemu-system-x86_64 \
 ssh ubuntu@localhost -p 2222
 ```
 
+## Mount cloud image without any special tooling
+
+Install required tools:
+```
+sudo apt update
+sudo apt install qemu-utils
+```
+
+If the image is in QCOW2 format, convert it to raw:
+```
+qemu-img convert -f qcow2 -O raw jammy-server-cloudimg-amd64.img jammy-server-cloudimg-amd64.raw
+```
+
+Find the offset of where the partition starts:
+```
+$ fdisk -l jammy-server-cloudimg-amd64.raw 
+Disk jammy-server-cloudimg-amd64.raw: 2.2 GiB, 2361393152 bytes, 4612096 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 00C72DCD-0CD8-440E-824E-C6B53F27E5F1
+
+Device                             Start     End Sectors  Size Type
+jammy-server-cloudimg-amd64.raw1  227328 4612062 4384735  2.1G Linux filesystem
+jammy-server-cloudimg-amd64.raw14   2048   10239    8192    4M BIOS boot
+jammy-server-cloudimg-amd64.raw15  10240  227327  217088  106M EFI System
+
+Partition table entries are not in disk order.
+
+# Offset is the second number times the sector size (usually 512 bytes)
+$ echo $((227328 * 512))
+116391936
+
+# Mount the image
+sudo mkdir /mnt/my_image
+sudo mount -o loop,offset=116391936 jammy-server-cloudimg-amd64.raw /mnt/my_image
+
+# Image contents are available as /mnt/my_image
+
+# Unmount the iamge
+sudo umount /mnt/my_image
+rmdir /mnt/my_image
+```
+
+
 #
 #
 #
