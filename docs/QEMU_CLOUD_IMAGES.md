@@ -192,6 +192,38 @@ $ sudo umount /mnt/mY-image
 $ sudo qemu-nbd --disconnect /dev/nbd0
 ```
 
+## Mount cloud image with guestfish
+
+```
+sudo apt-get update
+sudo apt-get install libguestfs-tools
+
+$ guestfish --version
+guestfish 1.46.2
+
+$ sudo guestfish
+
+Welcome to guestfish, the guest filesystem shell for
+editing virtual machine filesystems and disk images.
+
+Type: ‘help’ for help on commands
+      ‘man’ to read the manual
+      ‘quit’ to quit the shell
+
+><fs> add jammy-server-cloudimg-amd64.img
+><fs> run
+ 100% ⟦▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒⟧ 00:00
+><fs> list-filesystems
+/dev/sda1: ext4
+/dev/sda14: unknown
+/dev/sda15: vfat
+type 'help mount' for more help on mount
+><fs> mount /dev/sda1 /
+><fs> mountpoints
+/dev/sda1: /
+><fs>
+```
+
 
 #
 #
@@ -277,3 +309,7 @@ qemu-system-x86_64 \
 https://amoldighe.github.io/2017/08/19/cloud-image-kvm-qemu-nbd/
 
 https://kashyapc.fedorapeople.org/Notes/_build/html/docs/QEMU-NBD-server-and-client.html
+
+https://www.redhat.com/sysadmin/customize-vm-cloud-images-guestfish
+
+https://ostechnix.com/access-and-modify-virtual-machine-disk-images-with-libguestfs/
