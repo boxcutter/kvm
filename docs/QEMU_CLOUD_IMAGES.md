@@ -275,3 +275,5 @@ qemu-system-x86_64 \
 [Launching Ubuntu Cloud Images with QEMU](https://powersj.io/posts/ubuntu-qemu-cli/)
 
 https://amoldighe.github.io/2017/08/19/cloud-image-kvm-qemu-nbd/
+
+https://kashyapc.fedorapeople.org/Notes/_build/html/docs/QEMU-NBD-server-and-client.html
