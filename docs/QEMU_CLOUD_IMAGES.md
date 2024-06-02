@@ -139,6 +139,59 @@ sudo umount /mnt/my_image
 rmdir /mnt/my_image
 ```
 
+## Mount cloud image with qemu-nbd
+
+```
+# Load the nbd module
+sudo modprobe nbd
+# Verify the nbd module is loaded
+$ lsmod | grep nbd
+nbd                    65536  0
+
+$ ls /dev/nbd*
+/dev/nbd0   /dev/nbd11  /dev/nbd14  /dev/nbd3  /dev/nbd6  /dev/nbd9
+/dev/nbd1   /dev/nbd12  /dev/nbd15  /dev/nbd4  /dev/nbd7
+/dev/nbd10  /dev/nbd13  /dev/nbd2   /dev/nbd5  /dev/nbd8
+
+# Connect the QCOW2 image as a network block device
+sudo qemu-nbd --connect=/dev/nbd0 jammy-server-cloudimg-amd64.img
+
+# Create a mount point directory
+sudo mkdir /mnt/my_image
+
+$ sudo fdisk -l /dev/nbd0
+Disk /dev/nbd0: 2.2 GiB, 2361393152 bytes, 4612096 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 00C72DCD-0CD8-440E-824E-C6B53F27E5F1
+
+Device        Start     End Sectors  Size Type
+/dev/nbd0p1  227328 4612062 4384735  2.1G Linux filesystem
+/dev/nbd0p14   2048   10239    8192    4M BIOS boot
+/dev/nbd0p15  10240  227327  217088  106M EFI System
+
+Partition table entries are not in disk order.
+
+sudo mount /dev/nbd0p1 /mnt/my_image
+
+$ ls /mnt/my_image
+bin   dev  home  lib32  libx32      media  opt   root  sbin  srv  tmp  var
+boot  etc  lib   lib64  lost+found  mnt    proc  run   snap  sys  usr
+
+# Use chroot jail to execute commands inside of the mounted root filesystem
+$ sudo chroot /mnt/my_image
+root@sfo2-kvm-playpen-ubuntu2204-desktop:/# ls
+bin   dev  home  lib32  libx32      media  opt   root  sbin  srv  tmp  var
+boot  etc  lib   lib64  lost+found  mnt    proc  run   snap  sys  usr
+root@sfo2-kvm-playpen-ubuntu2204-desktop:/#
+
+# Exit chroot and unmount the image file
+$ sudo umount /mnt/mY-image
+$ sudo qemu-nbd --disconnect /dev/nbd0
+```
+
 
 #
 #
@@ -220,3 +273,5 @@ qemu-system-x86_64 \
 [How to run cloud-init locally](https://cloudinit.readthedocs.io/en/latest/howto/run_cloud_init_locally.html)
 
 [Launching Ubuntu Cloud Images with QEMU](https://powersj.io/posts/ubuntu-qemu-cli/)
+
+https://amoldighe.github.io/2017/08/19/cloud-image-kvm-qemu-nbd/
