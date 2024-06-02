@@ -17,6 +17,6 @@ sudo apt-get update
 sudo apt install packer
 
 # Verify the install
-$ packer version
-Packer v1.10.3
+$ packer --version
+Packer v1.11.0
 ```
