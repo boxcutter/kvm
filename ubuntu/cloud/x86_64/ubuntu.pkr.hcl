@@ -23,6 +23,11 @@ variable "ssh_password" {
   default = "packer"
 }
 
+variable "vm_name" {
+  type    = string
+  default = "ubuntu-22.04-x86_64"
+}
+
 source "file" "user_data" {
   content = <<EOF
 #cloud-config
@@ -31,7 +36,7 @@ password: ${var.ssh_password}
 chpasswd: { expire: False }
 ssh_pwauth: True
 EOF
-  target  = "user-data"
+  target  = "boot-${var.vm_name}/user-data"
 }
 
 source "file" "meta_data" {
@@ -39,14 +44,14 @@ source "file" "meta_data" {
 instance-id: ubuntu-cloud
 local-hostname: ubuntu-cloud
 EOF
-  target  = "meta-data"
+  target  = "boot-${var.vm_name}/meta-data"
 }
 
 build {
   sources = ["sources.file.user_data", "sources.file.meta_data"]
 
   provisioner "shell-local" {
-    inline = ["genisoimage -output cidata.iso -input-charset utf-8 -volid cidata -joliet -r user-data meta-data"]
+    inline = ["genisoimage -output boot-${var.vm_name}/cidata.iso -input-charset utf-8 -volid cidata -joliet -r boot-${var.vm_name}/user-data boot-${var.vm_name}/meta-data"]
   }
 }
 
@@ -60,11 +65,6 @@ variable "iso_url" {
   default = "http://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-amd64.img"
 }
 
-variable "vm_name" {
-  type    = string
-  default = "ubuntu-22.04-x86_64"
-}
-
 source "qemu" "ubuntu" {
   disk_compression = true
   disk_image       = true
@@ -72,14 +72,14 @@ source "qemu" "ubuntu" {
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   qemuargs = [
-    ["-cdrom", "cidata.iso"]
+    ["-cdrom", "boot-${var.vm_name}/cidata.iso"]
   ]
   output_directory  = "output-${var.vm_name}"
   shutdown_command  = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
   ssh_password      = var.ssh_password
   ssh_timeout       = "120s"
   ssh_username      = var.ssh_username
-  vm_name           = var.vm_name
+  vm_name           = "${var.vm_name}.qcow2"
   efi_boot          = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
