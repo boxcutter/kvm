@@ -18,6 +18,20 @@ The SeaBIOS open source implementation of a 16-bit X86 BIOS is used for the
 Legacy BIOS firmware in these images. And the TianoCore open source implentation
 is used for images with UEFI firmware.
 
+> NOTE: We don't bother creating vagrant boxes compatible with the
+> vagrant-libvirt plugin. There's no ARM64 version of vagrant for Linux.
+> The vagrant-libvirt hasn't been updated in almost a year as of this writing.
+> Troubleshooting all the ruby dependencies for the vagrant-libvirt plugin is
+> so complicated it's easier to run vagrant in a Docker container. And then
+> there are still so many issues troubleshooting the xml output of
+> vagrant-libvirt, it's just easier to avoid using vagrant entirely. By
+> comparison, using libvirt or qemu to work with the qcow2 images directly
+> is easier than trying to use these as vagrant boxes for our use case in
+> robotics.
+
+> run vagrant in 
+
+
 ## Building the images
 
 Prequisites:
@@ -47,11 +61,11 @@ contains shared code referenced by each processor build.
 cd ubuntu/iso/x86_64
 packer init .
 PACKER_LOG=1 packer build \
-  -var-file ubuntu-22.04-bios-x86_64.pkrvars.hcl \
+  -var-file ubuntu-24.04-x86_64.pkrvars.hcl \
   ubuntu.pkr.hcl
 
 PACKER_LOG=1 packer build \
-  -var-file ubuntu-22.04-x86_64.pkrvars.hcl \
+  -var-file ubuntu-24.04-bios-x86_64.pkrvars.hcl \
   ubuntu.pkr.hcl
 ```
 
@@ -82,7 +96,39 @@ docker run --interactive --tty --rm \
   --network host \
   vagrantlibvirt/vagrant-libvirt:latest \
     vagrant status
+
 ```
+
+# Give permission to allow user VMs to access bridged device
+
+```
+mkdir -p /etc/qemu
+cat >/etc/qemu/bridge.conf <<EOF
+allow br0
+EOF
+chown root:root /etc/qemu/bridge.conf
+chmod 0644 /etc/qemu/bridge.conf
+# Add setuid to the qemu-bridge-helper binary
+chmod u+s /usr/lib/qemu/qemu-bridge-helper
+```
+
+# https://wiki.qemu.org/Documentation/Networking
+
+```
+$ qemu-img convert -O qcow2 output-ubuntu-22.04-bios-x86_64/ubuntu-22.04-bios-x86_64 ubuntu-image.qcow2
+$ qemu-img resize -f qcow2 ubuntu-image.qcow2 32G
+$ qemu-system-x86_64 \
+  -name ubuntu-image \
+  -machine accel=kvm,type=q35 \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -net bridge,br=br0 -net nic,macaddr=${mac},model=virtio
+  -device virtio-net-pci,netdev=net0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -drive file=ubuntu-image.qcow2,if=virtio,format=qcow2
+```
+
 
 ### QEMU x86_64 BIOS
 
@@ -253,3 +299,14 @@ virt-viewer ubuntu-image
 virsh destroy ubuntu-image
 virsh undefine ubuntu-image --nvram --remove-all-storage
 ```
+
+#
+#
+#
+
+https://www.dzombak.com/blog/2024/02/Setting-up-KVM-virtual-machines-using-a-bridged-network.html
+
+virsh net-list
+virsh net-info hostbridge
+virsh net-dhcp-leases hostbridge
+sudo brctl show br0
