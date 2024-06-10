@@ -1,4 +1,4 @@
-# Ubuntu cloud images
+# Ubuntu x86_64 cloud images
 
 ## Ubuntu 20.04 UEFI virtual firmware
 
