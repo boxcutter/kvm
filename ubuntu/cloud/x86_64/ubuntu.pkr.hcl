@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
+
 variable "efi_boot" {
   type    = bool
   default = false
