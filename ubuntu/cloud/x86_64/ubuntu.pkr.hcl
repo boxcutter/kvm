@@ -100,10 +100,9 @@ build {
   # cloud-init may still be running when we start executing scripts
   # To avoid race conditions, make sure cloud-init is done first
   provisioner "shell" {
-    inline = [
-      "echo '==> Waiting for cloud-init to finish'",
-      "/usr/bin/cloud-init status --wait",
-      "echo '==> Cloud-init complete'",
+    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    scripts = [
+      "../scripts/cloud-init-wait.sh",
     ]
   }
 

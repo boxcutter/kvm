@@ -355,12 +355,180 @@ $ virsh shutdown ubuntu-server-2204
 $ virsh undefine ubuntu-server-2204 --nvram --remove-all-storage
 ```
 
+## Ubuntu 24.04 UEFI virtual firmware
+
+```
+cd ubuntu/cloud/x86_64
+packer init .
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-24.04-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+```
+
+```
+$ sudo qemu-img convert \
+    -f qcow2 \
+    -O qcow2 \
+    output-ubuntu-24.04-x86_64/ubuntu-24.04-x86_64.qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2404.qcow2
+$ sudo qemu-img resize \
+    -f qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2404.qcow2 \
+    32G
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2404 \
+  --boot uefi \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk /var/lib/libvirt/images/ubuntu-server-2404.qcow2,bus=virtio \
+  --network network=host-network,model=virtio \
+  --graphics spice \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2404
+
+# login with packer user
+
+# Check networking - you may notice that the network interface is down and
+# the name of the interface generated in netplan doesn't match. If not 
+# correct, can regenerate with cloud-init
+# ip reports that enp1s0 is down
+$ ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp1s0           DOWN
+
+# Netplan was configured with a different interface name - ens3
+$ sudo netplan get
+network:
+  version: 2
+  ethernets:
+    ens3:
+      match:
+        macaddress: "52:54:00:12:34:56"
+      dhcp4: true
+      dhcp6: true
+      set-name: "ens3"
+
+# Check to make sure cloud-init is greater than 23.4
+$ cloud-init --version
+/usr/bin/cloud-init 24.1.3-0ubuntu3.2
+
+# Regenerate only the network config
+$ sudo cloud-init clean --configs network
+$ sudo cloud-init init --local
+
+# Now netplan should be configured to use the correct interface
+
+# Verify cloud-init is disabled
+$ cloud-init status
+status: disabled
+
+$ sudo shutdown -h now
+
+# Verify image boots with the networking enabled
+$ ip --brief a
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp1s0           UP             192.168.107.79/24 fda2:8d37:bed8:93ee:5054:ff:fe8c:e161/64 fe80::5054:ff:fe8c:e161/64
+```
+
+```
+$ virsh shutdown ubuntu-server-2404
+$ virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
+```
+
+## Ubuntu 24.04 BIOS virtual firmware
+
+```
+cd ubuntu/cloud/x86_64
+packer init .
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-24.04-bios-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+```
+
+```
+$ sudo qemu-img convert \
+    -f qcow2 \
+    -O qcow2 \
+    output-ubuntu-24.04-bios-x86_64/ubuntu-24.04-bios-x86_64.qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2404.qcow2
+$ sudo qemu-img resize \
+    -f qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2404.qcow2 \
+    32G
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2404 \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk /var/lib/libvirt/images/ubuntu-server-2404.qcow2,bus=virtio \
+  --network network=host-network,model=virtio \
+  --graphics spice \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2404
+
+# login with packer user
+
+# Check networking - you may notice that the network interface is down and
+# the name of the interface generated in netplan doesn't match. If not 
+# correct, can regenerate with cloud-init
+# ip reports that enp1s0 is down
+$ ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+enp1s0           DOWN
+
+# Netplan was configured with a different interface name - ens3
+$ sudo netplan get
+network:
+  version: 2
+  ethernets:
+    ens3:
+      match:
+        macaddress: "52:54:00:12:34:56"
+      dhcp4: true
+      dhcp6: true
+      set-name: "ens3"
+
+# Check to make sure cloud-init is greater than 23.4
+$ cloud-init --version
+/usr/bin/cloud-init 24.1.3-0ubuntu3.2
+
+# Regenerate only the network config
+$ sudo cloud-init clean --configs network
+$ sudo cloud-init init --local
+
+# Now netplan should be configured to use the correct interface
+
+# Verify cloud-init is disabled
+$ cloud-init status
+status: disabled
+
+$ sudo shutdown -h now
+
+# Verify image boots without cloud-init iso being mounted
+```
+
+```
+$ virsh shutdown ubuntu-server-2404
+$ virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
+```
 
 ## References:
-
-https://askubuntu.com/questions/1104285/how-do-i-reload-network-configuration-with-cloud-init
-
-
-References:
 
 https://askubuntu.com/questions/1104285/how-do-i-reload-network-configuration-with-cloud-init
