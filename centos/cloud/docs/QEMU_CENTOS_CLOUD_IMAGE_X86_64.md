@@ -41,13 +41,10 @@ EOF
 
 cat <<EOF > user-data
 #cloud-config
-users:
-  - name: ubuntu
-    ssh-authorized-keys:
-      - <your-public-ssh-key>
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    groups: sudo
-    shell: /bin/bash
+password: superseekret
+chpasswd:
+  expire: False
+ssh_pwauth: True
 EOF
 ```
 
@@ -86,5 +83,6 @@ qemu-system-x86_64 \
 Login to the image
 
 ```
-ssh ubuntu@localhost -p 2222
+# cloud-user / superseekret
+ssh cloud-user@localhost -p 2222
 ```
