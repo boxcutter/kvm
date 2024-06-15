@@ -333,6 +333,34 @@ $ rmmod nbd
 ## Ubuntu 22.04 Cloud Image
 
 ```
+$ curl -LO https://cloud-images.ubuntu.com/jammy/current/SHA256SUMS
+$ curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+
+$ sudo modprobe -v nbd
+insmod /lib/modules/6.5.0-35-generic/kernel/drivers/block/nbd.ko
+$ lsmod | grep nbd
+nbd                    65536  0
+$ sudo qemu-nbd --connect=/dev/nbd0 jammy-server-cloudimg-amd64.img
+$ sudo mkdir /mnt/ubuntu-server-2204
+
+$ sudo fdisk -l /dev/nbd0
+Disk /dev/nbd0: 2.2 GiB, 2361393152 bytes, 4612096 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 6EEF80A3-1A86-4AB2-B08D-8FAD6C29F148
+
+Device        Start     End Sectors  Size Type
+/dev/nbd0p1  227328 4612062 4384735  2.1G Linux filesystem
+/dev/nbd0p14   2048   10239    8192    4M BIOS boot
+/dev/nbd0p15  10240  227327  217088  106M EFI System
+
+Partition table entries are not in disk order.
+
+$ sudo mount /dev/nbd0p1 /mnt/ubuntu-server-2204
+$ sudo chroot /mnt/ubuntu-server-2204
+
 # cat /etc/cloud/cloud.cfg
 # The top level settings are used as module
 # and base configuration.
@@ -431,11 +459,11 @@ system_info:
     name: ubuntu
     lock_passwd: True
     gecos: Ubuntu
-    groups: [adm, cdrom, dip, lxd, sudo]
+    groups: [adm, audio, cdrom, dialout, dip, floppy, lxd, netdev, plugdev, sudo, video]
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     shell: /bin/bash
   network:
-    dhcp_client_priority: [dhcpcd, dhclient, udhcpc]
+    dhcp_client_priority: [dhclient, dhcpcd, udhcpc]
     renderers: ['netplan', 'eni', 'sysconfig']
     activators: ['netplan', 'eni', 'network-manager', 'networkd']
   # Automatically discover the best ntp_client
@@ -470,4 +498,12 @@ system_info:
         primary: http://ports.ubuntu.com/ubuntu-ports
         security: http://ports.ubuntu.com/ubuntu-ports
   ssh_svcname: ssh
+
+# exit
+
+$ sudo umount /mnt/ubuntu-server-2204
+$ sudo qemu-nbd --disconnect /dev/nbd0
+$ sudo rmdir /mnt/ubuntu-server-2204
+$ rmmod nbd
+
 ```
