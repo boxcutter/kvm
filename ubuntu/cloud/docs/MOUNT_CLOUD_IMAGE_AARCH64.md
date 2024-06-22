@@ -11,7 +11,7 @@ curl -LO https://cloud.centos.org/centos/9-stream/aarch64/images/CentOS-Stream-G
 
 ```
 # Load the nbd module
-sudo modprobe nbd
+sudo modprobe -v nbd
 # Verify the nbd module is loaded
 $ lsmod | grep nbd
 nbd                    45056  0
@@ -61,11 +61,11 @@ root@sfo2-kvm-playpen-ubuntu2204-desktop:/#
 # Exit chroot and unmount the image file
 $ sudo umount /mnt/centos-stream-9
 $ sudo qemu-nbd --disconnect /dev/nbd0
-$ sudo rmdir /mnt/cento-stream-9
+$ sudo rmdir /mnt/centos-stream-9
 ```
 
 ```
-$ cat cloud.cfg
+$ cat /mnt/centos-stream-9/etc/cloud/cloud.cfg
 # The top level settings are used as module
 # and base configuration.
 
