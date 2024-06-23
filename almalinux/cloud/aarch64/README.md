@@ -2,6 +2,8 @@
 
 https://wiki.almalinux.org/cloud/Generic-cloud.html#download-images
 
+https://github.com/AlmaLinux/cloud-images
+
 ## AlmaLinux 9
 
 ```
