@@ -84,7 +84,7 @@ $ sudo shutdown -h now
 ```
 
 ```
-$ virsh shutdown oracle-linux-9
-$ virsh undefine oracle-linux-9 --nvram --remove-all-storage
+$ virsh shutdown rockylinux-9
+$ virsh undefine rockylinux-9 --nvram --remove-all-storage
 ```
 
