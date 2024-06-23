@@ -1,0 +1,111 @@
+# QEMU Oracle Linux Cloud Images
+
+https://yum.oracle.com/oracle-linux-templates.html
+
+https://blogs.oracle.com/linux/post/a-quick-start-with-the-oracle-linux-templates-for-kvm
+
+## Oracle Linux 9
+
+Download the Oracle Linux 9 Cloud Image
+
+```
+$ curl -LO https://yum.oracle.com/templates/OracleLinux/OL9/u4/aarch64/OL9U4_aarch64-kvm-cloud-b90.qcow2
+
+$ qemu-img info OL9U4_aarch64-kvm-cloud-b90.qcow2 
+image: OL9U4_aarch64-kvm-cloud-b90.qcow2
+file format: qcow2
+virtual size: 16 GiB (17179869184 bytes)
+disk size: 478 MiB
+cluster_size: 65536
+Format specific information:
+    compat: 1.1
+    lazy refcounts: false
+    refcount bits: 16
+    corrupt: false
+
+$ qemu-img convert \
+    -O qcow2 \
+    OL9U4_aarch64-kvm-cloud-b90.qcow2 \
+    oracle-linux-9.qcow2
+
+# Resize the image
+$ qemu-img resize \
+    -f qcow2 \
+    oracle-linux-9.qcow2 32G
+```
+
+Create a cloud init configuration
+
+```
+touch network-config
+
+cat >meta-data <<EOF
+instance-id: oracle-linux-9
+local-hostname: oracle-linux-9
+EOF
+
+cat <<EOF > user-data
+#cloud-config
+password: superseekret
+chpasswd:
+  expire: False
+ssh_pwauth: True
+EOF
+```
+
+Create the cloud-init ISO
+
+```
+sudo apt-get update
+sudo apt-get install genisoimage
+genisoimage \
+    -input-charset utf-8 \
+    -output cloud-init.iso \
+    -volid cidata -rational-rock -joliet \
+    user-data meta-data network-config
+```
+
+Create a firmware image
+
+```
+# Qemu expects aarch firmware images to be 64M so the firmware
+# images can't be used as is, some padding is needed to
+# create an image for pflash
+dd if=/dev/zero of=flash0.img bs=1M count=64
+dd if=/usr/share/AAVMF/AAVMF_CODE.fd of=flash0.img conv=notrunc
+dd if=/dev/zero of=flash1.img bs=1M count=64
+```
+
+Run the VM with QEMU
+
+```
+# login: opc
+qemu-system-aarch64 \
+  -name oracle-linux-9 \
+  -machine virt,accel=kvm,gic-version=3,kernel-irqchip=on \
+  -cpu host \
+  -smp 2 \
+  -m 2G \
+  -device virtio-keyboard \
+  -device virtio-mouse \
+  -device virtio-gpu-pci \
+  -nographic \
+  -device virtio-net-pci,netdev=net0 \
+  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+  -drive file=oracle-linux-9.qcow2,if=virtio,format=qcow2 \
+  -cdrom cloud-init.iso \
+  -drive if=pflash,format=raw,readonly=on,unit=0,file=flash0.img \
+  -drive if=pflash,format=raw,unit=1,file=flash1.img
+
+Ctrl-a h: Show help (displays all available commands).
+Ctrl-a x: Exit QEMU.
+Ctrl-a c: Switch between the monitor and the console.
+Ctrl-a s: Send a break signal.
+```
+
+Login to the image
+
+```
+# opc / superseekret
+ssh cloud-user@localhost -p 2222
+```
