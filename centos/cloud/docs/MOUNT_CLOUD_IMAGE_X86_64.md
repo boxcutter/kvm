@@ -1,5 +1,8 @@
 ## CentOS Cloud Images
 
+More detailed documentation on cloud-init with RHEL can be found here:
+https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/configuring_and_managing_cloud-init_for_rhel_9/configuring-cloud-init_cloud-content#configuring-cloud-init_cloud-content
+
 ## Loopback mount - requires converting qcow to raw
 
 Install required tools:
