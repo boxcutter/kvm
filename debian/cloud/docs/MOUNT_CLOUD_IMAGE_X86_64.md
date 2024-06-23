@@ -115,7 +115,7 @@ exit
 $ sudo umount /mnt/debian-12
 $ sudo qemu-nbd --disconnect /dev/nbd0
 $ sudo rmdir /mnt/debian-12
-$ rmmod nbd
+$ sudo rmmod nbd
 ```
 
 ## Mount cloud image with guestfish
