@@ -112,6 +112,7 @@ build {
     scripts = [
       "../scripts/disable-updates.sh",
       "../scripts/qemu.sh",
+      "../scripts/clear-machine-information.sh"
     ]
   }
 }

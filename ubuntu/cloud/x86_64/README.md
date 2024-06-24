@@ -266,8 +266,8 @@ enp1s0           UP             192.168.107.79/24 fda2:8d37:bed8:93ee:5054:ff:fe
 ```
 
 ```
-$ virsh shutdown ubuntu-server-2004
-$ virsh undefine ubuntu-server-2004 --nvram --remove-all-storage
+$ virsh shutdown ubuntu-server-2204
+$ virsh undefine ubuntu-server-2204 --nvram --remove-all-storage
 ```
 
 ## Ubuntu 22.04 BIOS virtual firmware
