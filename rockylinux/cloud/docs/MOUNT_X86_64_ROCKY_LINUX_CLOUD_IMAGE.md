@@ -1,12 +1,10 @@
-# AlmaLinux OS Generic Cloud (Cloud-init) images
+# Mount Rocky Linux Cloud images
 
-https://wiki.almalinux.org/cloud/Generic-cloud.html#download-images
-
-https://github.com/AlmaLinux/cloud-images
+https://rockylinux.org/download
 
 ```
-curl -LO https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/CHECKSUM
-curl -LO https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/CHECKSUM
+curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 ```
 
 ## Loopback mount - requires converting qcow to raw
@@ -24,43 +22,44 @@ If the image is in QCOW2 format, convert it to raw:
 qemu-img convert \
   -f qcow2 \
   -O raw \
-  AlmaLinux-9-GenericCloud-latest.x86_64.qcow2 \
-  almalinux-9-x86_64.raw
+  Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 \
+  rockylinux-9-x86_64.raw
 ```
 
 Find the offset of where the partition starts:
 
 ```
-$ fdisk -l almalinux-9-x86_64.raw 
-Disk almalinux-9-x86_64.raw: 10 GiB, 10737418240 bytes, 20971520 sectors
+$ fdisk -l rockylinux-9-x86_64.raw 
+Disk rockylinux-9-x86_64.raw: 10 GiB, 10737418240 bytes, 20971520 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: gpt
-Disk identifier: BFCF6B5D-2B26-45A9-9A0D-4793FB0D30B5
+Disk identifier: 6F744111-DA69-4CA5-B481-DDDEB77763F5
 
-Device                    Start      End  Sectors  Size Type
-almalinux-9-x86_64.raw1    2048     4095     2048    1M BIOS boot
-almalinux-9-x86_64.raw2    4096   413695   409600  200M EFI System
-almalinux-9-x86_64.raw3  413696  2510847  2097152    1G Linux filesystem
-almalinux-9-x86_64.raw4 2510848 20969471 18458624  8.8G Linux filesystem
+Device                     Start      End  Sectors  Size Type
+rockylinux-9-x86_64.raw1    2048     6143     4096    2M BIOS boot
+rockylinux-9-x86_64.raw2    6144   210943   204800  100M EFI System
+rockylinux-9-x86_64.raw3  210944  2258943  2048000 1000M Linux extended boot
+rockylinux-9-x86_64.raw4 2258944 20971486 18712543  8.9G Linux root (x86-64)
 
 
 # Offset is the start number times the sector size (usually 512 bytes)
-$ echo $((2510848 * 512))
-1285554176
+$ echo $((2258944 * 512))
+1156579328
 
 # Mount the image
-sudo mkdir -p /mnt/almalinux-9
-sudo mount -o loop,offset=1285554176 almalinux-9-x86_64.raw /mnt/almalinux-9
+sudo mkdir -p /mnt/rockylinux-9
+sudo mount -o loop,offset=1156579328 rockylinux-9-x86_64.raw /mnt/rockylinux-9
 
-$ ls /mnt/almalinux-9/
-afs  boot  etc   lib    media  opt   root  sbin  sys  usr
-bin  dev   home  lib64  mnt    proc  run   srv   tmp  var
+$ ls /mnt/rockylinux-9/
+afs   config.bootoptions  etc    lib    mnt   root  srv  usr
+bin   config.partids      grub2  lib64  opt   run   sys  var
+boot  dev                 home   media  proc  sbin  tmp
 
 # Unmount the image
-$ sudo umount /mnt/almalinux-9
-$ sudo rmdir /mnt/almalinux-9/
+$ sudo umount /mnt/rockylinux-9
+$ sudo rmdir /mnt/rockylinux-9/
 ```
 
 ## Mount cloud image with qemu-nbd
@@ -79,10 +78,10 @@ $ ls /dev/nbd*
 /dev/nbd10  /dev/nbd13  /dev/nbd2   /dev/nbd5  /dev/nbd8
 
 # Connect the QCOW2 image as a network block device
-$ sudo qemu-nbd --connect=/dev/nbd0 AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+$ sudo qemu-nbd --connect=/dev/nbd0 Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 
 # Create a mount point directory
-sudo mkdir -p /mnt/almalinux-9
+$ sudo mkdir -p /mnt/rockylinux-9
 
 $ sudo fdisk -l /dev/nbd0
 Disk /dev/nbd0: 10 GiB, 10737418240 bytes, 20971520 sectors
@@ -90,34 +89,37 @@ Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
 I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: gpt
-Disk identifier: BFCF6B5D-2B26-45A9-9A0D-4793FB0D30B5
+Disk identifier: 6F744111-DA69-4CA5-B481-DDDEB77763F5
 
 Device        Start      End  Sectors  Size Type
-/dev/nbd0p1    2048     4095     2048    1M BIOS boot
-/dev/nbd0p2    4096   413695   409600  200M EFI System
-/dev/nbd0p3  413696  2510847  2097152    1G Linux filesystem
-/dev/nbd0p4 2510848 20969471 18458624  8.8G Linux filesystem
+/dev/nbd0p1    2048     6143     4096    2M BIOS boot
+/dev/nbd0p2    6144   210943   204800  100M EFI System
+/dev/nbd0p3  210944  2258943  2048000 1000M Linux extended boot
+/dev/nbd0p4 2258944 20971486 18712543  8.9G Linux root (x86-64)
 
 
-$ sudo mount /dev/nbd0p4 /mnt/almalinux-9
+$ sudo mount /dev/nbd0p4 /mnt/rockylinux-9
 
-$ ls /mnt/almalinux-9/
-afs  boot  etc   lib    media  opt   root  sbin  sys  usr
-bin  dev   home  lib64  mnt    proc  run   srv   tmp  var
+$ ls /mnt/rockylinux-9/
+afs   config.bootoptions  etc    lib    mnt   root  srv  usr
+bin   config.partids      grub2  lib64  opt   run   sys  var
+boot  dev                 home   media  proc  sbin  tmp
 
-$ sudo chroot /mnt/almalinux-9/
+$ sudo chroot /mnt/rockylinux-9/
 basename: missing operand
 Try 'basename --help' for more information.
 [root@crake-kvm-playpen /]# ls
-afs  boot  etc   lib    media  opt   root  sbin  sys  usr
-bin  dev   home  lib64  mnt    proc  run   srv   tmp  var
+afs   config.bootoptions  etc    lib    mnt   root  srv  usr
+bin   config.partids      grub2  lib64  opt   run   sys  var
+boot  dev                 home   media  proc  sbin  tmp
+
 [root@crake-kvm-playpen /]# exit
 exit
 
 # Unmount the image file
-$ sudo umount /mnt/almalinux-9
+$ sudo umount /mnt/rockylinux-9
 $ sudo qemu-nbd --disconnect /dev/nbd0
-$ sudo rmdir /mnt/almalinux-9
+$ sudo rmdir /mnt/rockylinux-9
 ```
 
 ## Mount cloud image with guestfish
@@ -129,7 +131,7 @@ sudo apt-get install libguestfs-tools
 $ guestfish --version
 guestfish 1.46.2
 
-$ sudo guestfish
+ sudo guestfish
 
 Welcome to guestfish, the guest filesystem shell for
 editing virtual machine filesystems and disk images.
@@ -138,9 +140,8 @@ Type: ‘help’ for help on commands
       ‘man’ to read the manual
       ‘quit’ to quit the shell
 
-><fs> add AlmaLinux-9-GenericCloud-latest.x86_64.qcow2
+><fs> add Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 ><fs> run
- 100% ⟦▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒⟧ --:--
 ><fs> list-filesystems
 /dev/sda1: unknown
 /dev/sda2: vfat
@@ -149,16 +150,18 @@ Type: ‘help’ for help on commands
 ><fs> mount /dev/sda4 /
 ><fs> mountpoints
 /dev/sda4: /
-><fs> ! mkdir -p /mnt/almalinux-9 readonly:true
-><fs> mount-local /mnt/almalinux-9 readonly:true
+><fs> ! mkdir -p /mnt/rockylinux-9 readonly:true
+><fs> mount-local /mnt/rockylinux-9 readonly:true
 ><fs> mount-local-run
+
 
 # Open a different terminal
 $ sudo su -
-root@crake-kvm-playpen:~# ls /mnt/almalinux-9/
-afs  boot  etc   lib    media  opt   root  sbin  sys  usr
-bin  dev   home  lib64  mnt    proc  run   srv   tmp  var
-root@crake-kvm-playpen:~# fusermount -u /mnt/almalinux-9
+root@crake-kvm-playpen:~# ls /mnt/rockylinux-9/
+afs   config.bootoptions  etc    lib    mnt   root  srv  usr
+bin   config.partids      grub2  lib64  opt   run   sys  var
+boot  dev                 home   media  proc  sbin  tmp
+root@crake-kvm-playpen:~# fusermount -u /mnt/rockylinux-9 
 root@crake-kvm-playpen:~# exit
 logout
 
@@ -169,10 +172,11 @@ logout
 ><fs> exit
 ```
 
-## AlmaLinux 9 Cloud Image
+## RockyLinux 9 Cloud Image
 
 ```
 # cat /etc/cloud/cloud.cfg
+# Modified for cloud image
 # The top level settings are used as module
 # and base configuration.
 
@@ -265,12 +269,12 @@ cloud_final_modules:
 # (not accessible to handlers/transforms)
 system_info:
   # This will affect which distro class gets used
-  distro: almalinux
+  distro: rocky
   # Default user name + that default users groups (if added/used)
   default_user:
-    name: almalinux
+    name: rocky
     lock_passwd: True
-    gecos: almalinux Cloud User
+    gecos: rocky Cloud User
     groups: [adm, systemd-journal]
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     shell: /bin/bash
@@ -369,22 +373,20 @@ output: {all: '| tee -a /var/log/cloud-init-output.log'}
 ```
 # ls /etc/cloud/templates/
 chef_client.rb.tmpl                   hosts.mariner.tmpl
-chrony.conf.almalinux.tmpl            hosts.photon.tmpl
-chrony.conf.alpine.tmpl               hosts.redhat.tmpl
-chrony.conf.centos.tmpl               hosts.suse.tmpl
-chrony.conf.cloudlinux.tmpl           ntp.conf.almalinux.tmpl
-chrony.conf.cos.tmpl                  ntp.conf.alpine.tmpl
-chrony.conf.debian.tmpl               ntp.conf.cloudlinux.tmpl
+chrony.conf.alpine.tmpl               hosts.photon.tmpl
+chrony.conf.centos.tmpl               hosts.redhat.tmpl
+chrony.conf.cos.tmpl                  hosts.suse.tmpl
+chrony.conf.debian.tmpl               ntp.conf.alpine.tmpl
 chrony.conf.fedora.tmpl               ntp.conf.debian.tmpl
 chrony.conf.freebsd.tmpl              ntp.conf.fedora.tmpl
 chrony.conf.opensuse-leap.tmpl        ntp.conf.freebsd.tmpl
 chrony.conf.opensuse-microos.tmpl     ntp.conf.opensuse.tmpl
-chrony.conf.opensuse-tumbleweed.tmpl  ntp.conf.photon.tmpl
-chrony.conf.opensuse.tmpl             ntp.conf.rhel.tmpl
+chrony.conf.opensuse.tmpl             ntp.conf.photon.tmpl
+chrony.conf.opensuse-tumbleweed.tmpl  ntp.conf.rhel.tmpl
 chrony.conf.photon.tmpl               ntp.conf.sles.tmpl
 chrony.conf.rhel.tmpl                 ntp.conf.ubuntu.tmpl
-chrony.conf.sle-micro.tmpl            ntpd.conf.openbsd.tmpl
-chrony.conf.sle_hpc.tmpl              resolv.conf.tmpl
+chrony.conf.sle_hpc.tmpl              ntpd.conf.openbsd.tmpl
+chrony.conf.sle-micro.tmpl            resolv.conf.tmpl
 chrony.conf.sles.tmpl                 sources.list.debian.deb822.tmpl
 chrony.conf.ubuntu.tmpl               sources.list.debian.tmpl
 hosts.alpine.tmpl                     sources.list.ubuntu.deb822.tmpl
