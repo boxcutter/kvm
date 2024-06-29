@@ -2,7 +2,11 @@
 
 https://docs.aws.amazon.com/linux/al2023/ug/kvm-supported-configurations.html
 
+Latest Amazon Linux 2 image:
 https://cdn.amazonlinux.com/os-images/latest/kvm/
+
+Latest Amazon Linux 2023 image:
+https://cdn.amazonlinux.com/al2023/os-images/latest/
 
 https://cdn.amazonlinux.com/os-images/2.0.20240610.1/README.cloud-init
 
