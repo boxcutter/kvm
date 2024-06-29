@@ -1,6 +1,9 @@
 # Mount Amazon Linux images
 
+https://docs.aws.amazon.com/linux/al2023/ug/kvm-supported-configurations.html
+
 https://docs.aws.amazon.com/linux/al2023/ug/outside-ec2-download.html
+
 https://cdn.amazonlinux.com/os-images/latest/kvm/
 
 ```

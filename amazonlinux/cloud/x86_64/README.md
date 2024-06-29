@@ -1,5 +1,7 @@
 # Amazon Linux Cloud Images
 
+https://docs.aws.amazon.com/linux/al2023/ug/kvm-supported-configurations.html
+
 https://cdn.amazonlinux.com/os-images/latest/kvm/
 
 https://cdn.amazonlinux.com/os-images/2.0.20240610.1/README.cloud-init
