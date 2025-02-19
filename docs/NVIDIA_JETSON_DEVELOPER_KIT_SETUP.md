@@ -22,6 +22,29 @@ kit when it ships to basically run Ubuntu server instead of desktop:
 
 https://nvidia-ai-iot.github.io/jetson-min-disk/step1.html
 
+A USB timeout error may occur during flashing. The following error indicates that your flash host’s USB port is not enabled:
+
+```
+[ 0.1172 ] Sending bct_br
+[ 0.1603 ] ERROR: might be timeout in USB write.
+Error: Return value
+```
+
+1. First try changing the USB port:
+  a. Move to a different USB port, if available.
+  b. Power cycle the AGX and retry flashing.
+2. If that doesn’t work, try disabling autosuspend:
+  a. To disable `autosuspend` on your host’s USB ports, run the following command.
+    ```
+    sudo bash -c 'echo -1 > /sys/module/usbcore/parameters/autosuspend'
+    ```
+  b. Power cycle the AGX and retry flashing.
+
+> **Note**
+> This error does not clear until you power cycle the AGX, so don’t skip that step.
+
+https://forums.developer.nvidia.com/t/jetson-agx-orin-faq/237459
+
 ## First steps - verify the Jetson is booting off NVMe and has at least 2TB of storage
 
 ### Verify that JetPack 5.1.x is present
