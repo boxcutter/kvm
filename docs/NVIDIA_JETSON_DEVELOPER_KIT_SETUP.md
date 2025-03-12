@@ -657,6 +657,20 @@ sudo adduser $(id -un) kvm
 sudo reboot
 ```
 
+Configure wifi as backup connection if configuring over ssh
+```
+sudo nmcli radio wifi on
+# List available wi-fi networks
+nmcli dev wifi list
+# Connect to a wi-fi- network
+sudo nmcli dev wifi connect "network-ssid" password "network-password"
+# Optional - prompt for password
+# # sudo nmcli --ask dev wifi connect "network-ssid"
+# ssh in through wifi
+# When done, disable wi-fi
+# # sudo nmcli radio wifi off
+```
+
 Configure bridged networking
 
 ```
@@ -672,24 +686,16 @@ sudo nmcli connection modify br0 ipv4.method auto
 # nmcli connection modify br0 ipv4.dns "8.8.8.8"
 # nmcli connection modify br0 ipv4.method manual
 
-# Assign the same IP to br0 to preserve SSH access
-IPADDR=$(ip -4 addr show eno1 | awk '/inet / {print $2}')
-sudo ip address add $IPADDR dev br0
-# Bring br0 up without disrupting ssh
-sudo ip link set dev br0 up
-# Modify wired connection 1 to join br0 safely
-sudo nmcli connection modify "Wired connection 1" connection.master br0 connection.slave-type bridge
 # Attach eno1 to the bridge
 sudo nmcli connection add type bridge-slave ifname eno1 master br0 con-name bridge-port-eno1
-# Apply and activate everything
-sudo nmcli connection up br0 && sudo nmcli connection up bridge-port-eno1
+# Apply and activate everything - this will drop your ssh connection so be careful
+sudo nmcli connection delete "Wired connection 1"
+sudo nmcli connection up br0
+sudo nmcli connection up bridge-port-eno1
 ```
 
 Removing bridge networking
 ```
-IPADDR=$(ip -4 addr show br0 | awk '/inet / {print $2}')
-sudo ip address add $IPADDR dev eno1
-
 # Recreate the standalone connection for eno1
 sudo nmcli connection delete "Wired connection 1"
 sudo nmcli connection add type ethernet ifname eno1 con-name "Wired connection 1"
