@@ -566,3 +566,80 @@ NVPM WARN: DO YOU WANT TO REBOOT NOW? enter YES/yes to confirm:
 yes
 NVPM WARN: rebooting
 ```
+
+### Configure CAN Bus
+
+The built-in can controllers should be automatically created by the `mttcan` driver:
+
+```
+$ lsmod | grep mttcan
+
+$ ip -details link show can0
+2: can0: <NOARP,ECHO> mtu 16 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0 minmtu 0 maxmtu 0
+    can state STOPPED (berr-counter tx 0 rx 0) restart-ms 0
+	  mttcan: tseg1 2..255 tseg2 0..127 sjw 1..127 brp 1..511 brp-inc 1
+	  mttcan: dtseg1 1..31 dtseg2 0..15 dsjw 1..15 dbrp 1..15 dbrp-inc 1
+	  clock 50000000 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 parentbus platform parentdev c310000.mttcan
+
+$ ip -details link show can0
+2: can0: <NOARP,ECHO> mtu 16 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0 minmtu 0 maxmtu 0
+    can state STOPPED (berr-counter tx 0 rx 0) restart-ms 0
+	  mttcan: tseg1 2..255 tseg2 0..127 sjw 1..127 brp 1..511 brp-inc 1
+	  mttcan: dtseg1 1..31 dtseg2 0..15 dsjw 1..15 dbrp 1..15 dbrp-inc 1
+	  clock 50000000 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 parentbus platform parentdev c310000.mttcan
+```
+
+Configuring the vcan0 interface on boot
+
+Because Linux for Tegra uses network manager by default instead of systemd-networkd, it
+is recommended to use a systemd service to bring up `vcan0` on boot. This makes
+the configuration of the vcan0 interface independent of the network service configuration.
+This ensures no conflicts happen when both systems are enabled at the same time. Otherwise
+you'll need to have `systemd-networkd` enabled to create `vcan0` via netdev or use udev
+rules, which will be less reliable than the service configuration.
+
+```
+# Create a new service file
+sudo tee /etc/systemd/system/vcan.service > /dev/null <<EOF
+[Unit]
+Description=Virtual CAN interface
+Wants=network.target
+Before=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip link add dev vcan0 type vcan
+ExecStart=/sbin/ip link set up vcan0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enabled and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable vcan.service
+sudo systemctl start vcan.service
+
+# Verify that vcan0 is up
+$ ip link show vcan0
+13: vcan0: <NOARP,UP,LOWER_UP> mtu 72 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/can
+```
+
+Testing can configurations:
+```
+# Install can-utils
+sudo apt-get update
+sudo apt-get install can-utils
+
+# Start listening for CAN messages
+candump vcan0 &
+
+# Send a test CAN message
+cansend can0 123#DEADBEEF
+```
+
+For more information on configurating the CAN bus refer to:
