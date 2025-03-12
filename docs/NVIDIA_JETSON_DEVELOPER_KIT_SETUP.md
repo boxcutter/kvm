@@ -47,47 +47,112 @@ https://forums.developer.nvidia.com/t/jetson-agx-orin-faq/237459
 
 ## First steps - verify the Jetson is booting off NVMe and has at least 2TB of storage
 
-### Verify that JetPack 5.1.x is present
+### Verify that JetPack 6.2.x (or higher) is present
+
 If you think your Jetson Developer Kit has already been configured, double
 check to make sure the system has the desired JetPack version and there is
 adequate storage.
 
-Make sure that you installed the right version of the OS - because JetPack 6.x is
-still in beta, we currently prefer Ubuntu 20.04 with JetPack 5.1.x.
+Make sure that you installed the right version of the OS - currently we prefer 
+Ubuntu 22.04 with JetPack 6.2 (or higher). Earlier versions of JetPack 6.x had issues
+with kvm virtual machine network performance, so we don't use these earlier
+versions of 6.x.
 
 ```bash
-automat@agx01:~/Downloads$ cat /etc/os-release 
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
 NAME="Ubuntu"
-VERSION="20.04.6 LTS (Focal Fossa)"
+VERSION_ID="22.04"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
 ID=ubuntu
 ID_LIKE=debian
-PRETTY_NAME="Ubuntu 20.04.6 LTS"
-VERSION_ID="20.04"
 HOME_URL="https://www.ubuntu.com/"
 SUPPORT_URL="https://help.ubuntu.com/"
 BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
 PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-VERSION_CODENAME=focal
-UBUNTU_CODENAME=focal
+UBUNTU_CODENAME=jammy
 
-automat@agx01:~/Downloads$ cat /etc/nv_tegra_release 
-# R35 (release), REVISION: 4.1, GCID: 33958178, BOARD: t186ref, EABI: aarch64, DATE: Tue Aug  1 19:57:35 UTC 2023
+$ cat /etc/nv_tegra_release
+# R36 (release), REVISION: 4.3, GCID: 38968081, BOARD: generic, EABI: aarch64, DATE: Wed Jan  8 01:49:37 UTC 2025
+# KERNEL_VARIANT: oot
+TARGET_USERSPACE_LIB_DIR=nvidia
+TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
 
-automat@agx01:~/Downloads$ sudo apt-cache show nvidia-jetpack
+$ sudo apt-cache show nvidia-jetpack
+[sudo] password for automat:
+Sorry, try again.
+[sudo] password for automat:
 Package: nvidia-jetpack
-Version: 5.1.2-b104
+Source: nvidia-jetpack (6.2)
+Version: 6.2+b77
 Architecture: arm64
 Maintainer: NVIDIA Corporation
 Installed-Size: 194
-Depends: nvidia-jetpack-runtime (= 5.1.2-b104), nvidia-jetpack-dev (= 5.1.2-b104)
+Depends: nvidia-jetpack-runtime (= 6.2+b77), nvidia-jetpack-dev (= 6.2+b77)
 Homepage: http://developer.nvidia.com/jetson
 Priority: standard
 Section: metapackages
-Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_5.1.2-b104_arm64.deb
-Size: 29304
-SHA256: fda2eed24747319ccd9fee9a8548c0e5dd52812363877ebe90e223b5a6e7e827
-SHA1: 78c7d9e02490f96f8fbd5a091c8bef280b03ae84
-MD5sum: 6be522b5542ab2af5dcf62837b34a5f0
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.2+b77_arm64.deb
+Size: 29298
+SHA256: 70553d4b5a802057f9436677ef8ce255db386fd3b5d24ff2c0a8ec0e485c59cd
+SHA1: 9deab64d12eef0e788471e05856c84bf2a0cf6e6
+MD5sum: 4db65dc36434fe1f84176843384aee23
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+
+Package: nvidia-jetpack
+Source: nvidia-jetpack (6.1)
+Version: 6.1+b123
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 6.1+b123), nvidia-jetpack-dev (= 6.1+b123)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.1+b123_arm64.deb
+Size: 29312
+SHA256: b6475a6108aeabc5b16af7c102162b7c46c36361239fef6293535d05ee2c2929
+SHA1: f0984a6272c8f3a70ae14cb2ca6716b8c1a09543
+MD5sum: a167745e1d88a8d7597454c8003fa9a4
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+
+automat@agx01:~$ sudo apt-cache show nvidia-jetpack
+Package: nvidia-jetpack
+Source: nvidia-jetpack (6.2)
+Version: 6.2+b77
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 6.2+b77), nvidia-jetpack-dev (= 6.2+b77)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.2+b77_arm64.deb
+Size: 29298
+SHA256: 70553d4b5a802057f9436677ef8ce255db386fd3b5d24ff2c0a8ec0e485c59cd
+SHA1: 9deab64d12eef0e788471e05856c84bf2a0cf6e6
+MD5sum: 4db65dc36434fe1f84176843384aee23
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+
+Package: nvidia-jetpack
+Source: nvidia-jetpack (6.1)
+Version: 6.1+b123
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 6.1+b123), nvidia-jetpack-dev (= 6.1+b123)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.1+b123_arm64.deb
+Size: 29312
+SHA256: b6475a6108aeabc5b16af7c102162b7c46c36361239fef6293535d05ee2c2929
+SHA1: f0984a6272c8f3a70ae14cb2ca6716b8c1a09543
+MD5sum: a167745e1d88a8d7597454c8003fa9a4
 Description: NVIDIA Jetpack Meta Package
 Description-md5: ad1462289bdbc54909ae109d1d32c0a8
 ```
@@ -111,7 +176,7 @@ Boot0004* UEFI PXEv6 (MAC:48B02DDCCCA5)
 Boot0005* UEFI HTTPv4 (MAC:48B02DDCCCA5)
 Boot0006* UEFI HTTPv6 (MAC:48B02DDCCCA5)
 Boot0007* BootManagerMenuApp
-Boot0008* UEFI Shell 
+Boot0008* UEFI Shell
 ```
 
 ## Remedy - install an NVMe drive and flash with SDK Manager
@@ -129,7 +194,8 @@ to flash the device and install JetPack on NVMe drive:
 
 The second x86_64 intel PC should be running Ubuntu 20.04. An Ubuntu 20.04
 host system can flash a target NVIDIA device with either JetPack 6.x or
-JetPack 5.x. We work with both versions of JetPack:
+JetPack 5.x. We work with both versions of JetPack (even though now we prefer
+JetPack 6.x):
 
 ![SDKManager system compatibility matrix](https://github.com/boxcutter/kvm/blob/d21e40166522408f1e5ff2bc73f0e218ea60ed3d/docs/images/jetpack6/Screenshot%202024-05-11%20at%2016.55.34.png)
 
@@ -218,6 +284,10 @@ https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/de
    the USB-C cable.
 3. Press and hold (2) "Force recovery button" (the middle button) while also
    pressing the (1) "Power button" (the left button). Then release both buttons.
+
+You may also need to make sure that you disconnect the display adapter and/or keyboard
+on the Jetson if JetPack is already configured to ensure the system will flash via
+recovery mode.
 
 ![Force Recovery](https://github.com/boxcutter/kvm/blob/ac9385b0b1e7772127945f21f23491f22184d7e4/docs/images/jetpack6/Screenshot%202024-05-11%20at%2018.15.07.png)
 
@@ -397,11 +467,11 @@ EOF
 Check `/etc/os-release` for the Ubuntu version:
 
 ```bash
-automat@agx01:~$ cat /etc/os-release
-PRETTY_NAME="Ubuntu 22.04.4 LTS"
+$ cat /etc/os-release
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
 NAME="Ubuntu"
 VERSION_ID="22.04"
-VERSION="22.04.4 LTS (Jammy Jellyfish)"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
 VERSION_CODENAME=jammy
 ID=ubuntu
 ID_LIKE=debian
@@ -415,29 +485,46 @@ UBUNTU_CODENAME=jammy
 Check `/etc/nv_tegra_release` for the JetPack version:
 
 ```bash
-automat@agx01:~$ cat /etc/nv_tegra_release
-# R36 (release), REVISION: 3.0, GCID: 36106755, BOARD: generic, EABI: aarch64, DATE: Thu Apr 25 03:14:05 UTC 2024
+$ cat /etc/nv_tegra_release
+# R36 (release), REVISION: 4.3, GCID: 38968081, BOARD: generic, EABI: aarch64, DATE: Wed Jan  8 01:49:37 UTC 2025
 # KERNEL_VARIANT: oot
 TARGET_USERSPACE_LIB_DIR=nvidia
 TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
 
-automat@agx01:~$ sudo apt-cache show nvidia-jetpack
-[sudo] password for automat: 
+$ sudo apt-cache show nvidia-jetpack
 Package: nvidia-jetpack
-Source: nvidia-jetpack (6.0)
-Version: 6.0+b87
+Source: nvidia-jetpack (6.2)
+Version: 6.2+b77
 Architecture: arm64
 Maintainer: NVIDIA Corporation
 Installed-Size: 194
-Depends: nvidia-jetpack-runtime (= 6.0+b87), nvidia-jetpack-dev (= 6.0+b87)
+Depends: nvidia-jetpack-runtime (= 6.2+b77), nvidia-jetpack-dev (= 6.2+b77)
 Homepage: http://developer.nvidia.com/jetson
 Priority: standard
 Section: metapackages
-Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.0+b87_arm64.deb
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.2+b77_arm64.deb
 Size: 29298
-SHA256: 70be95162aad864ee0b0cd24ac8e4fa4f131aa97b32ffa2de551f1f8f56bc14e
-SHA1: 36926a991855b9feeb12072694005c3e7e7b3836
-MD5sum: 050cb1fd604a16200d26841f8a59a038
+SHA256: 70553d4b5a802057f9436677ef8ce255db386fd3b5d24ff2c0a8ec0e485c59cd
+SHA1: 9deab64d12eef0e788471e05856c84bf2a0cf6e6
+MD5sum: 4db65dc36434fe1f84176843384aee23
+Description: NVIDIA Jetpack Meta Package
+Description-md5: ad1462289bdbc54909ae109d1d32c0a8
+
+Package: nvidia-jetpack
+Source: nvidia-jetpack (6.1)
+Version: 6.1+b123
+Architecture: arm64
+Maintainer: NVIDIA Corporation
+Installed-Size: 194
+Depends: nvidia-jetpack-runtime (= 6.1+b123), nvidia-jetpack-dev (= 6.1+b123)
+Homepage: http://developer.nvidia.com/jetson
+Priority: standard
+Section: metapackages
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.1+b123_arm64.deb
+Size: 29312
+SHA256: b6475a6108aeabc5b16af7c102162b7c46c36361239fef6293535d05ee2c2929
+SHA1: f0984a6272c8f3a70ae14cb2ca6716b8c1a09543
+MD5sum: a167745e1d88a8d7597454c8003fa9a4
 Description: NVIDIA Jetpack Meta Package
 Description-md5: ad1462289bdbc54909ae109d1d32c0a8
 ```
