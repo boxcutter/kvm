@@ -283,7 +283,7 @@ https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-user-guide/de
 2. Make sure the device is powered off, but still connected to the host PC by
    the USB-C cable.
 3. Press and hold (2) "Force recovery button" (the middle button) while also
-   pressing the (1) "Power button" (the left button). Then release both buttons.
+   pressing the (3) "Reset button" (the right button). Then release both buttons.
 
 You may also need to make sure that you disconnect the display adapter and/or keyboard
 on the Jetson if JetPack is already configured to ensure the system will flash via
