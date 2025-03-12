@@ -650,6 +650,7 @@ https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/HR/ControllerArea
 ```
 sudo apt-get update
 sudo apt-get install libvirt-daemon-system qemu-kvm
+# This will allow the user to manage VMs without needing to use sudo
 sudo adduser $(id -un) libvirt
 sudo adduser $(id -un) kvm
 
@@ -694,7 +695,7 @@ sudo nmcli connection up br0
 sudo nmcli connection up bridge-port-eno1
 ```
 
-Removing bridge networking
+Reverting changes for bridge networking
 ```
 # Recreate the standalone connection for eno1
 sudo nmcli connection delete "Wired connection 1"
@@ -705,4 +706,61 @@ sudo nmcli connection delete br0
 
 # Delete the old bridge port configuration
 sudo nmcli connection delete bridge-port-eno1
+```
+
+Iptables considerations if Docker is running on the host
+
+Docker enables a netfliter for bridge interfaces that will isolate bridge networks
+from each other. The default Docker network type used when you create a
+"docker network" is a bridge.
+
+These rules will break networking in your VMs, and also isolate them from the
+rest of your network. This will prevent the VMs from getting DHCP addresses
+among other things. You'll need to modify iptables so that the bridge interface
+used for your virtual machines isn't added to this netfilter by default.
+
+```
+sudo iptables -I DOCKER-USER -i br0 -o br0 -j ACCEPT
+# verify chain
+sudo iptables -L DOCKER-USER -v -n
+# verify it works, then save the rules
+sudo apt-get update
+sudo apt-get install iptables-persistent
+sudo iptables-save > /etc/iptables/rules.v4
+```
+
+Configure libvirtd
+
+```
+vi /tmp/host-network.xml
+<network>
+  <name>host-network</name>
+  <forward mode="bridge"/>
+  <bridge name="br0" />
+</network>
+
+sudo virsh net-define /tmp/host-network.xml
+sudo virsh net-start host-network
+sudo virsh net-autostart host-network
+sudo virsh net-list --all
+
+virsh pool-define-as default dir --target "/var/lib/libvirt/images"
+virsh pool-build default
+virsh pool-start default
+virsh pool-autostart default
+
+# Pool for storing ISOs
+virsh pool-define-as iso dir --target "/var/lib/libvirt/iso"
+virsh pool-build iso
+virsh pool-start iso
+virsh pool-autostart iso
+
+# Pool for storing temporary cloud-init boot images
+virsh pool-define-as \
+    --name boot-scratch \
+    --type dir \
+    --target /var/lib/libvirt/boot
+virsh pool-build boot-scratch
+virsh pool-start boot-scratch
+virsh pool-autostart boot-scratch
 ```
