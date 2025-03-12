@@ -642,4 +642,61 @@ candump vcan0 &
 cansend can0 123#DEADBEEF
 ```
 
-For more information on configurating the CAN bus refer to:
+For more information on configurating the CAN bus refer to the Jetson Linux developer guide:
+https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/HR/ControllerAreaNetworkCan.html
+
+### Configure KVM/Libvirtd
+
+```
+sudo apt-get update
+sudo apt-get install libvirt-daemon-system qemu-kvm
+sudo adduser $(id -un) libvirt
+sudo adduser $(id -un) kvm
+
+# Reboot to restart the QEMU/KVM daemon
+sudo reboot
+```
+
+Configure bridged networking
+
+```
+# Add the bridge interface
+sudo nmcli connection add type bridge ifname br0 con-name br0
+# Disable STP for faster port activation
+sudo nmcli connection modify br0 bridge.stp no
+# Assign an IP to br0
+sudo nmcli connection modify br0 ipv4.method auto
+# Optional static IP
+# nmcli connection modify br0 ipv4.addresses "192.168.1.100/24"
+# nmcli connection modify br0 ipv4.gateway "192.168.1.1"
+# nmcli connection modify br0 ipv4.dns "8.8.8.8"
+# nmcli connection modify br0 ipv4.method manual
+
+# Assign the same IP to br0 to preserve SSH access
+IPADDR=$(ip -4 addr show eno1 | awk '/inet / {print $2}')
+sudo ip address add $IPADDR dev br0
+# Bring br0 up without disrupting ssh
+sudo ip link set dev br0 up
+# Modify wired connection 1 to join br0 safely
+sudo nmcli connection modify "Wired connection 1" connection.master br0 connection.slave-type bridge
+# Attach eno1 to the bridge
+sudo nmcli connection add type bridge-slave ifname eno1 master br0 con-name bridge-port-eno1
+# Apply and activate everything
+sudo nmcli connection up br0 && sudo nmcli connection up bridge-port-eno1
+```
+
+Removing bridge networking
+```
+IPADDR=$(ip -4 addr show br0 | awk '/inet / {print $2}')
+sudo ip address add $IPADDR dev eno1
+
+# Recreate the standalone connection for eno1
+sudo nmcli connection delete "Wired connection 1"
+sudo nmcli connection add type ethernet ifname eno1 con-name "Wired connection 1"
+sudo nmcli connection modify "Wired connection 1" ipv4.method auto
+# This will drop the ssh connection
+sudo nmcli connection delete br0
+
+# Delete the old bridge port configuration
+sudo nmcli connection delete bridge-port-eno1
+```
