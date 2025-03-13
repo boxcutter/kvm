@@ -601,6 +601,14 @@ you'll need to have `systemd-networkd` enabled to create `vcan0` via netdev or u
 rules, which will be less reliable than the service configuration.
 
 ```
+# Check if vcan module is present
+lsmod | grep vcan
+sudo modprobe vcan
+# if you see this - load modules
+# modprobe: FATAL: Module vcan not found in directory /lib/modules/$(uname -r)
+sudo apt-get update
+sudo apt install linux-modules-extra-$(uname -r)
+
 # Create a new service file
 sudo tee /etc/systemd/system/vcan.service > /dev/null <<EOF
 [Unit]
@@ -639,7 +647,7 @@ sudo apt-get install can-utils
 candump vcan0 &
 
 # Send a test CAN message
-cansend can0 123#DEADBEEF
+cansend vcan0 123#DEADBEEF
 ```
 
 For more information on configurating the CAN bus refer to the Jetson Linux developer guide:
