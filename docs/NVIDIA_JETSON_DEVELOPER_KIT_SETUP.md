@@ -650,6 +650,8 @@ https://docs.nvidia.com/jetson/archives/r36.4.3/DeveloperGuide/HR/ControllerArea
 ```
 sudo apt-get update
 sudo apt-get install libvirt-daemon-system qemu-kvm
+# if you want to install images from ISOs with virt-install
+sudo apt-get install virtinst
 # This will allow the user to manage VMs without needing to use sudo
 sudo adduser $(id -un) libvirt
 sudo adduser $(id -un) kvm
@@ -732,12 +734,13 @@ sudo iptables-save > /etc/iptables/rules.v4
 Configure libvirtd
 
 ```
-vi /tmp/host-network.xml
+cat <<EOF > /tmp/host-network.xml
 <network>
   <name>host-network</name>
   <forward mode="bridge"/>
   <bridge name="br0" />
 </network>
+EOF
 
 sudo virsh net-define /tmp/host-network.xml
 sudo virsh net-start host-network
@@ -763,4 +766,125 @@ virsh pool-define-as \
 virsh pool-build boot-scratch
 virsh pool-start boot-scratch
 virsh pool-autostart boot-scratch
+```
+
+### Ubuntu Server 2204 VM
+
+```
+mkdir ~/ubuntu-server-2204
+cd ~/ubuntu-server-2204
+curl -LO https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-arm64.img
+qemu-img info jammy-server-cloudimg-arm64.img 
+
+sudo qemu-img convert \
+  -f qcow2 \
+  -O qcow2 \
+  jammy-server-cloudimg-arm64.img \
+  /var/lib/libvirt/images/ubuntu-server-2204.qcow2
+sudo qemu-img resize \
+  -f qcow2 \
+  /var/lib/libvirt/images/ubuntu-server-2204.qcow2 \
+  64G
+
+touch network-config
+
+cat >meta-data <<EOF
+instance-id: ubuntu-server-2204
+local-hostname: ubuntu-server-2204
+EOF
+
+cat >user-data <<EOF
+#cloud-config
+hostname: ubuntu-server-2204
+users:
+  - name: automat
+    uid: 63112
+    primary_group: users
+    groups: users
+    shell: /bin/bash
+    plain_text_passwd: superseekret63
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+chpasswd: { expire: False }
+ssh_pwauth: True
+package_update: False
+package_upgrade: false
+packages:
+  - qemu-guest-agent
+growpart:
+  mode: auto
+  devices: ['/']
+power_state:
+  mode: reboot
+EOF
+
+sudo apt-get update
+sudo apt-get install genisoimage
+genisoimage \
+    -input-charset utf-8 \
+    -output ubuntu-server-2204-cloud-init.img \
+    -volid cidata -rational-rock -joliet \
+    user-data meta-data network-config
+sudo cp ubuntu-server-2204-cloud-init.img /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2204 \
+  --boot uefi \
+  --memory 3092 \
+  --vcpus 2 \
+  --os-variant ubuntu22.04 \
+  --disk /var/lib/libvirt/images/ubuntu-server-2204.qcow2 \
+  --disk /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso,device=cdrom \
+  --network network=host-network,model=virtio \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2204
+
+$ cloud-init status
+status: done
+
+# Verify networking is working
+$ ip -br a
+
+# Check to make sure cloud-init is greater than 23.4
+$ cloud-init --version
+/usr/bin/cloud-init 24.1.3-0ubuntu1~22.04.1
+
+# Regenerate only the network config
+$ sudo cloud-init clean --configs network
+$ sudo cloud-init init --local
+
+# Disable cloud-init
+$ sudo touch /etc/cloud/cloud-init.disabled
+
+$ cloud-init status
+status: disabled
+
+$ sudo shutdown -h now
+
+$ virsh domblklist ubuntu-server-2204
+$ virsh change-media ubuntu-server-2204 sda --eject
+Successfully ejected media.
+
+$ sudo rm /var/lib/libvirt/boot/ubuntu-server-2204-cloud-init.iso
+```
+
+```
+$ virsh snapshot-create-as --domain ubuntu-server-2204 --name clean --description "Initial install"
+$ virsh snapshot-list ubuntu-server-2204
+$ virsh snapshot-revert ubuntu-server-2204 clean
+$ virsh snapshot-delete ubuntu-server-2204 clean
+
+$ virsh shutdown ubuntu-server-2204
+$ virsh undefine ubuntu-server-2204 --nvram --remove-all-storage
+```
+
+```
+virsh start ubuntu-server-2204
 ```
