@@ -1,3 +1,5 @@
 http/
 output-*/
 boot-*/
+*.iso
+.DS_Store
