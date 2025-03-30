@@ -601,7 +601,10 @@ $ sudo rm /var/lib/libvirt/boot/ubuntu-server-2404-cloud-init.iso
 ```
 
 ```
-$ virsh snapshot-create-as --domain ubuntu-server-2404 --name clean --description "Initial install"
+$ virsh snapshot-create-as \
+    --domain ubuntu-server-2404 \
+    --name clean \
+    --description "Initial install"
 $ virsh snapshot-list ubuntu-server-2404
 $ virsh snapshot-revert ubuntu-server-2404 clean
 $ virsh snapshot-delete ubuntu-server-2404 clean
