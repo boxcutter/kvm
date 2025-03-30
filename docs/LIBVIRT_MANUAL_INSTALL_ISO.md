@@ -77,7 +77,7 @@ sudo apt-get install qemu-efi-aarch64
 sudo reboot
 ```
 
-### Configure bridged networking
+### Configure bridged networking - Ubuntu Desktop
 
 ```bash
 $ sudo netplan get
@@ -142,25 +142,91 @@ network:
       link-local: []
 ```
 
+### Configure bridged networking - Ubuntu Server
+
+```bash
+$ sudo netplan get
+
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      dhcp4: true
+
+$ ip -brief link
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
+enp1s0           UP             52:54:00:06:be:23 <BROADCAST,MULTICAST,UP,LOWER_UP>
+virbr0           DOWN           52:54:00:be:01:10 <NO-CARRIER,BROADCAST,MULTICAST,UP>
+```
+
+```
+vi /etc/netplan/host-bridge.yaml
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      dhcp4: false
+      dhcp6: false
+      # Marks the interface as optional during boot, so the system won't
+      # wait for it to be up, which it will never be because it is 
+      optional: true
+  bridges:
+    br0:
+      interfaces: [enp1s0]
+      dhcp4: true
+      dhcp6: false
+      accept-ra: false
+      link-local: []
+      parameters:
+        stp: false
+```
+
+```
+$ sudo netplan --debug apply
+$ ip -br a
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp1s0           UP
+virbr0           DOWN           192.168.122.1/24
+br0              UP             192.168.107.166/24 
+```
+
+```
+$ sudo netplan get
+
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      optional: true
+      dhcp4: false
+      dhcp6: false
+  bridges:
+    br0:
+      dhcp4: true
+      dhcp6: false
+      accept-ra: false
+      interfaces:
+      - enp1s0
+      parameters:
+        stp: false
+      link-local: []
+```
+
 ### Create a definition for the bridge network in libvirt
 
 ```
-vi /tmp/host-network.xml
+cat <<EOF > /tmp/host-network.xml
 <network>
   <name>host-network</name>
   <forward mode="bridge"/>
   <bridge name="br0" />
 </network>
+EOF
 
-virsh net-define /tmp/host-network.xml
-virsh net-start host-network
-virsh net-autostart host-network
-virsh net-list --all
-$ virsh net-list --all
- Name           State    Autostart   Persistent
--------------------------------------------------
- default        active   yes         yes
- host-network   active   yes         yes
+sudo virsh net-define /tmp/host-network.xml
+sudo virsh net-start host-network
+sudo virsh net-autostart host-network
+sudo virsh net-list --all
 ```
 
 ## Installing an OS from an ISO without automation
@@ -170,40 +236,10 @@ Create a storage pool for your ISOs, so that virsh has permission to access them
 By default a clean KVM install does not define any storage pools.
 
 ```
-# Create the storage pool definition
-$ virsh pool-define-as \
-    --name iso \
-    --type dir \
-    --target /var/lib/libvirt/iso
-Pool iso defined
-
-# Create the local directory
-$ virsh pool-build iso
-# Start the storage pool
-$ virsh pool-start iso
-# Turn on autostart
-$ virsh pool-autostart iso
-
-# Verify the storage pool is listed
-$ virsh pool-list --all
- Name   State    Autostart
-----------------------------
- iso    active   yes
-
-$ virsh vol-list --pool iso --details
- Name   Path   Type   Capacity   Allocation
----------------------------------------------
-
-# Verify the storage pool configuration
-$ virsh pool-info iso
-Name:           iso
-UUID:           7de2281d-2fda-41e4-900f-3819ba3407e7
-State:          running
-Persistent:     yes
-Autostart:      yes
-Capacity:       960.65 GiB
-Allocation:     12.49 GiB
-Available:      948.16 GiB
+virsh pool-define-as iso dir --target "/var/lib/libvirt/iso"
+virsh pool-build iso
+virsh pool-start iso
+virsh pool-autostart iso
 
 $ sudo ls -ld /var/lib/libvirt/iso
 drwx--x--x 2 root root 4096 Nov 12 08:41 /var/lib/libvirt/iso
@@ -229,24 +265,21 @@ $ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
 ### Create a storage pool for images
 
 ```
-# Create the storage pool definition
-$ virsh pool-define-as \
-    --name default \
+virsh pool-define-as default dir --target "/var/lib/libvirt/images"
+virsh pool-build default
+virsh pool-start default
+virsh pool-autostart default
+```
+
+# Pool for storing temporary cloud-init boot images
+```
+virsh pool-define-as \
+    --name boot-scratch \
     --type dir \
-    --target /var/lib/libvirt/images
-
-# Create the local directory
-$ virsh pool-build default
-# Start the storage pool
-$ virsh pool-start default
-# Turn on autostart
-$ virsh pool-autostart default
-
-$ virsh pool-list --all
- Name      State    Autostart
--------------------------------
- default   active   yes
- iso       active   yes
+    --target /var/lib/libvirt/boot
+virsh pool-build boot-scratch
+virsh pool-start boot-scratch
+virsh pool-autostart boot-scratch
 ```
 
 ### Installing Ubuntu 24.04 Server on a graphical head
@@ -460,905 +493,123 @@ virsh destroy ubuntu-desktop-2404
 virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
 ```
 
-## Ubuntu Server 22.04 cloud image cloud-init
+### Ubuntu Server 2404 VM
+
+```
+mkdir ~/ubuntu-server-2404
+cd ~/ubuntu-server-2404
+curl -LO https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+qemu-img info noble-server-cloudimg-amd64.img
+
+sudo qemu-img convert \
+  -f qcow2 \
+  -O qcow2 \
+  noble-server-cloudimg-amd64.img \
+  /var/lib/libvirt/images/ubuntu-server-2404.qcow2
+sudo qemu-img resize \
+  -f qcow2 \
+  /var/lib/libvirt/images/ubuntu-server-2404.qcow2 \
+  64G
+
+touch network-config
+
+cat >meta-data <<EOF
+instance-id: ubuntu-server-2404
+local-hostname: ubuntu-server-2404
+EOF
+
+cat >user-data <<EOF
+#cloud-config
+hostname: ubuntu-server-2404
+users:
+  - name: automat
+    uid: 63112
+    primary_group: users
+    groups: users
+    shell: /bin/bash
+    plain_text_passwd: superseekret
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+chpasswd: { expire: False }
+ssh_pwauth: True
+package_update: False
+package_upgrade: false
+packages:
+  - qemu-guest-agent
+growpart:
+  mode: auto
+  devices: ['/']
+power_state:
+  mode: reboot
+EOF
+
+sudo apt-get update
+sudo apt-get install genisoimage
+genisoimage \
+    -input-charset utf-8 \
+    -output ubuntu-server-2404-cloud-init.img \
+    -volid cidata -rational-rock -joliet \
+    user-data meta-data network-config
+sudo cp ubuntu-server-2404-cloud-init.img /var/lib/libvirt/boot/ubuntu-server-2404-cloud-init.iso
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2404 \
+  --boot uefi \
+  --memory 3092 \
+  --vcpus 2 \
+  --os-variant ubuntu24.04 \
+  --disk /var/lib/libvirt/images/ubuntu-server-2404.qcow2 \
+  --disk /var/lib/libvirt/boot/ubuntu-server-2404-cloud-init.iso,device=cdrom \
+  --network network=host-network,model=virtio \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2404
+
+$ cloud-init status
+status: done
+
+# Verify networking is working
+$ ip -br a
+
+# Check to make sure cloud-init is greater than 23.4
+$ cloud-init --version
+/usr/bin/cloud-init 24.1.3-0ubuntu1~22.04.1
+
+# Regenerate only the network config
+$ sudo cloud-init clean --configs network
+$ sudo cloud-init init --local
+
+# Disable cloud-init
+$ sudo touch /etc/cloud/cloud-init.disabled
+
+$ cloud-init status
+status: disabled
+
+$ sudo shutdown -h now
+
+$ virsh domblklist ubuntu-server-2404
+$ virsh change-media ubuntu-server-2404 sda --eject
+Successfully ejected media.
 
+$ sudo rm /var/lib/libvirt/boot/ubuntu-server-2404-cloud-init.iso
 ```
-$ ls -l /etc/cloud
-total 20
--rw-r--r-- 1 root root   36 Jun  1 02:11 build.info
-drwxr-xr-x 2 root root 4096 Mar 27 13:36 clean.d
--rw-r--r-- 1 root root 3766 Mar 27 13:36 cloud.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 02:10 cloud.cfg.d
-drwxr-xr-x 2 root root 4096 Jun  1 02:10 templates
-```
-
-```
-$ cat /etc/cloud/build.info 
-build_name: server
-serial: 20240601
-```
-
-```
-$ ls -l /etc/cloud/clean.d
-total 0
-```
-
-```
-$ ls -l /etc/cloud/cloud.cfg.d
-total 12
--rw-r--r-- 1 root root 2071 Mar 27 13:14 05_logging.cfg
--rw-r--r-- 1 root root  333 Jun  1 02:10 90_dpkg.cfg
--rw-r--r-- 1 root root  167 Mar 27 13:14 README
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg 
-## This yaml formatted config file handles setting
-## logger information.  The values that are necessary to be set
-## are seen at the bottom.  The top '_log' are only used to remove
-## redundancy in a syslog and fallback-to-file case.
-##
-## The 'log_cfgs' entry defines a list of logger configs
-## Each entry in the list is tried, and the first one that
-## works is used.  If a log_cfg list entry is an array, it will
-## be joined with '\n'.
-_log:
- - &log_base |
-   [loggers]
-   keys=root,cloudinit
-   
-   [handlers]
-   keys=consoleHandler,cloudLogHandler
-   
-   [formatters]
-   keys=simpleFormatter,arg0Formatter
-   
-   [logger_root]
-   level=DEBUG
-   handlers=consoleHandler,cloudLogHandler
-   
-   [logger_cloudinit]
-   level=DEBUG
-   qualname=cloudinit
-   handlers=
-   propagate=1
-   
-   [handler_consoleHandler]
-   class=StreamHandler
-   level=WARNING
-   formatter=arg0Formatter
-   args=(sys.stderr,)
-   
-   [formatter_arg0Formatter]
-   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
-   
-   [formatter_simpleFormatter]
-   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
- - &log_file |
-   [handler_cloudLogHandler]
-   class=FileHandler
-   level=DEBUG
-   formatter=arg0Formatter
-   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
- - &log_syslog |
-   [handler_cloudLogHandler]
-   class=handlers.SysLogHandler
-   level=DEBUG
-   formatter=simpleFormatter
-   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
-
-log_cfgs:
-# Array entries in this list will be joined into a string
-# that defines the configuration.
-#
-# If you want logs to go to syslog, uncomment the following line.
-# - [ *log_base, *log_syslog ]
-#
-# The default behavior is to just log to a file.
-# This mechanism that does not depend on a system service to operate.
- - [ *log_base, *log_file ]
-# A file path can also be used.
-# - /etc/log.conf
-
-# This tells cloud-init to redirect its stdout and stderr to
-# 'tee -a /var/log/cloud-init-output.log' so the user can see output
-# there without needing to look on the console.
-output: {all: '| tee -a /var/log/cloud-init-output.log'}
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
-# to update this file, run dpkg-reconfigure cloud-init
-datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, Akamai, WSL, None ]
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/README 
-# All files with the '.cfg' extension in this directory will be read by
-# cloud-init. They are read in lexical order. Later files overwrite values in
-# earlier files.
-```
-
-```
-$ sudo netplan get
-network:
-  version: 2
-  ethernets:
-    enp1s0:
-      match:
-        macaddress: "52:54:00:a7:a3:60"
-      dhcp4: true
-      dhcp6: true
-      set-name: "enp1s0"
-```
-
-```
-$ sudo cat /etc/netplan/50-cloud-init.yaml 
-# This file is generated from information provided by the datasource.  Changes
-# to it will not persist across an instance reboot.  To disable cloud-init's
-# network configuration capabilities, write a file
-# /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
-# network: {config: disabled}
-network:
-    ethernets:
-        enp1s0:
-            dhcp4: true
-            dhcp6: true
-            match:
-                macaddress: 52:54:00:a7:a3:60
-            set-name: enp1s0
-    version: 2
-```
-
-> **Note:**
-> All of the subiquity-based installers make use of cloud-init
-
-## Ubuntu Server 24.04 ISO cloud-init
-
-```
-$ ls -l /etc/cloud
-total 24
-drwxr-xr-x 2 root root 4096 Jun  1 17:18 clean.d
--rw-r--r-- 1 root root 3718 Apr  5 23:18 cloud.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 17:18 cloud.cfg.d
--rw-r--r-- 1 root root  132 Jun  1 17:20 cloud-init.disabled
--rw-r--r-- 1 root root   16 Jun  1 17:18 ds-identify.cfg
-drwxr-xr-x 2 root root 4096 Apr 23 09:40 templates
-```
-
-```
-$ cat /etc/cloud/cloud-init.disabled 
-Disabled by Ubuntu live installer after first boot.
-To re-enable cloud-init on this image run:
-  sudo cloud-init clean --machine-id
-```
-
-```
-$ cat /etc/cloud/ds-identify.cfg 
-policy: enabled
-```
-
-```
-$ ls -l /etc/cloud/clean.d
-total 4
--rwxr-xr-x 1 root root 484 Jun  1 17:18 99-installer
-```
-
-```
-$ cat /etc/cloud/clean.d/99-installer 
-#!/usr/bin/env python3
-# Remove live-installer config artifacts when running: sudo cloud-init clean
-# Autogenerated by Subiquity: 2024-06-01 17:18:27.949965 UTC
-
-
-import os
-
-for cfg_file in ["/etc/cloud/cloud-init.disabled", "/etc/cloud/cloud.cfg.d/20-disable-cc-dpkg-grub.cfg", "/etc/cloud/cloud.cfg.d/90-installer-network.cfg", "/etc/cloud/cloud.cfg.d/99-installer.cfg", "/etc/cloud/ds-identify.cfg"]:
-    try:
-        os.remove(cfg_file)
-    except FileNotFoundError:
-        pass
-```
-
-```
-$ ls -l /etc/cloud/cloud.cfg.d
-total 28
--rw-r--r-- 1 root root 2071 Mar 27 13:14 05_logging.cfg
--rw-r--r-- 1 root root   28 Jun  1 17:18 20-disable-cc-dpkg-grub.cfg
--rw-r--r-- 1 root root  333 Apr 23 09:40 90_dpkg.cfg
--rw------- 1 root root  117 Jun  1 17:16 90-installer-network.cfg
--rw------- 1 root root  793 Jun  1 17:18 99-installer.cfg
--rw-r--r-- 1 root root   35 Jun  1 17:15 curtin-preserve-sources.cfg
--rw-r--r-- 1 root root  167 Mar 27 13:14 README
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg
-## This yaml formatted config file handles setting
-## logger information.  The values that are necessary to be set
-## are seen at the bottom.  The top '_log' are only used to remove
-## redundancy in a syslog and fallback-to-file case.
-##
-## The 'log_cfgs' entry defines a list of logger configs
-## Each entry in the list is tried, and the first one that
-## works is used.  If a log_cfg list entry is an array, it will
-## be joined with '\n'.
-_log:
- - &log_base |
-   [loggers]
-   keys=root,cloudinit
-   
-   [handlers]
-   keys=consoleHandler,cloudLogHandler
-   
-   [formatters]
-   keys=simpleFormatter,arg0Formatter
-   
-   [logger_root]
-   level=DEBUG
-   handlers=consoleHandler,cloudLogHandler
-   
-   [logger_cloudinit]
-   level=DEBUG
-   qualname=cloudinit
-   handlers=
-   propagate=1
-   
-   [handler_consoleHandler]
-   class=StreamHandler
-   level=WARNING
-   formatter=arg0Formatter
-   args=(sys.stderr,)
-   
-   [formatter_arg0Formatter]
-   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
-   
-   [formatter_simpleFormatter]
-   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
- - &log_file |
-   [handler_cloudLogHandler]
-   class=FileHandler
-   level=DEBUG
-   formatter=arg0Formatter
-   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
- - &log_syslog |
-   [handler_cloudLogHandler]
-   class=handlers.SysLogHandler
-   level=DEBUG
-   formatter=simpleFormatter
-   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
-
-log_cfgs:
-# Array entries in this list will be joined into a string
-# that defines the configuration.
-#
-# If you want logs to go to syslog, uncomment the following line.
-# - [ *log_base, *log_syslog ]
-#
-# The default behavior is to just log to a file.
-# This mechanism that does not depend on a system service to operate.
- - [ *log_base, *log_file ]
-# A file path can also be used.
-# - /etc/log.conf
-
-# This tells cloud-init to redirect its stdout and stderr to
-# 'tee -a /var/log/cloud-init-output.log' so the user can see output
-# there without needing to look on the console.
-output: {all: '| tee -a /var/log/cloud-init-output.log'}
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/20-disable-cc-dpkg-grub.cfg 
-grub_dpkg:
-  enabled: false
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
-# to update this file, run dpkg-reconfigure cloud-init
-datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, Akamai, WSL, None ]
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/90-installer-network.cfg 
-# This is the network config written by 'subiquity'
-network:
-  ethernets:
-    enp1s0:
-      dhcp4: true
-  version: 2
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/99-installer.cfg 
-datasource:
-  None:
-    metadata:
-      instance-id: 7fcad967-8b86-40aa-8761-58d0ed4245d5
-    userdata_raw: "#cloud-config\ngrowpart:\n  mode: 'off'\nlocale: en_US.UTF-8\n\
-      preserve_hostname: true\nresize_rootfs: false\nssh_pwauth: true\nusers:\n- gecos:\
-      \ automat\n  groups: adm,cdrom,dip,lxd,plugdev,sudo\n  lock_passwd: false\n\
-      \  name: automat\n  passwd: $6$VHMEtYQBCS/gpEYp$XghG2ozLRgkm.jGqmEMl2Q/161CjT5DbYbSRSGsYoDDLXAtUV.yRrMJdmClMi2.EAelEN1JPZ78sIIGmBXNK60\n\
-      \  shell: /bin/bash\nwrite_files:\n- content: \"Disabled by Ubuntu live installer\
-      \ after first boot.\\nTo re-enable cloud-init\\\n    \\ on this image run:\\\
-      n  sudo cloud-init clean --machine-id\\n\"\n  defer: true\n  path: /etc/cloud/cloud-init.disabled\n"
-datasource_list:
-- None
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/curtin-preserve-sources.cfg 
-apt:
-  preserve_sources_list: true
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/README 
-# All files with the '.cfg' extension in this directory will be read by
-# cloud-init. They are read in lexical order. Later files overwrite values in
-# earlier files.
-```
-
-## Ubuntu Server 22.04 ISO cloud-init
-
-```
-$ ls -l /etc/cloud
-total 20
-drwxr-xr-x 2 root root 4096 Jun  1 17:47 clean.d
--rw-r--r-- 1 root root 3756 Oct 24  2023 cloud.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 17:47 cloud.cfg.d
--rw-r--r-- 1 root root   16 Jun  1 17:47 ds-identify.cfg
-drwxr-xr-x 2 root root 4096 Feb 16 18:48 templates
-```
-
-```
-$ cat /etc/cloud/ds-identify.cfg 
-policy: enabled
-```
-
-```
-$ ls -l /etc/cloud/clean.d
-total 8
--rwxr-xr-x 1 root root 455 Jun  1 17:47 99-installer
--rw-r--r-- 1 root root 883 Oct 24  2023 README
-```
-
-```
-$ cat /etc/cloud/clean.d/99-installer 
-#!/usr/bin/env python3
-# Remove live-installer config artifacts when running: sudo cloud-init clean
-# Autogenerated by Subiquity: 2024-06-01 17:47:12.223074 UTC
-
-
-import os
-
-for cfg_file in ["/etc/cloud/cloud.cfg.d/99-installer.cfg", "/etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg", "/etc/cloud/ds-identify.cfg", "/etc/netplan/00-installer-config.yaml"]:
-    try:
-        os.remove(cfg_file)
-    except FileNotFoundError:
-        pass
-```
-
-```
-$ cat /etc/cloud/clean.d/README 
--- cloud-init's clean.d run-parts directory --
-
-This directory is provided for third party applications which need
-additional configuration artifact cleanup from the filesystem when
-the command `cloud-init clean` is invoked.
-
-The `cloud-init clean` operation is typically performed by image creators
-when preparing a golden image for clone and redeployment. The clean command
-removes any cloud-init semaphores, allowing cloud-init to treat the next
-boot of this image as the "first boot". When the image is next booted
-cloud-init will performing all initial configuration based on any valid
-datasource meta-data and user-data.
-
-Any executable scripts in this subdirectory will be invoked in lexicographical
-order with run-parts by the command: sudo cloud-init clean.
-
-Typical format of such scripts would be a ##-<some-app> like the following:
-  /etc/cloud/clean.d/99-live-installer
-```
-
-```
-$ ls -l /etc/cloud/cloud.cfg.d/
-total 24
--rw-r--r-- 1 root root 2070 Oct 24  2023 05_logging.cfg
--rw-r--r-- 1 root root  328 Feb 16 18:46 90_dpkg.cfg
--rw------- 1 root root  542 Jun  1 17:47 99-installer.cfg
--rw-r--r-- 1 root root   35 Jun  1 17:43 curtin-preserve-sources.cfg
--rw-r--r-- 1 root root  167 Oct 24  2023 README
--rw------- 1 root root   28 Jun  1 17:45 subiquity-disable-cloudinit-networking.cfg
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg 
-## This yaml formated config file handles setting
-## logger information.  The values that are necessary to be set
-## are seen at the bottom.  The top '_log' are only used to remove
-## redundency in a syslog and fallback-to-file case.
-##
-## The 'log_cfgs' entry defines a list of logger configs
-## Each entry in the list is tried, and the first one that
-## works is used.  If a log_cfg list entry is an array, it will
-## be joined with '\n'.
-_log:
- - &log_base |
-   [loggers]
-   keys=root,cloudinit
-   
-   [handlers]
-   keys=consoleHandler,cloudLogHandler
-   
-   [formatters]
-   keys=simpleFormatter,arg0Formatter
-   
-   [logger_root]
-   level=DEBUG
-   handlers=consoleHandler,cloudLogHandler
-   
-   [logger_cloudinit]
-   level=DEBUG
-   qualname=cloudinit
-   handlers=
-   propagate=1
-   
-   [handler_consoleHandler]
-   class=StreamHandler
-   level=WARNING
-   formatter=arg0Formatter
-   args=(sys.stderr,)
-   
-   [formatter_arg0Formatter]
-   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
-   
-   [formatter_simpleFormatter]
-   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
- - &log_file |
-   [handler_cloudLogHandler]
-   class=FileHandler
-   level=DEBUG
-   formatter=arg0Formatter
-   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
- - &log_syslog |
-   [handler_cloudLogHandler]
-   class=handlers.SysLogHandler
-   level=DEBUG
-   formatter=simpleFormatter
-   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
 
-log_cfgs:
-# Array entries in this list will be joined into a string
-# that defines the configuration.
-#
-# If you want logs to go to syslog, uncomment the following line.
-# - [ *log_base, *log_syslog ]
-#
-# The default behavior is to just log to a file.
-# This mechanism that does not depend on a system service to operate.
- - [ *log_base, *log_file ]
-# A file path can also be used.
-# - /etc/log.conf
-
-# This tells cloud-init to redirect its stdout and stderr to
-# 'tee -a /var/log/cloud-init-output.log' so the user can see output
-# there without needing to look on the console.
-output: {all: '| tee -a /var/log/cloud-init-output.log'}
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
-# to update this file, run dpkg-reconfigure cloud-init
-datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, Akamai, None ]
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/99-installer.cfg 
-[sudo] password for automat: 
-datasource:
-  None:
-    metadata:
-      instance-id: 1aa5ee9f-653a-4290-a6fa-83836a30ce72
-    userdata_raw: "#cloud-config\ngrowpart:\n  mode: 'off'\nlocale: en_US.UTF-8\n\
-      preserve_hostname: true\nresize_rootfs: false\nssh_pwauth: true\nusers:\n- gecos:\
-      \ automat\n  groups: adm,cdrom,dip,lxd,plugdev,sudo\n  lock_passwd: false\n\
-      \  name: automat\n  passwd: $6$tDf4cjp9f6HsAtsq$yeAA0vHqtLPAttWpz7hbQN6mCGiyyVVhgD/AW.ehH0Jyr.xrt7gItfZS7NEE9QGsdPtmctQ4lZ3kCpapJN.Gm1\n\
-      \  shell: /bin/bash\n"
-datasource_list:
-- None
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/curtin-preserve-sources.cfg 
-apt:
-  preserve_sources_list: true
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/README 
-# All files with the '.cfg' extension in this directory will be read by
-# cloud-init. They are read in lexical order. Later files overwrite values in
-# earlier files.
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg 
-network: {config: disabled}
-```
-
-## Ubuntu Server 20.04 ISO cloud-init
-
-```
-$ ls -l /etc/cloud
-total 20
-drwxr-xr-x 2 root root 4096 Jun  1 18:19 clean.d
--rw-r--r-- 1 root root 3787 May 19  2023 cloud.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 18:19 cloud.cfg.d
--rw-r--r-- 1 root adm    16 Jun  1 18:08 ds-identify.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 18:19 templates
-```
-
-```
-$ cat /etc/cloud/ds-identify.cfg 
-policy: enabled
-```
-
-```
-$ ls -l /etc/cloud/clean.d/
-total 4
--rw-r--r-- 1 root root 883 Nov 23  2022 README
-```
-
-```
-$ ls -l /etc/cloud/clean.d/
-total 4
--rw-r--r-- 1 root root 883 Nov 23  2022 README
-automat@ubuntu-server-2004:~$ cat /etc/cloud/clean.d/README 
--- cloud-init's clean.d run-parts directory --
-
-This directory is provided for third party applications which need
-additional configuration artifact cleanup from the filesystem when
-the command `cloud-init clean` is invoked.
-
-The `cloud-init clean` operation is typically performed by image creators
-when preparing a golden image for clone and redeployment. The clean command
-removes any cloud-init semaphores, allowing cloud-init to treat the next
-boot of this image as the "first boot". When the image is next booted
-cloud-init will performing all initial configuration based on any valid
-datasource meta-data and user-data.
-
-Any executable scripts in this subdirectory will be invoked in lexicographical
-order with run-parts by the command: sudo cloud-init clean.
-
-Typical format of such scripts would be a ##-<some-app> like the following:
-  /etc/cloud/clean.d/99-live-installer
-```
-
-```
-$ ls -l /etc/cloud/cloud.cfg.d/
-total 24
--rw-r--r-- 1 root root 2070 Nov 23  2022 05_logging.cfg
--rw-r--r-- 1 root root  320 Jun  1 18:19 90_dpkg.cfg
--rw------- 1 root adm   542 Jun  1 18:08 99-installer.cfg
--rw-r--r-- 1 root root   35 Jun  1 18:05 curtin-preserve-sources.cfg
--rw-r--r-- 1 root root  167 Nov 23  2022 README
--rw-r--r-- 1 root root   28 Jun  1 18:06 subiquity-disable-cloudinit-networking.cfg
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg 
-## This yaml formated config file handles setting
-## logger information.  The values that are necessary to be set
-## are seen at the bottom.  The top '_log' are only used to remove
-## redundency in a syslog and fallback-to-file case.
-##
-## The 'log_cfgs' entry defines a list of logger configs
-## Each entry in the list is tried, and the first one that
-## works is used.  If a log_cfg list entry is an array, it will
-## be joined with '\n'.
-_log:
- - &log_base |
-   [loggers]
-   keys=root,cloudinit
-   
-   [handlers]
-   keys=consoleHandler,cloudLogHandler
-   
-   [formatters]
-   keys=simpleFormatter,arg0Formatter
-   
-   [logger_root]
-   level=DEBUG
-   handlers=consoleHandler,cloudLogHandler
-   
-   [logger_cloudinit]
-   level=DEBUG
-   qualname=cloudinit
-   handlers=
-   propagate=1
-   
-   [handler_consoleHandler]
-   class=StreamHandler
-   level=WARNING
-   formatter=arg0Formatter
-   args=(sys.stderr,)
-   
-   [formatter_arg0Formatter]
-   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
-   
-   [formatter_simpleFormatter]
-   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
- - &log_file |
-   [handler_cloudLogHandler]
-   class=FileHandler
-   level=DEBUG
-   formatter=arg0Formatter
-   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
- - &log_syslog |
-   [handler_cloudLogHandler]
-   class=handlers.SysLogHandler
-   level=DEBUG
-   formatter=simpleFormatter
-   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
-
-log_cfgs:
-# Array entries in this list will be joined into a string
-# that defines the configuration.
-#
-# If you want logs to go to syslog, uncomment the following line.
-# - [ *log_base, *log_syslog ]
-#
-# The default behavior is to just log to a file.
-# This mechanism that does not depend on a system service to operate.
- - [ *log_base, *log_file ]
-# A file path can also be used.
-# - /etc/log.conf
-
-# This tells cloud-init to redirect its stdout and stderr to
-# 'tee -a /var/log/cloud-init-output.log' so the user can see output
-# there without needing to look on the console.
-output: {all: '| tee -a /var/log/cloud-init-output.log'}
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
-# to update this file, run dpkg-reconfigure cloud-init
-datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, None ]
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/99-installer.cfg 
-[sudo] password for automat: 
-datasource:
-  None:
-    metadata:
-      instance-id: 77521a3c-2b8a-4149-9706-e727a3d81645
-    userdata_raw: "#cloud-config\ngrowpart:\n  mode: 'off'\nlocale: en_US.UTF-8\n\
-      preserve_hostname: true\nresize_rootfs: false\nssh_pwauth: true\nusers:\n- gecos:\
-      \ automat\n  groups: adm,cdrom,dip,lxd,plugdev,sudo\n  lock_passwd: false\n\
-      \  name: automat\n  passwd: $6$xQgNaFgU.unsZFSI$cuC0eUuTshAawkNjM8dM.h.GQGLPHQ4uj/4i/z.brPKs41Dbzo77B0m.tkWHOtcvgr.IpU9T29z.wl9H456QP.\n\
-      \  shell: /bin/bash\n"
-datasource_list:
-- None
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/curtin-preserve-sources.cfg 
-apt:
-  preserve_sources_list: true
 ```
+$ virsh snapshot-create-as --domain ubuntu-server-2404 --name clean --description "Initial install"
+$ virsh snapshot-list ubuntu-server-2404
+$ virsh snapshot-revert ubuntu-server-2404 clean
+$ virsh snapshot-delete ubuntu-server-2404 clean
 
+$ virsh shutdown ubuntu-server-2404
+$ virsh undefine ubuntu-server-2404 --nvram --remove-all-storage
 ```
-$ cat /etc/cloud/cloud.cfg.d/README 
-# All files with the '.cfg' extension in this directory will be read by
-# cloud-init. They are read in lexical order. Later files overwrite values in
-# earlier files.
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg 
-network: {config: disabled}
-```
-
-## Ubuntu Desktop 24.04 ISO cloud-init
-
-```
-$ ls -l /etc/cloud
-total 24
-drwxr-xr-x 2 root root 4096 Jun  1 11:40 clean.d
--rw-r--r-- 1 root root 3718 Apr  5 16:18 cloud.cfg
-drwxr-xr-x 2 root root 4096 Jun  1 11:40 cloud.cfg.d
--rw-r--r-- 1 root root  132 Jun  1 11:44 cloud-init.disabled
--rw-r--r-- 1 root root   16 Jun  1 11:40 ds-identify.cfg
-drwxr-xr-x 2 root root 4096 Apr 24 03:49 templates
-```
-
-```
-$ cat /etc/cloud/cloud-init.disabled 
-Disabled by Ubuntu live installer after first boot.
-To re-enable cloud-init on this image run:
-  sudo cloud-init clean --machine-id
-```
-
-```
-$ cat /etc/cloud/ds-identify.cfg 
-policy: enabled
-```
-
-```
-$ ls -l /etc/cloud/clean.d/
-total 8
--rwxr-xr-x 1 root root 484 Jun  1 11:40 99-installer
--rwxr-xr-x 1 root root 342 Apr 24 03:51 99-installer-use-networkmanager
-```
-
-```
-$ cat /etc/cloud/clean.d/99-installer
-#!/usr/bin/env python3
-# Remove live-installer config artifacts when running: sudo cloud-init clean
-# Autogenerated by Subiquity: 2024-06-01 18:40:50.910343 UTC
-
-
-import os
-
-for cfg_file in ["/etc/cloud/cloud-init.disabled", "/etc/cloud/cloud.cfg.d/20-disable-cc-dpkg-grub.cfg", "/etc/cloud/cloud.cfg.d/90-installer-network.cfg", "/etc/cloud/cloud.cfg.d/99-installer.cfg", "/etc/cloud/ds-identify.cfg"]:
-    try:
-        os.remove(cfg_file)
-    except FileNotFoundError:
-        pass
-```
-
-```
-$ cat /etc/cloud/clean.d/99-installer-use-networkmanager 
-#!/bin/sh
-# Inform clone image creators about strict network-manager cfg for cloud-init
-if [ -f /etc/cloud/cloud.cfg.d/99-installer-use-networkmanager.cfg ]; then
-  echo "WARNING: cloud-init network config is limited to using network-manager."
-  echo "If this is undesirable: rm /etc/cloud/cloud.cfg.d/99-installer-use-networkmanager.cfg"
-fi
-```
-
-```
-$ ls -l /etc/cloud/cloud.cfg.d/
-total 28
--rw-r--r-- 1 root root 2071 Mar 27 06:14 05_logging.cfg
--rw-r--r-- 1 root root   28 Jun  1 11:40 20-disable-cc-dpkg-grub.cfg
--rw-r--r-- 1 root root  333 Apr 24 03:49 90_dpkg.cfg
--rw------- 1 root root  117 Jun  1 11:38 90-installer-network.cfg
--rw------- 1 root root  815 Jun  1 11:40 99-installer.cfg
--rw-r--r-- 1 root root   35 Jun  1 11:34 curtin-preserve-sources.cfg
--rw-r--r-- 1 root root  167 Mar 27 06:14 README
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/05_logging.cfg 
-## This yaml formatted config file handles setting
-## logger information.  The values that are necessary to be set
-## are seen at the bottom.  The top '_log' are only used to remove
-## redundancy in a syslog and fallback-to-file case.
-##
-## The 'log_cfgs' entry defines a list of logger configs
-## Each entry in the list is tried, and the first one that
-## works is used.  If a log_cfg list entry is an array, it will
-## be joined with '\n'.
-_log:
- - &log_base |
-   [loggers]
-   keys=root,cloudinit
-   
-   [handlers]
-   keys=consoleHandler,cloudLogHandler
-   
-   [formatters]
-   keys=simpleFormatter,arg0Formatter
-   
-   [logger_root]
-   level=DEBUG
-   handlers=consoleHandler,cloudLogHandler
-   
-   [logger_cloudinit]
-   level=DEBUG
-   qualname=cloudinit
-   handlers=
-   propagate=1
-   
-   [handler_consoleHandler]
-   class=StreamHandler
-   level=WARNING
-   formatter=arg0Formatter
-   args=(sys.stderr,)
-   
-   [formatter_arg0Formatter]
-   format=%(asctime)s - %(filename)s[%(levelname)s]: %(message)s
-   
-   [formatter_simpleFormatter]
-   format=[CLOUDINIT] %(filename)s[%(levelname)s]: %(message)s
- - &log_file |
-   [handler_cloudLogHandler]
-   class=FileHandler
-   level=DEBUG
-   formatter=arg0Formatter
-   args=('/var/log/cloud-init.log', 'a', 'UTF-8')
- - &log_syslog |
-   [handler_cloudLogHandler]
-   class=handlers.SysLogHandler
-   level=DEBUG
-   formatter=simpleFormatter
-   args=("/dev/log", handlers.SysLogHandler.LOG_USER)
-
-log_cfgs:
-# Array entries in this list will be joined into a string
-# that defines the configuration.
-#
-# If you want logs to go to syslog, uncomment the following line.
-# - [ *log_base, *log_syslog ]
-#
-# The default behavior is to just log to a file.
-# This mechanism that does not depend on a system service to operate.
- - [ *log_base, *log_file ]
-# A file path can also be used.
-# - /etc/log.conf
-
-# This tells cloud-init to redirect its stdout and stderr to
-# 'tee -a /var/log/cloud-init-output.log' so the user can see output
-# there without needing to look on the console.
-output: {all: '| tee -a /var/log/cloud-init-output.log'}
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/20-disable-cc-dpkg-grub.cfg 
-grub_dpkg:
-  enabled: false
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/90_dpkg.cfg 
-# to update this file, run dpkg-reconfigure cloud-init
-datasource_list: [ NoCloud, ConfigDrive, OpenNebula, DigitalOcean, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, SmartOS, Bigstep, Scaleway, AliYun, Ec2, CloudStack, Hetzner, IBMCloud, Oracle, Exoscale, RbxCloud, UpCloud, VMware, Vultr, LXD, NWCS, Akamai, WSL, None ]
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/90-installer-network.cfg 
-[sudo] password for automat: 
-# This is the network config written by 'subiquity'
-network:
-  ethernets:
-    enp1s0:
-      dhcp4: true
-  version: 2
-```
-
-```
-$ sudo cat /etc/cloud/cloud.cfg.d/99-installer.cfg
-datasource:
-  None:
-    metadata:
-      instance-id: 8f24aaf6-e801-4314-ab4d-140cf7903665
-    userdata_raw: "#cloud-config\ngrowpart:\n  mode: 'off'\nlocale: en_US.UTF-8\n\
-      preserve_hostname: true\nresize_rootfs: false\ntimezone: America/Los_Angeles\n\
-      users:\n- gecos: automat\n  groups: adm,cdrom,dip,lpadmin,plugdev,sudo,users\n\
-      \  lock_passwd: false\n  name: automat\n  passwd: $6$40T70sujp2hUJyd9$IlfKZwMFKEmsGuG.xCYtmO3iUTWqPcg1erpNuaD3qd3xPq9U09ON5J3lZX8zkqAOWOx/IteCJgD3/m8ddLFv.1\n\
-      \  shell: /bin/bash\nwrite_files:\n- content: \"Disabled by Ubuntu live installer\
-      \ after first boot.\\nTo re-enable cloud-init\\\n    \\ on this image run:\\\
-      n  sudo cloud-init clean --machine-id\\n\"\n  defer: true\n  path: /etc/cloud/cloud-init.disabled\n"
-datasource_list:
-- None
-```
-
-```
-$ cat /etc/cloud/cloud.cfg.d/curtin-preserve-sources.cfg 
-apt:
-  preserve_sources_list: true
-```
 
 ```
-$ cat /etc/cloud/cloud.cfg.d/README 
-# All files with the '.cfg' extension in this directory will be read by
-# cloud-init. They are read in lexical order. Later files overwrite values in
-# earlier files.
+virsh start ubuntu-server-2404
 ```
-
-References:
-
-https://www.pugetsystems.com/labs/hpc/ubuntu-22-04-server-autoinstall-iso/
