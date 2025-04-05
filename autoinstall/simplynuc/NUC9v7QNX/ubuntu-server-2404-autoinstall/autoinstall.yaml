@@ -2,24 +2,28 @@
 autoinstall:
   version: 1
   network:
-    network:
-      version: 2
-      ethernets:
-        # Intel I219-LM interface that supports vPro/AMT pass-through
-        eno1:
-          dhcp4: true
-          dhcp6: false
-        # # Intel I210-AT standalone gigabit ethernet
-        # enp113s0: {}
-        # wlp4s0: {}
-      bridges:
-        br0:
-          interfaces:
-            - eno1
-          dhcp4: true
-          dhcp6: false
-          parameters:
-            stp: false
+    version: 2
+    ethernets:
+      # Intel I219-LM interface that supports vPro/AMT pass-through
+      eno1:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      # Intel I210-AT standalone gigabit ethernet
+      enp113s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      wlp4s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces:
+          - eno1
+        dhcp4: true
+        dhcp6: false
   storage:
     layout:
       name: lvm
