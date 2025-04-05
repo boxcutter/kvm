@@ -69,3 +69,120 @@ sudo apt-get install ovmf
 # Files are in /usr/share/AAVMF
 sudo apt-get install qemu-efi-aarch64
 ```
+
+## Create a storage pool for ISOs
+
+```
+# Create the storage pool definition
+$ virsh pool-define-as \
+    --name iso \
+    --type dir \
+    --target /var/lib/libvirt/iso
+Pool iso defined
+
+# Create the local directory
+$ virsh pool-build iso
+# Start the storage pool
+$ virsh pool-start iso
+# Turn on autostart
+$ virsh pool-autostart iso
+
+# Verify the storage pool is listed
+$ virsh pool-list --all
+$ virsh vol-list --pool default --details
+$ virsh pool-info iso
+
+$ sudo ls -ld /var/lib/libvirt/iso
+drwx--x--x 2 root root 4096 Nov 12 08:41 /var/lib/libvirt/iso
+
+# Install curl
+$ sudo apt-get update
+$ sudo apt-get install ca-certificates curl
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-20.04.6-live-server-amd64.iso
+
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-20.04.6-live-server-amd64.iso
+b8f31413336b9393ad5d8ef0282717b2ab19f007df2e9ed5196c13d8f9153c8b *ubuntu-20.04.6-live-server-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/22.04.4/ubuntu-22.04.4-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso
+
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.4-live-server-amd64.iso
+45f873de9f8cb637345d6e66a583762730bbea30277ef7b32c9c3bd6700a32b2 *ubuntu-22.04.4-live-server-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-24.04-live-server-amd64.iso
+8762f7e74e4d64d72fceb5f70682e6b069932deedb4949c6975d0f0fe0a91be3 *ubuntu-24.04-live-server-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/20.04.6/ubuntu-20.04.6-desktop-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-20.04.6-desktop-amd64.iso
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-20.04.6-desktop-amd64.iso
+510ce77afcb9537f198bc7daa0e5b503b6e67aaed68146943c231baeaab94df1 *ubuntu-20.04.6-desktop-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/22.04.4/ubuntu-22.04.4-desktop-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-22.04.4-desktop-amd64.iso
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-22.04.4-desktop-amd64.iso
+071d5a534c1a2d61d64c6599c47c992c778e08b054daecc2540d57929e4ab1fd *ubuntu-22.04.4-desktop-amd64.iso
+
+$ sudo curl \
+    -L https://releases.ubuntu.com/24.04/ubuntu-24.04-desktop-amd64.iso \
+    -o /var/lib/libvirt/iso/ubuntu-24.04-desktop-amd64.iso
+$ sudo shasum -a 256 /var/lib/libvirt/iso/ubuntu-24.04-desktop-amd64.iso
+81fae9cc21e2b1e3a9a4526c7dad3131b668e346c580702235ad4d02645d9455 *ubuntu-24.04-desktop-amd64.iso
+```
+
+## Create a storage pool for images
+
+```
+# Create the storage pool definition
+$ virsh pool-define-as \
+    --name default \
+    --type dir \
+    --target /var/lib/libvirt/images
+
+# Create the local directory
+$ virsh pool-build default
+# Start the storage pool
+$ virsh pool-start default
+# Turn on autostart
+$ virsh pool-autostart default
+
+# Verify the storage pool is listed
+$ virsh pool-list --all
+$ virsh vol-list --pool default --details
+```
+
+## Create a storage pool for cloud-init boot images
+
+> **Note:**
+> There is a `--cloud-init` parameter for `virt-install` to auto-generate the
+> cloud-init ISO. It creates a pool called `boot-scratch` in
+> `/var/lib/libvirt/boot`. However oftentimes it's just easier to control the
+> lifecycle of these images manually
+
+```
+# Create the storage pool definition
+$ virsh pool-define-as \
+    --name boot-scratch \
+    --type dir \
+    --target /var/lib/libvirt/boot
+Pool iso defined
+
+# Create the local directory
+$ virsh pool-build boot-scratch
+# Start the storage pool
+$ virsh pool-start boot-scratch
+# Turn on autostart
+$ virsh pool-autostart boot-scratch
+
+# Verify the storage pool is listed
+$ virsh pool-list --all
+$ virsh vol-list --pool boot-scratch --details
+```
