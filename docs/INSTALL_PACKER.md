@@ -4,7 +4,8 @@
 # Add Hashicorp's official GPG key
 sudo apt-get update
 sudo apt-get install ca-certificates curl gnupg
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+curl -fsSL https://apt.releases.hashicorp.com/gpg | \
+  sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
 # Add the repository to Apt sources
 echo \
@@ -18,5 +19,5 @@ sudo apt install packer
 
 # Verify the install
 $ packer --version
-Packer v1.11.0
+Packer v1.12.0
 ```
