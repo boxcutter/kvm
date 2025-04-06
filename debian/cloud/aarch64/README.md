@@ -35,9 +35,9 @@ virt-install \
   --boot uefi \
   --memory 4096 \
   --vcpus 2 \
-  --os-variant debian10 \
+  --os-variant debian12 \
   --disk /var/lib/libvirt/images/debian-12-aarch64.qcow2,bus=virtio \
-  --network network=host-network,model=virtio \
+  --network network=default,model=virtio \
   --noautoconsole \
   --console pty,target_type=serial \
   --import \
@@ -47,25 +47,26 @@ virsh console debian-12
 
 # login with packer user
 
+# Make sure cloud-init is finished
+$ cloud-init status --wait
+status: done
+
 # Check networking - you may notice that the network interface is down and
 # the name of the interface generated in netplan doesn't match. If not 
 # correct, can regenerate with cloud-init
-# ip reports that enp1s0 is down
-$ ip --brief a
-lo               UNKNOWN        127.0.0.1/8 ::1/128 
-enp1s0           UP             10.63.34.169/22 metric 100 fe80::5054:ff:fee1:b969/64
 
 # Check to make sure cloud-init is greater than 23.4
 $ cloud-init --version
-/usr/bin/cloud-init 22.4.2
 
-# NOTE: Because Ubuntu 20.04 has a version of cloud-init earlier than 23.4
-# it does not have the "clean" parameter, instead regenerate the netplan
-# config with the following
+# Regenerate only the network config
+$ sudo cloud-init clean --configs network
+$ sudo cloud-init init --local
 
-# Make cloud-init regenerate the network configuration
-sudo rm /var/lib/cloud/data/instance-id
-sudo cloud-init init --local
+# Disable cloud-init
+$ sudo touch /etc/cloud/cloud-init.disabled
+
+$ cloud-init status
+status: disabled
 
 $ sudo reboot
 
@@ -73,17 +74,6 @@ $ sudo reboot
 $ ip --brief a
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
 enp1s0           UP             10.63.46.11/22 metric 100 fe80::5054:ff:fe04:483/64
-
-
-$ cloud-init status
-status: done
-
-# Disable cloud-init
-$ sudo touch /etc/cloud/cloud-init.disabled
-
-# Verify cloud-init is disabled
-$ cloud-init status
-status: disabled
 ```
 
 ```
