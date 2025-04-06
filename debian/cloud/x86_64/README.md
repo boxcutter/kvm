@@ -37,7 +37,7 @@ virt-install \
   --vcpus 2 \
   --os-variant debian12 \
   --disk /var/lib/libvirt/images/debian-12-x86_64.qcow2,bus=virtio \
-  --network network=host-network,model=virtio \
+  --network network=default,model=virtio \
   --graphics spice \
   --noautoconsole \
   --console pty,target_type=serial \
@@ -57,7 +57,7 @@ lo               UNKNOWN        127.0.0.1/8 ::1/128
 enp1s0           DOWN
 
 # Make cloud-init regenerate the network configuration
-sudo rm /var/lib/cloud/data/instance-id
+sudo cloud-init clean --logs
 sudo cloud-init init --local
 
 $ sudo reboot
@@ -107,7 +107,7 @@ virt-install \
   --vcpus 2 \
   --os-variant debian12 \
   --disk /var/lib/libvirt/images/debian-12.qcow2,bus=virtio \
-  --network network=host-network,model=virtio \
+  --network network=default,model=virtio \
   --graphics spice \
   --noautoconsole \
   --console pty,target_type=serial \
@@ -131,7 +131,7 @@ enp1s0           DOWN
 # config with the following
 
 # Make cloud-init regenerate the network configuration
-sudo rm /var/lib/cloud/data/instance-id
+sudo cloud-init clean --logs
 sudo cloud-init init --local
 
 $ sudo reboot
