@@ -111,4 +111,12 @@ build {
       "../scripts/cloud-init-wait.sh",
     ]
   }
+
+  provisioner "shell" {
+    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    expect_disconnect = true
+    scripts = [
+      "../scripts/reconfigure-cloud-init.sh",
+    ]
+  }
 }
