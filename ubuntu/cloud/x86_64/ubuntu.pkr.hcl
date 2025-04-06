@@ -116,6 +116,7 @@ build {
     execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     expect_disconnect = true
     scripts = [
+      "../scripts/reconfigure-cloud-init.sh",
       "../scripts/disable-updates.sh",
       "../scripts/qemu.sh",
       "../scripts/clear-machine-information.sh"
