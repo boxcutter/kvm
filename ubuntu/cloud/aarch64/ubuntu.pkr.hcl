@@ -7,6 +7,11 @@ packer {
   }
 }
 
+variable "headless" {
+  type    = bool
+  default = true
+}
+
 variable "ssh_username" {
   type    = string
   default = "packer"
@@ -64,6 +69,7 @@ source "qemu" "ubuntu" {
   disk_image       = true
   disk_size        = "30G"
   format           = "qcow2"
+  headless         = var.headless
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   qemu_binary      = "qemu-system-aarch64"
@@ -104,6 +110,7 @@ build {
     execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     expect_disconnect = true
     scripts = [
+      "../scripts/reconfigure-cloud-init.sh",
       "../scripts/disable-updates.sh",
       "../scripts/qemu.sh",
     ]
