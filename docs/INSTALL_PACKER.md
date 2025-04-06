@@ -20,4 +20,8 @@ sudo apt install packer
 # Verify the install
 $ packer --version
 Packer v1.12.0
+
+# Install dependencies for generating cloud-init images
+sudo apt-get update
+sudo apt-get install genisoimage
 ```
