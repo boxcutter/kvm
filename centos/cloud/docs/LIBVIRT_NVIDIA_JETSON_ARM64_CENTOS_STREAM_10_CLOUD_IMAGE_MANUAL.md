@@ -53,7 +53,7 @@ $ osinfo-query os
 virt-install \
   --connect qemu:///system \
   --name centos-stream-10 \
-  --boot uefi \
+  --boot loader=/usr/share/AAVMF/AAVMF_CODE.fd,loader.readonly=yes,loader.type=pflash,nvram.template=/usr/share/AAVMF/AAVMF_VARS.fd \
   --memory 4096 \
   --vcpus 2 \
   --os-variant centos-stream9 \
@@ -71,7 +71,7 @@ virt-viewer centos-stream-10
 
 # login with cloud-user
 
-$ cloud-init status
+$ cloud-init status --wait
 status: done
 
 # Verify networking is working
