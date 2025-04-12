@@ -9,18 +9,6 @@ $ curl -LO https://cloud.debian.org/images/cloud/bookworm/latest/SHA512SUMS
 $ curl -LO https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2
 
 $ qemu-img info debian-12-generic-amd64.qcow2
-image: debian-12-generic-amd64.qcow2
-file format: qcow2
-virtual size: 2 GiB (2147483648 bytes)
-disk size: 424 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    compression type: zlib
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
-    extended l2: false
 
 $ qemu-img convert \
     -O qcow2 \
@@ -80,7 +68,8 @@ qemu-system-x86_64 \
   -drive file=debian-12.qcow2,if=virtio,format=qcow2 \
   -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
-  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd
+  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd \
+  -display none -serial mon:stdio
 ```
 
 Login to the image
