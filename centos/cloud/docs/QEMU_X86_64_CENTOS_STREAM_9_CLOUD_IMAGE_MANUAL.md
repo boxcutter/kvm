@@ -11,15 +11,6 @@ $ curl -LO https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-
 $ curl -LO https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-x86_64-9-latest.x86_64.qcow2
 
 $ qemu-img info CentOS-Stream-GenericCloud-x86_64-9-latest.x86_64.qcow2
-image: CentOS-Stream-GenericCloud-x86_64-9-latest.x86_64.qcow2
-file format: qcow2
-virtual size: 10 GiB (10737418240 bytes)
-disk size: 1.15 GiB
-cluster_size: 65536
-Format specific information:
-    compat: 0.10
-    compression type: zlib
-    refcount bits: 16
 
 $ qemu-img convert \
     -O qcow2 \
@@ -80,7 +71,8 @@ qemu-system-x86_64 \
   -drive file=centos-stream-9.qcow2,if=virtio,format=qcow2 \
   -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
-  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd
+  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd \
+  -display none -serial mon:stdio
 ```
 
 Login to the image
