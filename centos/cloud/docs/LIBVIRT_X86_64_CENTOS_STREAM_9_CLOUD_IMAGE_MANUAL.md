@@ -68,11 +68,9 @@ virt-install \
 
 virsh console centos-stream-9
 
-virt-viewer centos-stream-9
-
 # login with cloud-user
 
-$ cloud-init status
+$ cloud-init status --wait
 status: done
 
 # Verify networking is working
