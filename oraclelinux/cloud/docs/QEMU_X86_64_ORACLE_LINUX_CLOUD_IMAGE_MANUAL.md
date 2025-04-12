@@ -8,27 +8,13 @@ https://yum.oracle.com/oracle-linux-templates.html
 
 Download the Oracle Linux 9 Cloud Image
 ```
-# SHA256 Checksum: 7f1cf4e1fafda55bb4d837d0eeb9592d60e896fa56565081fc4d8519c0a3f
-d1a
-curl -LO https://yum.oracle.com/templates/OracleLinux/OL9/u4/x86_64/OL9U4_x86_64-kvm-b234.qcow2
+curl -LO https://yum.oracle.com/templates/OracleLinux/OL9/u5/x86_64/OL9U5_x86_64-kvm-b259.qcow2
 
-$ qemu-img info OL9U4_x86_64-kvm-b234.qcow2 
-image: OL9U4_x86_64-kvm-b234.qcow2
-file format: qcow2
-virtual size: 37 GiB (39728447488 bytes)
-disk size: 585 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    compression type: zlib
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
-    extended l2: false
+$ qemu-img info OL9U5_x86_64-kvm-b259.qcow2
 
 $ qemu-img convert \
     -O qcow2 \
-    OL9U4_x86_64-kvm-b234.qcow2 \
+    OL9U5_x86_64-kvm-b259.qcow2 \
     oracle-linux-9.qcow2
 
 # Resize the image
@@ -85,5 +71,12 @@ qemu-system-x86_64 \
   -device virtio-net-pci,netdev=net0 \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
   -drive file=oracle-linux-9.qcow2,if=virtio,format=qcow2 \
-  -cdrom cloud-init.iso
+  -cdrom cloud-init.iso \
+  -display none -serial mon:stdio
+```
+
+Login to the image
+
+```
+# cloud-user / superseekret
 ```
