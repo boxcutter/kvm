@@ -53,7 +53,7 @@ sudo apt-get update
 sudo apt-get install genisoimage
 genisoimage \
   -input-charset utf-8 \
-  -output amazonlinux-2023-cloud-init.iso \
+  -output cloud-init.iso \
   -volid cidata -rational-rock -joliet \
   user-data meta-data network-config
 ```
@@ -86,7 +86,7 @@ qemu-system-aarch64 \
   -device virtio-net-pci,netdev=net0 \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
   -drive file=amazonlinux-2023.qcow2,if=virtio,format=qcow2 \
-  -cdrom amazonlinux-2023-cloud-init.iso \
+  -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=flash0.img \
   -drive if=pflash,format=raw,unit=1,file=flash1.img
 
