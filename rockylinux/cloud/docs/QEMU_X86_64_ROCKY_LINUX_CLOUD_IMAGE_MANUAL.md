@@ -2,11 +2,6 @@
 
 https://rockylinux.org/download
 
-```
-curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/CHECKSUM
-curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
-```
-
 ## Rocky Linux 9
 
 Download the AlmaLinux cloud image
@@ -15,19 +10,7 @@ Download the AlmaLinux cloud image
 curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/CHECKSUM
 curl -LO https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 
-$ qemu-img info Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 
-image: Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
-file format: qcow2
-virtual size: 10 GiB (10737418240 bytes)
-disk size: 581 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    compression type: zlib
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
-    extended l2: false
+$ qemu-img info Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 
 $ qemu-img convert \
     -O qcow2 \
@@ -88,7 +71,8 @@ qemu-system-x86_64 \
   -drive file=rockylinux-9-x86_64.qcow2,if=virtio,format=qcow2 \
   -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
-  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd
+  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd \
+  -display none -serial mon:stdio
 ```
 
 Login to the image
