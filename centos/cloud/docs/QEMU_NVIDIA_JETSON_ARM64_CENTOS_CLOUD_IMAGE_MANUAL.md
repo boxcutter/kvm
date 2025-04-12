@@ -11,14 +11,6 @@ $ curl -LO https://cloud.centos.org/centos/9-stream/aarch64/images/CentOS-Stream
 $ curl -LO https://cloud.centos.org/centos/9-stream/aarch64/images/CentOS-Stream-GenericCloud-9-latest.aarch64.qcow2
 
 $ qemu-img info CentOS-Stream-GenericCloud-9-latest.aarch64.qcow2
-image: CentOS-Stream-GenericCloud-9-latest.aarch64.qcow2
-file format: qcow2
-virtual size: 10 GiB (10737418240 bytes)
-disk size: 985 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 0.10
-    refcount bits: 16
 
 $ qemu-img convert \
     -O qcow2 \
