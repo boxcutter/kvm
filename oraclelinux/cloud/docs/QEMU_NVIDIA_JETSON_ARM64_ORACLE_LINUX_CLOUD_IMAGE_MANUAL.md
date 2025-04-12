@@ -12,16 +12,6 @@ Download the Oracle Linux 9 Cloud Image
 $ curl -LO https://yum.oracle.com/templates/OracleLinux/OL9/u4/aarch64/OL9U4_aarch64-kvm-cloud-b90.qcow2
 
 $ qemu-img info OL9U4_aarch64-kvm-cloud-b90.qcow2 
-image: OL9U4_aarch64-kvm-cloud-b90.qcow2
-file format: qcow2
-virtual size: 16 GiB (17179869184 bytes)
-disk size: 478 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
 
 $ qemu-img convert \
     -O qcow2 \
@@ -107,5 +97,5 @@ Login to the image
 
 ```
 # opc / superseekret
-ssh cloud-user@localhost -p 2222
+ssh opc@localhost -p 2222
 ```
