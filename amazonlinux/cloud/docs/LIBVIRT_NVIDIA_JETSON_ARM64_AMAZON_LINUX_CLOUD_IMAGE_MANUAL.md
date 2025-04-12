@@ -58,21 +58,6 @@ $ osinfo-query os
 ```
 
 ```
-# Qemu expects aarch firmware images to be 64M so the firmware
-# images can't be used as is, some padding is needed to
-# create an image for pflash
-dd if=/dev/zero of=flash0.img bs=1M count=64
-dd if=/usr/share/AAVMF/AAVMF_CODE.fd of=flash0.img conv=notrunc
-dd if=/dev/zero of=flash1.img bs=1M count=64
-
-#
-#
-#
-
-dd if=/dev/zero of=amazonlinux-2023_VARS.img bs=1M count=64
-```
-
-```
 virt-install \
   --connect qemu:///system \
   --name amazonlinux-2023 \
