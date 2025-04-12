@@ -6,16 +6,6 @@ Download the Debian cloud image
 $ curl -LO https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-arm64.qcow2
 
 $ qemu-img info debian-12-generic-arm64.qcow2 
-image: debian-12-generic-arm64.qcow2
-file format: qcow2
-virtual size: 2 GiB (2147483648 bytes)
-disk size: 394 MiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
 
 $ qemu-img convert \
     -O qcow2 \
@@ -95,23 +85,6 @@ Ctrl-a h: Show help (displays all available commands).
 Ctrl-a x: Exit QEMU.
 Ctrl-a c: Switch between the monitor and the console.
 Ctrl-a s: Send a break signal.
-
-qemu-system-x86_64 \
-  -name debian-12 \
-  -machine virt,accel=kvm,type=q35 \
-  -cpu host \
-  -smp 2 \
-  -m 2G \
-  -device virtio-keyboard \
-  -device virtio-mouse \
-  -device virtio-net-pci,netdev=net0 \
-  -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-  -drive file=debian-12.qcow2,if=virtio,format=qcow2 \
-  -cdrom cloud-init.iso \
-  -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE_
-4M.fd \
-  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_
-4M.fd
 ```
 
 Login to the image
