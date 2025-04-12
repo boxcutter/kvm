@@ -68,11 +68,9 @@ virt-install \
 
 virsh console debian-12
 
-virt-viewer debian-12
-
 # login with debian user
 
-$ cloud-init status
+$ cloud-init status --wait
 status: done
 
 # Verify networking is working
