@@ -46,29 +46,17 @@ virsh console centos-stream-10
 
 # login with packer user
 
-# Check networking - you may notice that the network interface is down and
-# the name of the interface generated in netplan doesn't match. If not
-# correct, can regenerate with cloud-init
-# ip reports that enp1s0 is down
-$ ip --brief a
-lo               UNKNOWN        127.0.0.1/8 ::1/128 
-eth0             UP             10.63.44.89/22 fe80::ea9d:34f2:68cc:bc78/64
+$ sudo cloud-init status --wait
+status: disabled
 
-# Check cloud-init version
-$ cloud-init --version
-/usr/bin/cl
-oud-init
-23.4-11.el9
+# Verify networking is working
+$ ip -br a
 
-# Regenerate only the network config
+# If networking isn't correct, regenerate only the network config
 $ sudo cloud-init clean --configs network
 $ sudo cloud-init init --local
 
 $ sudo reboot
-
-$ ip --brief a
-lo               UNKNOWN        127.0.0.1/8 ::1/128 
-eth0             UP             10.63.44.89/22 fe80::5054:ff:fe12:a922/64
 
 # Verify cloud-init is disabled
 $ sudo cloud-init status
