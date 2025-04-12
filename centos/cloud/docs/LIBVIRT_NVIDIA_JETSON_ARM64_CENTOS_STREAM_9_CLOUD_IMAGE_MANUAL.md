@@ -45,15 +45,6 @@ sudo cp centos-stream-9-cloud-init.img \
 ```
 
 ```
-# Qemu expects aarch firmware images to be 64M so the firmware
-# images can't be used as is, some padding is needed to
-# create an image for pflash
-dd if=/dev/zero of=flash0.img bs=1M count=64
-dd if=/usr/share/AAVMF/AAVMF_CODE.fd of=flash0.img conv=notrunc
-dd if=/dev/zero of=flash1.img bs=1M count=64
-```
-
-```
 $ sudo apt-get install libosinfo-bin
 $ osinfo-query os
 ```
@@ -62,8 +53,7 @@ $ osinfo-query os
 virt-install \
   --connect qemu:///system \
   --name centos-stream-9 \
-  --boot uefi \
-  --arch aarch64 \
+  --boot loader=/usr/share/AAVMF/AAVMF_CODE.fd,loader.readonly=yes,loader.type=pflash,nvram.template=/usr/share/AAVMF/AAVMF_VARS.fd \
   --memory 4096 \
   --vcpus 2 \
   --os-variant centos-stream9 \
@@ -77,11 +67,9 @@ virt-install \
 
 virsh console centos-stream-9
 
-virt-viewer centos-stream-9
-
 # login with cloud-user
 
-$ cloud-init status
+$ cloud-init status --wait
 status: done
 
 # Verify networking is working
@@ -99,26 +87,26 @@ status: disabled
 
 $ sudo shutdown -h now
 
-$ virsh domblklist centos-stream-10
+$ virsh domblklist centos-stream-9
  Target   Source
------------------------------------------------------------------
- vda      /var/lib/libvirt/images/centos-stream-10.qcow2
- sda      /var/lib/libvirt/boot/centos-stream-10-cloud-init.iso
+----------------------------------------------------------------
+ vda      /var/lib/libvirt/images/centos-stream-9.qcow2
+ sda      /var/lib/libvirt/boot/centos-stream-9-cloud-init.iso
  
-$ virsh change-media centos-stream-10 sda --eject
+$ virsh change-media centos-stream-9 sda --eject
 Successfully ejected media.
 
-$ sudo rm /var/lib/libvirt/boot/centos-stream-10-cloud-init.iso
+$ sudo rm /var/lib/libvirt/boot/centos-stream-9-cloud-init.iso
 
 # Verify image boots without cloud-init iso being mounted
 ```
 
 ```
-$ virsh snapshot-create-as --domain centos-stream-10 --name clean --description "Initial install"
-$ virsh snapshot-list centos-stream-10
-$ virsh snapshot-revert centos-stream-10 clean
-$ virsh snapshot-delete centos-stream-10 clean
+$ virsh snapshot-create-as --domain centos-stream-9 --name clean --description "Initial install"
+$ virsh snapshot-list centos-stream-9
+$ virsh snapshot-revert centos-stream-9 clean
+$ virsh snapshot-delete centos-stream-9 clean
 
-$ virsh shutdown centos-stream-10
-$ virsh undefine centos-stream-10 --nvram --remove-all-storage
+$ virsh shutdown centos-stream-9
+$ virsh undefine centos-stream-9 --nvram --remove-all-storage
 ```
