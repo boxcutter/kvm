@@ -4,44 +4,27 @@ https://docs.aws.amazon.com/linux/al2023/ug/kvm-supported-configurations.html
 
 https://docs.aws.amazon.com/linux/al2023/ug/outside-ec2-download.html
 
-https://cdn.amazonlinux.com/os-images/latest/kvm/
-
-```
-curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.5.20240624.0/kvm/SHA256SUMS
-curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.5.20240624.0/kvm/al2023-kvm-2023.5.20240624.0-kernel-6.1-x86_64.xfs.gpt.qcow2
-```
+https://cdn.amazonlinux.com/al2023/os-images/latest/
 
 ## Amazon Linux 2
 
 Download the Amazon Linux 2 cloud image
 
 ```
-curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.5.20240624.0/kvm/SHA256SUMS
-curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.5.20240624.0/kvm/al2023-kvm-2023.5.20240624.0-kernel-6.1-x86_64.xfs.gpt.qcow2
+curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.7.20250331.0/kvm/SHA256SUMS
+curl -LO https://cdn.amazonlinux.com/al2023/os-images/2023.7.20250331.0/kvm/al2023-kvm-2023.7.20250331.0-kernel-6.1-x86_64.xfs.gpt.qcow2
 
-$ qemu-img info al2023-kvm-2023.5.20240624.0-kernel-6.1-x86_64.xfs.gpt.qcow2 
-image: al2023-kvm-2023.5.20240624.0-kernel-6.1-x86_64.xfs.gpt.qcow2
-file format: qcow2
-virtual size: 25 GiB (26843545600 bytes)
-disk size: 1.61 GiB
-cluster_size: 65536
-Format specific information:
-    compat: 1.1
-    compression type: zlib
-    lazy refcounts: false
-    refcount bits: 16
-    corrupt: false
-    extended l2: false
+$ qemu-img info al2023-kvm-2023.7.20250331.0-kernel-6.1-x86_64.xfs.gpt.qcow2
 
 $ qemu-img convert \
     -O qcow2 \
-    al2023-kvm-2023.5.20240624.0-kernel-6.1-x86_64.xfs.gpt.qcow2 \
-    amazon-linux-2-x86_64.qcow2
+    al2023-kvm-2023.7.20250331.0-kernel-6.1-x86_64.xfs.gpt.qcow2 \
+    amazonlinux-2023.qcow2
 
 # Resize the image
 $ qemu-img resize \
     -f qcow2 \
-    amazon-linux-2-x86_64.qcow2 32G
+    amazonlinux-2023.qcow2 32G
 ```
 
 Create a cloud-init configuration
@@ -50,8 +33,8 @@ Create a cloud-init configuration
 touch network-config
 
 cat >meta-data <<EOF
-instance-id: amazon-linux-2
-local-hostname: amazon-linux-2
+instance-id: amazonlinux-2023
+local-hostname: amazonlinux-2023
 EOF
 
 cat <<EOF > user-data
@@ -89,10 +72,11 @@ qemu-system-x86_64 \
   -device virtio-mouse \
   -device virtio-net-pci,netdev=net0 \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-  -drive file=amazon-linux-2-x86_64.qcow2,if=virtio,format=qcow2 \
+  -drive file=amazonlinux-2023.qcow2,if=virtio,format=qcow2 \
   -cdrom cloud-init.iso \
   -drive if=pflash,format=raw,readonly=on,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
-  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd
+  -drive if=pflash,format=raw,readonly=on,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd \
+  -display none -serial mon:stdio
 ```
 
 Login to the image
