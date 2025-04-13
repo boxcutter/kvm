@@ -7,6 +7,18 @@ packer {
   }
 }
 
+variable "cpus" {
+  type    = number
+  default = 1
+  description = "The number of virtual cpus to use when building the VM."
+}
+
+variable "memory" {
+  type    = number
+  default = 2048
+  description = "The amount of memory to use when building the VM in megabytes. This defaults to 512 megabytes."
+}
+
 variable "efi_boot" {
   type    = bool
   default = false
@@ -14,12 +26,12 @@ variable "efi_boot" {
 
 variable "efi_firmware_code" {
   type    = string
-  default = null
+  default = "/usr/share/OVMF/OVMF_CODE_4M.fd"
 }
 
 variable "efi_firmware_vars" {
   type    = string
-  default = null
+  default = "/usr/share/OVMF/OVMF_VARS_4M.fd"
 }
 
 variable "headless" {
@@ -81,6 +93,8 @@ variable "iso_url" {
 
 source "qemu" "almalinux" {
   cpu_model        = "host"
+  cpus             = var.cpus
+  memory           = var.memory
   disk_compression = true
   disk_image       = true
   disk_size        = "32G"
