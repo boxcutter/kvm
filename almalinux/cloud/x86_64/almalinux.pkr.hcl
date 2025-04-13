@@ -8,14 +8,14 @@ packer {
 }
 
 variable "cpus" {
-  type    = number
-  default = 1
+  type        = number
+  default     = 1
   description = "The number of virtual cpus to use when building the VM."
 }
 
 variable "memory" {
-  type    = number
-  default = 2048
+  type        = number
+  default     = 2048
   description = "The amount of memory to use when building the VM in megabytes. This defaults to 512 megabytes."
 }
 
@@ -105,13 +105,13 @@ source "qemu" "almalinux" {
   qemuargs = [
     ["-cdrom", "boot-${var.vm_name}/cidata.iso"]
   ]
-  output_directory = "output-${var.vm_name}"
-  shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
-  ssh_password     = var.ssh_password
-  ssh_timeout      = "120s"
-  ssh_username     = var.ssh_username
-  vm_name          = "${var.vm_name}.qcow2"
-  efi_boot         = var.efi_boot
+  output_directory  = "output-${var.vm_name}"
+  shutdown_command  = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
+  ssh_password      = var.ssh_password
+  ssh_timeout       = "120s"
+  ssh_username      = var.ssh_username
+  vm_name           = "${var.vm_name}.qcow2"
+  efi_boot          = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
 }
@@ -122,7 +122,7 @@ build {
   # cloud-init may still be running when we start executing scripts
   # To avoid race conditions, make sure cloud-init is done first
   provisioner "shell" {
-    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     scripts = [
       "../scripts/cloud-init-wait.sh",
     ]
