@@ -7,6 +7,18 @@ packer {
   }
 }
 
+variable "cpus" {
+  type        = number
+  default     = 1
+  description = "The number of virtual cpus to use when building the VM."
+}
+
+variable "memory" {
+  type        = number
+  default     = 2048
+  description = "The amount of memory to use when building the VM in megabytes."
+}
+
 variable "efi_boot" {
   type    = bool
   default = false
@@ -80,6 +92,8 @@ variable "iso_url" {
 }
 
 source "qemu" "debian" {
+  cpus             = var.cpus
+  memory           = var.memory
   disk_compression = true
   disk_image       = true
   disk_size        = "16G"
@@ -106,7 +120,7 @@ build {
   # cloud-init may still be running when we start executing scripts
   # To avoid race conditions, make sure cloud-init is done first
   provisioner "shell" {
-    execute_command   = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -S -E sh -eux '{{ .Path }}'"
     scripts = [
       "../scripts/cloud-init-wait.sh",
     ]
