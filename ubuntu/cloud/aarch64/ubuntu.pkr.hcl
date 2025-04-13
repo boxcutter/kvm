@@ -24,7 +24,17 @@ variable "ssh_password" {
 
 variable "vm_name" {
   type    = string
-  default = "ubuntu-22.04-aarch64"
+  default = "ubuntu-24.04-aarch64"
+}
+
+variable "iso_checksum" {
+  type    = string
+  default = "file:http://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS"
+}
+
+variable "iso_url" {
+  type    = string
+  default = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
 }
 
 source "file" "user_data" {
@@ -52,16 +62,6 @@ build {
   provisioner "shell-local" {
     inline = ["genisoimage -output boot-${var.vm_name}/cidata.iso -input-charset utf-8 -volid cidata -joliet -r boot-${var.vm_name}/user-data boot-${var.vm_name}/meta-data"]
   }
-}
-
-variable "iso_checksum" {
-  type    = string
-  default = "file:http://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS"
-}
-
-variable "iso_url" {
-  type    = string
-  default = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
 }
 
 source "qemu" "ubuntu" {
