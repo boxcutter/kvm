@@ -89,7 +89,7 @@ source "qemu" "debian" {
   machine_type      = "virt,gic-version=max"
   net_device        = "virtio-net"
   disk_interface    = "virtio"
-  efi_boot          = var.efi_boot
+  efi_boot          = true
   efi_firmware_code = "/usr/share/AAVMF/AAVMF_CODE.fd"
   efi_firmware_vars = "/usr/share/AAVMF/AAVMF_VARS.fd"
 }
