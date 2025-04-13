@@ -71,12 +71,12 @@ build {
 
 variable "iso_checksum" {
   type    = string
-  default = "file:https://cdn.amazonlinux.com/os-images/2.0.20240610.1/kvm/SHA256SUMS"
+  default = "file:https://cdn.amazonlinux.com/al2023/os-images/2023.7.20250331.0/kvm/SHA256SUMS"
 }
 
 variable "iso_url" {
   type    = string
-  default = "https://cdn.amazonlinux.com/os-images/2.0.20240610.1/kvm/amzn2-kvm-2.0.20240610.1-x86_64.xfs.gpt.qcow2"
+  default = "https://cdn.amazonlinux.com/al2023/os-images/2023.7.20250331.0/kvm/al2023-kvm-2023.7.20250331.0-kernel-6.1-x86_64.xfs.gpt.qcow2"
 }
 
 source "qemu" "amazonlinux" {
