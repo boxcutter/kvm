@@ -69,7 +69,7 @@ source "qemu" "oracle-linux" {
   disk_image       = true
   disk_size        = "30G"
   format           = "qcow2"
-  headless         = var.headles
+  headless         = var.headless
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   machine_type     = "virt,gic-version=max"
