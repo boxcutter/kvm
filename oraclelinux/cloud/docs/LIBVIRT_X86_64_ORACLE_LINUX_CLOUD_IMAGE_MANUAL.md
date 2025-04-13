@@ -61,7 +61,7 @@ virt-install \
   --boot uefi \
   --memory 4096 \
   --vcpus 2 \
-  --os-variant rocky9 \
+  --os-variant ol9.4 \
   --disk /var/lib/libvirt/images/oraclelinux-9.qcow2,bus=virtio \
   --disk /var/lib/libvirt/boot/oraclelinux-9-cloud-init.iso,device=cdrom \
   --network network=default,model=virtio \
