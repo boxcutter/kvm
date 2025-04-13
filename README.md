@@ -42,10 +42,13 @@ Prequisites:
 In the root of this repo there are directories with examples for the following
 distros:
 
-- `centos`
-- `debian`
-- `oraclinux`
-- `ubuntu`
+- [almalinux/cloud](almalinux/cloud)
+- [amazonlinux/cloud](amazonlinux/cloud)
+- [centos/cloud](centos/cloud)
+- [debian/cloud](debian/cloud)
+- [oraclelinux/cloud](oraclelinux/cloud)
+- [rockylinux/cloud](rockylinux/cloud)
+- [ubuntu/cloud](ubuntu/cloud)
 
 Each distro directory has a subdirectory for each processor architecture. You'll
 want to make each directory the current directory when run Hashcirop packer
