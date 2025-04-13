@@ -7,6 +7,11 @@ packer {
   }
 }
 
+variable "headless" {
+  type    = bool
+  default = true
+}
+
 variable "ssh_username" {
   type    = string
   default = "packer"
@@ -51,12 +56,12 @@ build {
 
 variable "iso_checksum" {
   type    = string
-  default = "1f4e20190e87c76e8c3b4a9e15e660972386cbfa4f128e5cdcd8faa43a713d44"
+  default = "0dfbae649781c801f8dc873a771a689d1bc63f22b8aa57e6d0a601b64ef32b1f"
 }
 
 variable "iso_url" {
   type    = string
-  default = "https://yum.oracle.com/templates/OracleLinux/OL9/u4/aarch64/OL9U4_aarch64-kvm-cloud-b90.qcow2"
+  default = "https://yum.oracle.com/templates/OracleLinux/OL9/u5/aarch64/OL9U5_aarch64-kvm-b126.qcow2"
 }
 
 source "qemu" "oracle-linux" {
@@ -64,6 +69,7 @@ source "qemu" "oracle-linux" {
   disk_image       = true
   disk_size        = "30G"
   format           = "qcow2"
+  headless         = var.headles
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   machine_type     = "virt,gic-version=max"
