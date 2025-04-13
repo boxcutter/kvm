@@ -56,12 +56,12 @@ build {
 
 variable "iso_checksum" {
   type    = string
-  default = "file:http://cloud-images.ubuntu.com/releases/22.04/release/SHA256SUMS"
+  default = "file:http://cloud-images.ubuntu.com/releases/24.04/release/SHA256SUMS"
 }
 
 variable "iso_url" {
   type    = string
-  default = "https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-arm64.img"
+  default = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-arm64.img"
 }
 
 source "qemu" "ubuntu" {
