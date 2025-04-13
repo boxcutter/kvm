@@ -27,6 +27,11 @@ $ sudo qemu-img resize \
 ```
 
 ```
+$ sudo apt-get install libosinfo-bin
+$ osinfo-query os
+```
+
+```
 virt-install \
   --connect qemu:///system \
   --name almalinux-9 \
