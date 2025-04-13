@@ -27,10 +27,6 @@ $ sudo qemu-img resize \
 ```
 
 ```
-osinfo-query os
-```
-
-```
 virt-install \
   --connect qemu:///system \
   --name almalinux-9 \
@@ -50,33 +46,6 @@ virt-install \
 virsh console almalinux-9
 
 # login with packer user
-
-# Make sure cloud-init is finished
-$ sudo cloud-init status --wait
-status: done
-
-# Check networking - you may notice that the network interface is down and
-# the name of the interface generated in netplan doesn't match. If not
-# correct, can regenerate with cloud-init
-$ ip --brief a
-
-# Check cloud-init version
-$ cloud-init --version
-
-# Regenerate only the network config
-$ sudo cloud-init clean --configs network
-$ sudo cloud-init init --local
-
-$ sudo reboot
-
-$ sudo cloud-init status
-status: done
-
-# Disable cloud-init
-$ sudo touch /etc/cloud/cloud-init.disabled
-
-$ sudo cloud-init status
-status: disabled
 
 $ sudo shutdown -h now
 ```
