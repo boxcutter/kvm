@@ -42,12 +42,9 @@ virt-install \
   --noautoconsole \
   --debug
 
-
 virsh console almalinux-9
 
 # login with packer user
-
-$ sudo shutdown -h now
 ```
 
 ```
