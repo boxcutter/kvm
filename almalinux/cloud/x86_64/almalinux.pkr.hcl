@@ -26,12 +26,12 @@ variable "efi_boot" {
 
 variable "efi_firmware_code" {
   type    = string
-  default = "/usr/share/OVMF/OVMF_CODE_4M.fd"
+  default = null
 }
 
 variable "efi_firmware_vars" {
   type    = string
-  default = "/usr/share/OVMF/OVMF_VARS_4M.fd"
+  default = null
 }
 
 variable "headless" {
@@ -111,7 +111,7 @@ source "qemu" "almalinux" {
   ssh_timeout      = "120s"
   ssh_username     = var.ssh_username
   vm_name          = "${var.vm_name}.qcow2"
-  efi_boot          = true
+  efi_boot         = var.efi_boot
   efi_firmware_code = var.efi_firmware_code
   efi_firmware_vars = var.efi_firmware_vars
 }
