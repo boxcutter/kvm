@@ -82,7 +82,7 @@ $ osinfo-query os
 ```
 virt-install \
   --connect qemu:///system \
-  --name oracle-linux-9 \
+  --name oracle-linux-9-bios \
   --memory 4096 \
   --vcpus 2 \
   --os-variant ol9-unknown \
@@ -93,12 +93,12 @@ virt-install \
   --import \
   --debug
 
-virsh console oracle-linux-9
+virsh console oracle-linux-9-bios
 
 # login with packer user
 ```
 
 ```
-$ virsh shutdown oracle-linux-9
-$ virsh undefine oracle-linux-9 --nvram --remove-all-storage
+$ virsh shutdown oracle-linux-9-bios
+$ virsh undefine oracle-linux-9-bios --nvram --remove-all-storage
 ```
