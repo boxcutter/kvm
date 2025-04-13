@@ -46,34 +46,6 @@ virt-install \
 virsh console debian-12
 
 # login with packer user
-
-# Make sure cloud-init is finished
-$ cloud-init status --wait
-status: done
-
-# Check networking - you may notice that the network interface is down and
-# the name of the interface generated in netplan doesn't match. If not 
-# correct, can regenerate with cloud-init
-
-# Check to make sure cloud-init is greater than 23.4
-$ cloud-init --version
-
-# Regenerate only the network config
-$ sudo cloud-init clean --configs network
-$ sudo cloud-init init --local
-
-# Disable cloud-init
-$ sudo touch /etc/cloud/cloud-init.disabled
-
-$ cloud-init status
-status: disabled
-
-$ sudo reboot
-
-# Verify image boots with the networking enabled
-$ ip --brief a
-lo               UNKNOWN        127.0.0.1/8 ::1/128 
-enp1s0           UP             10.63.46.11/22 metric 100 fe80::5054:ff:fe04:483/64
 ```
 
 ```
