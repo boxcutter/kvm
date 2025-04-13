@@ -7,6 +7,11 @@ packer {
   }
 }
 
+variable "headless" {
+  type    = bool
+  default = true
+}
+
 variable "ssh_username" {
   type    = string
   default = "packer"
@@ -64,6 +69,7 @@ source "qemu" "centos" {
   disk_image       = true
   disk_size        = "30G"
   format           = "qcow2"
+  headless         = var.headless
   iso_checksum     = var.iso_checksum
   iso_url          = var.iso_url
   machine_type     = "virt,gic-version=max"
