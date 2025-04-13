@@ -7,21 +7,6 @@ packer {
   }
 }
 
-variable "efi_boot" {
-  type    = bool
-  default = false
-}
-
-variable "efi_firmware_code" {
-  type    = string
-  default = null
-}
-
-variable "efi_firmware_vars" {
-  type    = string
-  default = null
-}
-
 variable "headless" {
   type    = bool
   default = true
