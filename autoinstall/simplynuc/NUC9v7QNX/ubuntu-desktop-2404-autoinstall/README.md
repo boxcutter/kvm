@@ -6,7 +6,7 @@ d7fe3d6a0419667d2f8eff12796996328daa2d4f90cd9f87aa9371b362f987bf  ubuntu-24.04.2
 docker pull docker.io/boxcutter/ubuntu-autoinstall
 docker run -it --rm \
   --mount type=bind,source="$(pwd)",target=/data \
-  docker.io/polymathrobotics/ubuntu-autoinstall \
+  docker.io/boxcutter/ubuntu-autoinstall \
     -a autoinstall.yaml \
     -g grub.cfg \
     -i \
