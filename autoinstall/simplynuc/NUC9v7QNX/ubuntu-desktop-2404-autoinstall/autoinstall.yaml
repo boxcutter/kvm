@@ -1,0 +1,59 @@
+#cloud-config
+autoinstall:
+  version: 1
+  network:
+    version: 2
+    ethernets:
+      # Intel I219-LM interface that supports vPro/AMT pass-through
+      eno1:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      # Intel I210-AT standalone gigabit ethernet
+      enp113s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      wlp4s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces:
+          - eno1
+        dhcp4: true
+        dhcp6: false
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+  ssh:
+    install-server: true
+    allow-pw: true
+  late-commands:
+    # Because we're using preserve_hostname to allow manual setting
+    # of the hostname, set an initial hostname manually
+    - echo robot00 > /target/etc/hostname
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
+    - curtin in-target -- update-grub
+  user-data:  # cloud-init starts here
+    preserve_hostname: true
+    users:
+      - name: automat
+        uid: 63112
+        primary_group: users
+        groups: users
+        shell: /bin/bash
+        plain_text_passwd: superseekret
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: false
+        ssh_authorized_keys:
+          # taylor
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy9cJcJl8oN6bRtcBc4RZq8f/T6P1AFR3YS1YRYi5YY sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGTw44QBehDXY6ebitrYydyAAhDFLBSkQ59RovcVsvX joan
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMWwrOVfOWfax6HR4Y+Mg01jT9No2zXHqkATnqwHuFKU emily
+    chpasswd: {expire: false}
+    ssh_pwauth: true
