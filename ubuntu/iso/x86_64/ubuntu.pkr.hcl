@@ -7,6 +7,11 @@ packer {
   }
 }
 
+variable "headless" {
+  type        = bool
+  default     = true
+}
+
 variable "ssh_username" {
   description = "The username to connect to SSH with."
   type        = string
@@ -55,6 +60,10 @@ autoinstall:
         apt-get install -y efibootmgr
         efibootmgr -o $(efibootmgr | sed -n 's/Boot\(.*\)\* ubuntu/\1/p')
       fi
+    # Configure grub to use serial console for display
+    - curtin in-target -- sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200n8 systemd.wants=serial-getty@ttyS0"/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console"/' /etc/default/grub
+    - curtin in-target -- update-grub
 EOF
   target  = "${var.http_directory}/user-data"
 }
@@ -127,7 +136,7 @@ source "qemu" "ubuntu" {
   disk_size         = "16G"
   disk_compression  = true
   format            = "qcow2"
-  headless          = false
+  headless          = var.headless
   http_directory    = var.http_directory
   iso_checksum      = var.iso_checksum
   iso_url           = var.iso_url
@@ -166,6 +175,9 @@ build {
     scripts = [
       "../scripts/disable-updates.sh",
       "../scripts/qemu.sh",
+      "../scripts/clear-machine-information.sh",
+      "../scripts/enable-cloud-init.sh",
+      "../scripts/reconfigure-cloud-init.sh"
     ]
   }
 }
