@@ -14,9 +14,15 @@ docker run -it --rm \
   docker.io/boxcutter/ubuntu-autoinstall \
     -a autoinstall.yaml \
     -g grub.cfg \
-    -i \
     -s ubuntu-24.04.3-live-server-amd64.iso \
     -d ubuntu-24.04.3-live-server-amd64-autoinstall.iso
+
+# Verify that the autoinstall is located in /nocloud
+$ isoinfo -R -i \
+    ubuntu-24.04.3-live-server-amd64-autoinstall.iso -f | grep -i nocloud
+/nocloud
+/nocloud/meta-data
+/nocloud/user-data
 ```
 
 ## Testing the autoinstall in a VM
@@ -45,7 +51,7 @@ virt-install \
 
 # To view install. Once it completes it will stop the vm:
 $ virsh console ubuntu-server-2404
-$ virsh-viewer ubuntu-server-2404
+$ virt-viewer ubuntu-server-2404
 ```
 
 ## If you need additional drivers
