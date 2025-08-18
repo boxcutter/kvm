@@ -14,15 +14,14 @@ docker run -it --rm \
   docker.io/boxcutter/ubuntu-autoinstall \
     -a autoinstall.yaml \
     -g grub.cfg \
+    --config-root \
     -s ubuntu-24.04.3-live-server-amd64.iso \
     -d ubuntu-24.04.3-live-server-amd64-autoinstall.iso
 
-# Verify that the autoinstall is located in /nocloud
+# Verify that the autoinstall is located in root
 $ isoinfo -R -i \
-    ubuntu-24.04.3-live-server-amd64-autoinstall.iso -f | grep -i nocloud
-/nocloud
-/nocloud/meta-data
-/nocloud/user-data
+    ubuntu-24.04.3-desktop-autoinstall.iso -f | grep -i autoinstall
+/autoinstall.yaml
 ```
 
 ## Testing the autoinstall in a VM
@@ -32,7 +31,6 @@ sudo cp ubuntu-24.04.3-live-server-amd64-autoinstall.iso \
   /var/lib/libvirt/iso/ubuntu-server-2404-autoinstall.iso
 
 virsh vol-create-as default ubuntu-server-2404.qcow2 50G --format qcow2
-# virsh vol-delete --pool default ubuntu-server-2404.qcow2
 
 virt-install \
   --connect qemu:///system \
@@ -52,20 +50,8 @@ virt-install \
 # To view install. Once it completes it will stop the vm:
 $ virsh console ubuntu-server-2404
 $ virt-viewer ubuntu-server-2404
-```
 
-## If you need additional drivers
-
-```bash
-# First try to install the kernel modules package
-sudo apt-get update
-sudo apt-get install linux-modules-$(uname -r)
-
-# sudo modprobe <kernel_module>
-
-# If that still doesn't work, try installing the full generic kernel image
-sudo apt-get install linux-image-generic
-# linux-generic-hwe-24.04
-# sudo apt install linux-lowlatency
-sudo reboot
+# Start the VM again to verify everything looks good
+$ virsh start ubuntu-server-2404
+$ virsh console ubuntu-server-2404
 ```
