@@ -37,7 +37,7 @@ autoinstall:
     - curtin in-target -- sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 console=ttyS0,115200n8 systemd.wants=serial-getty@ttyS0"/' /etc/default/grub
     - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console serial"/' /etc/default/grub
     - curtin in-target -- update-grub
-    # See the already ran marker for gnome-initial-setup so new users inherit
+    # Seed the already ran marker for gnome-initial-setup so new users inherit
     - curtin in-target -- mkdir -p /etc/skel/.config
     - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
   user-data: # cloud-init starts here
