@@ -90,6 +90,7 @@ autoinstall:
   user-data:
     preserve_hostname: true
     users:
+      # Temporary user used for initial bootstrapping with CM tool
       - name: autobot
         uid: 63112
         primary_group: users
@@ -101,9 +102,7 @@ autoinstall:
         ssh_authorized_keys:
           # taylor
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy9cJcJl8oN6bRtcBc4RZq8f/T6P1AFR3YS1YRYi5YY sheila
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGTw44QBehDXY6ebitrYydyAAhDFLBSkQ59RovcVsvX joan
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMWwrOVfOWfax6HR4Y+Mg01jT9No2zXHqkATnqwHuFKU emily
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
     chpasswd: {expire: false}
     ssh_pwauth: true
     runcmd:
