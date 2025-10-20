@@ -1,0 +1,112 @@
+#cloud-config
+autoinstall:
+  version: 1
+  network:
+    version: 2
+    ethernets:
+      eno1:
+        dhcp4: true
+        dhcp6: false
+    wifis: {}
+  storage:
+    config:
+    - transport: pcie
+      preserve: true
+      id: nvme-controller-nvme2
+      type: nvme_controller
+    - ptable: gpt
+      serial: KINGSTON_SNVS2000G_50026B768596C4FC_1
+      wwn: eui.00000000000000000026b768596c4fc5
+      nvme_controller: nvme-controller-nvme2
+      path: /dev/nvme2n1
+      preserve: true
+      name: ''
+      grub_device: false
+      id: disk-nvme2n1
+      type: disk
+    - device: disk-nvme2n1
+      size: 1127219200
+      flag: boot
+      number: 1
+      preserve: true
+      grub_device: true
+      offset: 1048576
+      partition_type: c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+      path: /dev/nvme2n1p1
+      uuid: 7220f12b-2a96-41b2-8d94-93c19a41ea09
+      id: partition-nvme2n1p1
+      type: partition
+    - device: disk-nvme2n1
+      size: 1999269527552
+      wipe: superblock
+      number: 2
+      preserve: false
+      offset: 1128267776
+      path: /dev/nvme2n1p2
+      id: partition-0
+      type: partition
+    - fstype: ext4
+      volume: partition-0
+      preserve: false
+      id: format-0
+      type: format
+    - path: /
+      device: format-0
+      id: mount-0
+      type: mount
+    - fstype: vfat
+      volume: partition-nvme2n1p1
+      preserve: true
+      id: format-partition-nvme2n1p1
+      type: format
+    - path: /boot/efi
+      device: format-partition-nvme2n1p1
+      id: mount-1
+      type: mount
+  snap:
+    commands:
+      - snap set system reporting=off
+      - snap set system metrics_collection=off
+  timezone: America/New_York
+  keyboard:
+    layout: us
+    toggle: null
+    variant: ''
+  locale: en_US.UTF-8
+  identity:
+    hostname: pxe
+    password: $6$lrdcNsI7YyFHUyJy$8aiGLz3YNGIYS1Tje1pKoBpsl6Pc5BIvALB7jcgiyWGPIULAKGGz2EW9IzPVh2yS6X2RuOSHA0B2Rn8lG48Db/
+    realname: autobot
+    username: autobot
+  kernel:
+    package: linux-generic-hwe-24.04
+  ssh:
+    install-server: true
+    allow-pw: true
+  late-commands:
+    # For any future users
+    - mkdir -p /target/etc/skel/.config
+    - touch /target/etc/skel/.config/gnome-initial-setup-done
+  user-data:
+    preserve_hostname: true
+    users:
+      - name: autobot
+        uid: 63112
+        primary_group: users
+        groups: users
+        shell: /bin/bash
+        plain_text_passwd: superseekret
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: false
+        ssh_authorized_keys:
+          # taylor
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy9cJcJl8oN6bRtcBc4RZq8f/T6P1AFR3YS1YRYi5YY sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGTw44QBehDXY6ebitrYydyAAhDFLBSkQ59RovcVsvX joan
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMWwrOVfOWfax6HR4Y+Mg01jT9No2zXHqkATnqwHuFKU emily
+    chpasswd: {expire: false}
+    ssh_pwauth: true
+    runcmd:
+      # Ensure the marker exists for the pre-created user before first login
+      - [ bash, -lc, "install -d -m 700 -o autobot -g autobot /home/autobot/.config" ]
+      - [ bash, -lc, "touch /home/autobot/.config/gnome-initial-setup-done && chown autobot:autobot /home/autobot/.config/gnome-initial-setup-done" ]
