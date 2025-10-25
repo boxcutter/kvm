@@ -40,22 +40,56 @@ autoinstall:
     # Seed the already ran marker for gnome-initial-setup so new users inherit
     - curtin in-target -- mkdir -p /etc/skel/.config
     - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
+    # --- Disable automatic APT updates / unattended-upgrades ---
+    - curtin in-target --target=/target -- bash -lc "printf '%s\n' 'APT::Periodic::Update-Package-Lists \"0\";' 'APT::Periodic::Unattended-Upgrade \"0\";' > /etc/apt/apt.conf.d/20auto-upgrades"
+    - curtin in-target --target=/target -- systemctl disable --now unattended-upgrades.service apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer
+    # Prevent release-upgrade prompts
+    - curtin in-target --target=/target -- sed -i 's/^Prompt=.*/Prompt=never/' /etc/update-manager/release-upgrades
+
+    # (Optional) Tame Snap auto-refresh to a tiny maintenance window
+    # NOTE: snap cannot be fully disabled permanently; this narrows its window.
+    - curtin in-target --target=/target -- snap set system refresh.timer=sun00:00-00:15
+        # --- Disable GNOME screen blanking & locking system-wide via dconf ---
+    - curtin in-target --target=/target -- bash -lc 'mkdir -p /etc/dconf/db/local.d /etc/dconf/db/local.d/locks'
+    - curtin in-target --target=/target -- bash -lc "cat >/etc/dconf/db/local.d/00-no-blank <<'EOF'
+[org/gnome/desktop/session]
+# 0 seconds = never blank
+idle-delay=uint32 0
+
+[org/gnome/desktop/screensaver]
+# don’t lock the screen
+lock-enabled=false
+
+[org/gnome/settings-daemon/plugins/power]
+# don’t auto-sleep when idle
+sleep-inactive-ac-type='nothing'
+sleep-inactive-battery-type='nothing'
+EOF"
+    - curtin in-target --target=/target -- bash -lc "cat >/etc/dconf/db/local.d/locks/00-no-blank <<'EOF'
+/org/gnome/desktop/session/idle-delay
+/org/gnome/desktop/screensaver/lock-enabled
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type
+EOF"
+    - curtin in-target --target=/target -- dconf update
+    
   user-data: # cloud-init starts here
     preserve_hostname: true
+    chpasswd: { expire: false }
+    ssh_pwauth: true
     users:
-      - name: automat
+      - name: autobot
         uid: 63112
         primary_group: users
         groups: users
         shell: /bin/bash
+        # Testing with a plaintext password
         plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash using 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01J$ajF/6iHYX1Ef2pF5mPi..zBFiU4Qzvnif.hT2MB.dZ9mSx6txdPiz..."
         sudo: ALL=(ALL) NOPASSWD:ALL
         lock_passwd: false
         ssh_authorized_keys:
           # taylor
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy9cJcJl8oN6bRtcBc4RZq8f/T6P1AFR3YS1YRYi5YY sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGTw44QBehDXY6ebitrYydyAAhDFLBSkQ59RovcVsvX joan
-
-    chpasswd: { expire: false }
-    ssh_pwauth: true
