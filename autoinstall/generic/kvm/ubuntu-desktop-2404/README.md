@@ -9,34 +9,34 @@ docker pull docker.io/boxcutter/ubuntu-autoinstall
 docker run -it --rm \
   --mount type=bind,source="$(pwd)",target=/data \
   docker.io/boxcutter/ubuntu-autoinstall \
-    -a autoinstall.yaml \
-    -g grub.cfg \
+    --autoinstall autoinstall.yaml \
+    --grub grub.cfg \
     --config-root \
-    -s ubuntu-24.04.3-desktop-amd64.iso \
-    -d ubuntu-24.04.3-desktop-autoinstall.iso
+    --source ubuntu-24.04.3-desktop-amd64.iso \
+    --destination ubuntu-24.04.3-desktop-amd64-autoinstall.iso
 
+$ sudo apt-get update
+$ sudo apt-get install genisoimage
 $ isoinfo -R -i \
-    ubuntu-24.04.3-desktop-autoinstall.iso -f | grep -i autoinstall
+    ubuntu-24.04.3-desktop-amd64-autoinstall.iso -f | grep -i autoinstall
 /autoinstall.yaml
 ```
 
-# Testing the autoinstall in a VM
+# Testing the autoinstall headlessly in a VM using VNC
 
 ```
 sudo cp ubuntu-24.04.3-desktop-autoinstall.iso \
   /var/lib/libvirt/iso/ubuntu-desktop-2404-autoinstall.iso
 
-virsh vol-create-as default ubuntu-desktop-2404.qcow2 50G --format qcow2
-
 virt-install \
   --connect qemu:///system \
   --name ubuntu-desktop-2404 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-desktop-2404-autoinstall.iso \
+  --cdrom /var/lib/libvirt/iso/ubuntu-desktop-2404-amd64-autoinstall.iso \
+  --disk pool=default,format=qcow2,bus=virtio,siz=60G \
   --memory 4096 \
   --vcpus 2 \
   --os-variant ubuntu24.04 \
-  --disk vol=default/ubuntu-desktop-2404.qcow2,bus=virtio \
   --network network=host-network,model=virtio \
   --graphics vnc,listen=0.0.0.0,password=foobar \
   --video qxl \
@@ -52,4 +52,34 @@ virsh dumpxml ubuntu-desktop-2404 | grep "graphics type='vnc'"
 ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 # Use a vnc client to connect to `vnc://<host_ip>:5900`
 # When the install is complete the VM will be shut down
+
+virsh destroy ubuntu-desktop-2404
+virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
+```
+
+# Testing the autoinstall in a desktop GUI on the same machine
+
+```
+sudo cp ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
+  /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso
+
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-desktop-2404 \
+  --boot uefi \
+  --cdrom /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
+  --disk pool=default,format=qcow2,bus=virtio,size=60 \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu24.04 \
+  --network network=host-network,model=virtio \
+  --graphics spice \
+  --video qxl \
+  --noautoconsole \
+  --debug
+
+virt-viewer ubuntu-desktop-2404
+
+virsh destroy ubuntu-desktop-2404
+virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
 ```
