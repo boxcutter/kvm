@@ -78,6 +78,7 @@ EOF"
     chpasswd: { expire: false }
     ssh_pwauth: true
     users:
+      # Temporary user for bootstrapping
       - name: autobot
         uid: 63112
         primary_group: users
