@@ -16,14 +16,16 @@ docker run -it --rm \
 
 ```
 docker container run --rm --interactive --tty \
-  --mount type=bind,source="$(pwd)",target=/share \
+  --mount type=bind,source="$(pwd)/test",target=/share \
   docker.io/boxcutter/cinc-auditor exec example \
     --key-files /Users/taylor/.ssh/id_ed25519 \
     --target ssh://autobot@10.63.33.125
 
 docker container run --rm --interactive --tty \
   --mount type=bind,source="$(pwd)",target=/share \
-  docker.io/boxcutter/cinc-auditor exec test \
+  docker.io/boxcutter/cinc-auditor exec /share/test \
+    --no-create-lockfile \
+    --no-distinct-exit \
     --password superseekret \
-    --target ssh://autobot@10.63.33.125
+    --target ssh://autobot@10.63.33.171
 ```
