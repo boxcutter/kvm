@@ -13,3 +13,17 @@ docker run -it --rm \
   --loopback loopback.cfg \
   --config-root
 ```
+
+```
+docker container run --rm --interactive --tty \
+  --mount type=bind,source="$(pwd)",target=/share \
+  docker.io/boxcutter/cinc-auditor exec example \
+    --key-files /Users/taylor/.ssh/id_ed25519 \
+    --target ssh://autobot@10.63.33.125
+
+docker container run --rm --interactive --tty \
+  --mount type=bind,source="$(pwd)",target=/share \
+  docker.io/boxcutter/cinc-auditor exec test \
+    --password superseekret \
+    --target ssh://autobot@10.63.33.125
+```

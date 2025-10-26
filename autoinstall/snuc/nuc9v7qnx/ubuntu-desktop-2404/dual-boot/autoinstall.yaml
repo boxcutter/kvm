@@ -3,11 +3,23 @@ autoinstall:
   version: 1
   network:
     version: 2
+    renderer: NetworkManager
     ethernets:
       eno1:
+        dhcp4: false
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces:
+          - eno1
         dhcp4: true
         dhcp6: false
-    wifis: {}
+        accept-ra: false
+        link-local: []
+        parameters:
+          stp: false
+          forward-delay: 0
   storage:
     config:
     - transport: pcie
@@ -63,31 +75,38 @@ autoinstall:
       device: format-partition-nvme2n1p1
       id: mount-1
       type: mount
-  snap:
-    commands:
-      - snap set system reporting=off
-      - snap set system metrics_collection=off
   timezone: America/New_York
   keyboard:
     layout: us
-    toggle: null
-    variant: ''
-  locale: en_US.UTF-8
-  identity:
-    hostname: pxe
-    password: $6$lrdcNsI7YyFHUyJy$8aiGLz3YNGIYS1Tje1pKoBpsl6Pc5BIvALB7jcgiyWGPIULAKGGz2EW9IzPVh2yS6X2RuOSHA0B2Rn8lG48Db/
-    realname: autobot
-    username: autobot
   kernel:
-    package: linux-generic-hwe-24.04
+    flavor: hwe
   ssh:
     install-server: true
     allow-pw: true
+  packages:
+    - openssh-server
   late-commands:
-    # For any future users
-    - mkdir -p /target/etc/skel/.config
-    - touch /target/etc/skel/.config/gnome-initial-setup-done
-  user-data:
+    # Because we're using preserve_hostname to allow manual setting of the
+    # hostname, set an initial hostname manually - the identity block requires
+    # a username and it doesn't support flexible enough configuration
+    - curtin in-target -- sh -c 'echo pxe > /etc/hostname'
+    # Seed the already ran marker for gnome-initial-setup so new users inherit
+    - curtin in-target -- mkdir -p /etc/skel/.config
+    - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
+    # Disable unattended upgrades
+    - curtin in-target -- systemctl disable apt-daily.timer
+    - curtin in-target -- systemctl disable apt-daily-upgrade.timer
+    - curtin in-target -- systemctl mask apt-daily.service
+    - curtin in-target -- systemctl mask apt-daily-upgrade.service
+    # Configure unattended-upgrades to not run
+    - curtin in-target -- sh -c 'echo "APT::Periodic::Update-Package-Lists \"0\";" > /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'echo "APT::Periodic::Unattended-Upgrade \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'echo "APT::Periodic::Download-Upgradeable-Packages \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'echo "APT::Periodic::AutocleanInterval \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
+    # Disable update-notifier
+    - curtin in-target -- systemctl disable update-notifier-download.timer || true
+    - curtin in-target -- systemctl disable update-notifier-motd.timer || true
+  user-data: # cloud-init starts here
     preserve_hostname: true
     users:
       # Temporary user used for initial bootstrapping with CM tool
@@ -96,16 +115,44 @@ autoinstall:
         primary_group: users
         groups: users
         shell: /bin/bash
+        # Testing with a plaintext password
         plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash using 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01J$ajF/6iHYX1Ef2pF5mPi..zBFiU4Qzvnif.hT2MB.dZ9mSx6txdPiz..."
         sudo: ALL=(ALL) NOPASSWD:ALL
         lock_passwd: false
         ssh_authorized_keys:
           # taylor
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
     chpasswd: {expire: false}
     ssh_pwauth: true
+    # DBus doesn't appear to be active in late-commands, so wait to configure
+    # power saving defaults until cloud-init time, plus cloud-init has
+    # a nice module to write out files
+    write_files:
+      # Configure system-wide defaults to disable screen blanking
+      - path: /etc/dconf/db/local.d/00-screensaver
+        content: |
+          [org/gnome/desktop/session]
+          idle-delay=uint32 0
+
+          [org/gnome/desktop/screensaver]
+          lock-enabled=false
+          idle-activation-enabled=false
+
+          [org/gnome/settings-daemon/plugins/power]
+          sleep-inactive-ac-type="nothing"
+          sleep-inactive-battery-type="nothing"
+          idle-dim=false
+      # Configure system to refer to user settings in ~/.config/dconf/user
+      # database first, then look for system-wide defaults in
+      # /etc/dconf/db/local
+      - path: /etc/dconf/profile/user
+        content: |
+          user-db:user
+          system-db:local
     runcmd:
-      # Ensure the marker exists for the pre-created user before first login
-      - [ bash, -lc, "install -d -m 700 -o autobot -g autobot /home/autobot/.config" ]
-      - [ bash, -lc, "touch /home/autobot/.config/gnome-initial-setup-done && chown autobot:autobot /home/autobot/.config/gnome-initial-setup-done" ]
+      # Update the GNOME system database with the changes to /etc/dconf
+      # above 
+      - dconf update
