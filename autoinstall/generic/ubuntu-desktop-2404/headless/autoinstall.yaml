@@ -1,0 +1,91 @@
+#cloud-config
+autoinstall:
+  version: 1
+  # https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2097769
+  network:
+    version: 2
+    ethernets:
+      enp1s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces: [enp1s0]
+        dhcp4: true
+        dhcp6: false
+        accept-ra: false
+        link-local: []
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+  timezone: UTC
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  packages:
+    - qemu-guest-agent
+  ssh:
+    install-server: yes
+    allow-pw: yes
+  late-commands:
+    # Because we're using preserve_hostname to allow manual setting of the
+    # hostname, set an initial hostname manually - the identity block requires
+    # a username and it doesn't support flexible enough configuration
+    # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
+    # commands within a shell that need redirection.
+    - curtin in-target -- sh -c 'echo generic > /etc/hostname'
+    # Seed the already ran marker for gnome-initial-setup so new users inherit
+    - curtin in-target -- mkdir -p /etc/skel/.config
+    - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
+    # Add serial console
+    - curtin in-target -- sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 console=ttyS0,115200n8 systemd.wants=serial-getty@ttyS0"/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console"/' /etc/default/grub
+    - curtin in-target -- update-grub
+  user-data: # cloud-init starts here
+    preserve_hostname: true
+    chpasswd: { expire: false }
+    ssh_pwauth: true
+    users:
+      # Temporary user for bootstrapping
+      - name: autobot
+        uid: 63112
+        primary_group: users
+        groups: users
+        shell: /bin/bash
+        # Testing with a plaintext password
+        plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash using 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01J$ajF/6iHYX1Ef2pF5mPi..zBFiU4Qzvnif.hT2MB.dZ9mSx6txdPiz..."
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: false
+        ssh_authorized_keys:
+          # taylor
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
+    write_files:
+      # Configure system-wide defaults to disable screen blanking
+      - path: /etc/dconf/db/local.d/00-screensaver
+        content: |
+          [org/gnome/desktop/session]
+          idle-delay=uint32 0
+
+          [org/gnome/desktop/screensaver]
+          lock-enabled=false
+          idle-activation-enabled=false
+
+          [org/gnome/settings-daemon/plugins/power]
+          sleep-inactive-ac-type="nothing"
+          sleep-inactive-battery-type="nothing"
+          idle-dim=false
+      # Configure system to refer to user settings in ~/.config/dconfig/user
+      # database first, then look for system-wide defaults in
+      # /etc/dconf/db/local
+      - path: /etc/dconf/profile/user
+        content: |
+          user-db:user
+          system-db:local
+    runcmd:
+      # Update the GNOME system databases with the changes to /etc/dconf
+      - dconf update

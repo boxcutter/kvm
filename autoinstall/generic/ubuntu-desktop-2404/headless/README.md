@@ -15,6 +15,7 @@ docker run -it --rm \
     --source ubuntu-24.04.3-desktop-amd64.iso \
     --destination ubuntu-24.04.3-desktop-amd64-autoinstall.iso
 
+# Verify that /autoinstall.yaml exists
 $ sudo apt-get update
 $ sudo apt-get install genisoimage
 $ isoinfo -R -i \
@@ -25,15 +26,15 @@ $ isoinfo -R -i \
 # Testing the autoinstall headlessly in a VM using VNC
 
 ```
-sudo cp ubuntu-24.04.3-desktop-autoinstall.iso \
-  /var/lib/libvirt/iso/ubuntu-desktop-2404-autoinstall.iso
+sudo cp ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
+  /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso
 
 virt-install \
   --connect qemu:///system \
   --name ubuntu-desktop-2404 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-desktop-2404-amd64-autoinstall.iso \
-  --disk pool=default,format=qcow2,bus=virtio,siz=60G \
+  --cdrom /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
+  --disk pool=default,format=qcow2,bus=virtio,size=60 \
   --memory 4096 \
   --vcpus 2 \
   --os-variant ubuntu24.04 \
@@ -52,33 +53,6 @@ virsh dumpxml ubuntu-desktop-2404 | grep "graphics type='vnc'"
 ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 # Use a vnc client to connect to `vnc://<host_ip>:5900`
 # When the install is complete the VM will be shut down
-
-virsh destroy ubuntu-desktop-2404
-virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
-```
-
-# Testing the autoinstall in a desktop GUI on the same machine
-
-```
-sudo cp ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
-  /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso
-
-virt-install \
-  --connect qemu:///system \
-  --name ubuntu-desktop-2404 \
-  --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
-  --disk pool=default,format=qcow2,bus=virtio,size=60 \
-  --memory 4096 \
-  --vcpus 2 \
-  --os-variant ubuntu24.04 \
-  --network network=host-network,model=virtio \
-  --graphics spice \
-  --video qxl \
-  --noautoconsole \
-  --debug
-
-virt-viewer ubuntu-desktop-2404
 
 virsh destroy ubuntu-desktop-2404
 virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
