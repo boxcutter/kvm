@@ -58,3 +58,17 @@ ip addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 virsh destroy ubuntu-desktop-2404
 virsh undefine ubuntu-desktop-2404 --nvram --remove-all-storage
 ```
+
+```
+virsh snapshot-create-as \
+  --domain ubuntu-desktop-2404 \
+  --name clean \
+  --description "Initial install"
+
+virsh snapshot-list ubuntu-desktop-2404
+virsh snapshot-revert ubuntu-desktop-2404
+virsh snapshot-delete ubuntu-desktop-2404
+
+virsh shutdown ubuntu-desktop-2404
+virsh shutdown ubuntu-desktop-2404
+```
