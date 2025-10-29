@@ -1,12 +1,8 @@
-# Ubuntu Server 24.04 autoinstall
+#!/bin/bash
 
-## Preparing the ISO
+set -x
 
-```
-$ curl -LO \
-    https://releases.ubuntu.com/noble/ubuntu-24.04.3-live-server-amd64.iso
-$ shasum -a 256 ubuntu-24.04.3-live-server-amd64.iso
-c3514bf0056180d09376462a7a1b4f213c1d6e8ea67fae5c25099c6fd3d8274b  ubuntu-24.04.3-live-server-amd64.iso
+sudo rm ubuntu-24.04.3-live-server-amd64-autoinstall.iso
 
 docker pull docker.io/boxcutter/ubuntu-autoinstall
 docker run -it --rm \
@@ -18,15 +14,7 @@ docker run -it --rm \
     --source ubuntu-24.04.3-live-server-amd64.iso \
     --destination ubuntu-24.04.3-live-server-amd64-autoinstall.iso
 
-# Verify that the autoinstall is located in root
-$ isoinfo -R -i \
-    ubuntu-24.04.3-live-server-amd64-autoinstall.iso -f | grep -i autoinstall
-/autoinstall.yaml
-```
-
-## Testing the autoinstall in a VM
-
-```
+sudo rm /var/lib/libvirt/iso/ubuntu-24.04.3-live-server-amd64-autoinstall.iso
 sudo cp ubuntu-24.04.3-live-server-amd64-autoinstall.iso \
   /var/lib/libvirt/iso/ubuntu-24.04.3-live-server-amd64-autoinstall.iso
 
@@ -44,12 +32,3 @@ virt-install \
   --noautoconsole \
   --console pty,target_type=serial \
   --debug
-
-# To view install. Once it completes it will stop the vm:
-$ virsh console ubuntu-server-2404
-$ virt-viewer ubuntu-server-2404
-
-# Start the VM again to verify everything looks good
-$ virsh start ubuntu-server-2404
-$ virsh console ubuntu-server-2404
-```

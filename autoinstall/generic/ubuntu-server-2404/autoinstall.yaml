@@ -20,13 +20,21 @@ autoinstall:
     layout:
       name: lvm
       sizing-policy: all
-  timezone: "UTC"
+  timezone: UTC
   keyboard:
-    layout: "us"
+    layout: us
+  packages:
+    - qemu-guest-agent
   ssh:
     install-server: yes
     allow-pw: yes
   late-commands:
+    # Because we're using preserve_hostname to allow manual setting of the
+    # hostname, set an initial hostname manually - the identity block requires
+    # a username and it doesn't support flexible enough configuration
+    # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
+    # commands within a shell that need redirection.
+    - curtin in-target -- sh -c 'echo generic > /etc/hostname'
     # Configure grub to use serial console for display
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
@@ -34,21 +42,23 @@ autoinstall:
     - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console serial"/' /etc/default/grub
     - curtin in-target -- update-grub
   user-data: # cloud-init starts here
-    hostname: robot00
+    preserve_hostname: true
     users:
-      - name: automat
+      # Temporary user for bootstrapping
+      - name: autobot
         uid: 63112
         primary_group: users
         groups: users
         shell: /bin/bash
+        # Testing with a plaintext password
         plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash w/ 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01Jvnif.hT2MB.dZ9mSx6txdPiz..."
         sudo: ALL=(ALL) NOPASSWD:ALL
-        lock_passwd: False
+        lock_passwd: false
         ssh_authorized_keys:
           # taylor
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy9cJcJl8oN6bRtcBc4RZq8f/T6P1AFR3YS1YRYi5YY sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
-          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGTw44QBehDXY6ebitrYydyAAhDFLBSkQ59RovcVsvX joan
-
     chpasswd: { expire: false }
     ssh_pwauth: true
