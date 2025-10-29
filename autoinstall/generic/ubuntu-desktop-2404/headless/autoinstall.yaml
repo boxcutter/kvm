@@ -45,7 +45,7 @@ autoinstall:
     # a username and it doesn't support flexible enough configuration
     # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
     # commands within a shell that need redirection.
-    - curtin in-target -- sh -c 'echo generic > /etc/hostname'
+    - curtin in-target -- sh -c 'echo generic-desktop > /etc/hostname'
     # Seed the already ran marker for gnome-initial-setup so new users inherit
     - curtin in-target -- mkdir -p /etc/skel/.config
     - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
@@ -53,6 +53,14 @@ autoinstall:
     - curtin in-target -- sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 console=ttyS0,115200n8 systemd.wants=serial-getty@ttyS0"/' /etc/default/grub
     - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console"/' /etc/default/grub
     - curtin in-target -- update-grub
+    # Run updates at our own cadence
+    - curtin in-target -- bash -c 'systemctl stop apt-daily.timer apt-daily-upgrade.timer || true'
+    - curtin in-target -- bash -c 'systemctl disable apt-daily.timer apt-daily-upgrade.timer || true'
+    - curtin in-target -- bash -c 'systemctl mask apt-daily.service apt-daily-upgrade.service || true'
+    - curtin in-target -- bash -c 'sed -i "s/^APT::Periodic::Update-Package-Lists.*/APT::Periodic::Update-Package-Lists \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- bash -c 'sed -i "s/^APT::Periodic::UnattendedUpgrade.*/APT::Periodic::Unattended-Upgrade \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- bash -c 'snap refresh --hold || true'
+    - curtin in-target -- bash -c 'echo "Hidden=true" >> /etc/xdg/autostart/update-notifier.desktop'
   user-data: # cloud-init starts here
     preserve_hostname: true
     chpasswd:

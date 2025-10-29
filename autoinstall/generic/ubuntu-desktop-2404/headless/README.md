@@ -66,8 +66,8 @@ virsh snapshot-create-as \
   --description "Initial install"
 
 virsh snapshot-list ubuntu-desktop-2404
-virsh snapshot-revert ubuntu-desktop-2404
-virsh snapshot-delete ubuntu-desktop-2404
+virsh snapshot-revert ubuntu-desktop-2404 clean
+virsh snapshot-delete ubuntu-desktop-2404 clean
 
 virsh shutdown ubuntu-desktop-2404
 virsh shutdown ubuntu-desktop-2404
