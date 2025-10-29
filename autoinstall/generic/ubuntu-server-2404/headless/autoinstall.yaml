@@ -10,12 +10,11 @@ autoinstall:
         optional: true
     bridges:
       br0:
+        interfaces: [enp1s0]
         dhcp4: true
         dhcp6: false
         accept-ra: false
         link-local: []
-        interfaces:
-          - enp1s0
   storage:
     layout:
       name: lvm
@@ -23,6 +22,16 @@ autoinstall:
   timezone: UTC
   keyboard:
     layout: us
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        # http://archive.ubuntu.com/ubntu
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-archive-apt-proxy/ubuntu"
+          arches: [i386, amd64]
+        # http://ports.ubuntu.com/ubuntu-ports
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
+          arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
   packages:
     - qemu-guest-agent
   ssh:
@@ -34,7 +43,7 @@ autoinstall:
     # a username and it doesn't support flexible enough configuration
     # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
     # commands within a shell that need redirection.
-    - curtin in-target -- sh -c 'echo generic > /etc/hostname'
+    - curtin in-target -- sh -c 'echo generic-server > /etc/hostname'
     # Configure grub to use serial console for display
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
@@ -60,5 +69,6 @@ autoinstall:
           # taylor
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
-    chpasswd: { expire: false }
+    chpasswd:
+      expire: false
     ssh_pwauth: true

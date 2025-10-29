@@ -5,6 +5,7 @@
 ```
 $ curl -LO \
     https://releases.ubuntu.com/noble/ubuntu-24.04.3-live-server-amd64.iso
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/noble/ubuntu-24.04.3-live-server-amd64.iso
 $ shasum -a 256 ubuntu-24.04.3-live-server-amd64.iso
 c3514bf0056180d09376462a7a1b4f213c1d6e8ea67fae5c25099c6fd3d8274b  ubuntu-24.04.3-live-server-amd64.iso
 
@@ -52,4 +53,19 @@ $ virt-viewer ubuntu-server-2404
 # Start the VM again to verify everything looks good
 $ virsh start ubuntu-server-2404
 $ virsh console ubuntu-server-2404
+```
+
+```
+virsh snapshot-create-as \
+  --domain ubuntu-server-2404 \
+  --name clean \
+  --description "Initial install"
+
+virsh snapshot-list ubuntu-server-2404
+virsh snapshot-revert ubuntu-server-2404
+virsh snapshot-delete ubuntu-server-2404
+
+virsh shutdown ubuntu-server-2404
+virsh shutdown ubuntu-server-2404
+```
 ```
