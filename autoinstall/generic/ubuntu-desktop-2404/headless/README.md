@@ -2,6 +2,7 @@
 
 ```
 $ curl -LO https://releases.ubuntu.com/noble/ubuntu-24.04.3-desktop-amd64.iso
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/noble/ubuntu-24.04.3-desktop-amd64.iso
 $ shasum -a 256 ubuntu-24.04.3-desktop-amd64.iso
 faabcf33ae53976d2b8207a001ff32f4e5daae013505ac7188c9ea63988f8328  ubuntu-24.04.3-desktop-amd64.iso
 

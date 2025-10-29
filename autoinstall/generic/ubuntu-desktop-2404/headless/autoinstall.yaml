@@ -24,6 +24,16 @@ autoinstall:
   locale: en_US.UTF-8
   keyboard:
     layout: us
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        # http://archive.ubuntu.com/ubntu
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-archive-apt-proxy/ubuntu"
+          arches: [i386, amd64]
+        # http://ports.ubuntu.com/ubuntu-ports
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
+          arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
   packages:
     - qemu-guest-agent
   ssh:
@@ -45,7 +55,8 @@ autoinstall:
     - curtin in-target -- update-grub
   user-data: # cloud-init starts here
     preserve_hostname: true
-    chpasswd: { expire: false }
+    chpasswd:
+      expire: false
     ssh_pwauth: true
     users:
       # Temporary user for bootstrapping
