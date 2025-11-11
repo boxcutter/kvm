@@ -1,12 +1,25 @@
 #cloud-config
 autoinstall:
   version: 1
+  source:
+    search_drivers: true
+    id: ubuntu-desktop-minimal
+  # https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/2097769
   network:
     version: 2
-    renderer: NetworkManager
     ethernets:
+      # Intel I219-LM interface that supports vPro/AMT pass-through
       eno1:
         dhcp4: false
+        dhcp6: false
+        optional: true
+      # Intel I210-AT standalone gigabit ethernet
+      enp113s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      wlp4s0:
+        dhcp4: true
         dhcp6: false
         optional: true
     bridges:
@@ -75,7 +88,8 @@ autoinstall:
       device: format-partition-nvme2n1p1
       id: mount-1
       type: mount
-  timezone: America/New_York
+  timezone: UTC
+  locale: en_US.UTF-8
   keyboard:
     layout: us
   kernel:
@@ -83,27 +97,39 @@ autoinstall:
   ssh:
     install-server: true
     allow-pw: true
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        # http://archive.ubuntu.com/ubntu
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-archive-apt-proxy/ubuntu"
+          arches: [i386, amd64]
+        # http://ports.ubuntu.com/ubuntu-ports
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
+          arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
   packages:
     - openssh-server
   late-commands:
     # Because we're using preserve_hostname to allow manual setting of the
     # hostname, set an initial hostname manually - the identity block requires
     # a username and it doesn't support flexible enough configuration
+    # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
+    # commands within a shell that need redirection.
     - curtin in-target -- sh -c 'echo pxe > /etc/hostname'
     # Seed the already ran marker for gnome-initial-setup so new users inherit
     - curtin in-target -- mkdir -p /etc/skel/.config
     - curtin in-target -- touch /etc/skel/.config/gnome-initial-setup-done
-    # Disable unattended upgrades
+    # Run updates at our own cadence
     - curtin in-target -- systemctl disable apt-daily.timer
     - curtin in-target -- systemctl disable apt-daily-upgrade.timer
     - curtin in-target -- systemctl mask apt-daily.service
     - curtin in-target -- systemctl mask apt-daily-upgrade.service
-    # Configure unattended-upgrades to not run
-    - curtin in-target -- sh -c 'echo "APT::Periodic::Update-Package-Lists \"0\";" > /etc/apt/apt.conf.d/20auto-upgrades'
-    - curtin in-target -- sh -c 'echo "APT::Periodic::Unattended-Upgrade \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
-    - curtin in-target -- sh -c 'echo "APT::Periodic::Download-Upgradeable-Packages \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
-    - curtin in-target -- sh -c 'echo "APT::Periodic::AutocleanInterval \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades'
-    # Disable update-notifier
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::Update-Package-Lists.*/APT::Periodic::Update-Package-Lists \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::Unattended-Upgrade.*/APT::Periodic::Unattended-Upgrade \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.Download-Upgradeable-Packages */APT::Periodic::Download-Upgradeable-Packages \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.AutocleanInterval */APT::Periodic::AutocleanInterval \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'snap refresh --hold || true'
+    - curtin in-target -- sh -c 'echo "Hidden=true" >> /etc/xdg/autostart/update-notifier.desktop'
     - curtin in-target -- systemctl disable update-notifier-download.timer || true
     - curtin in-target -- systemctl disable update-notifier-motd.timer || true
   user-data: # cloud-init starts here
