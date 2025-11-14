@@ -1,0 +1,148 @@
+#cloud-config
+autoinstall:
+  version: 1
+  source:
+    id: ubuntu-server
+    search_drivers: false 
+  network:
+    version: 2
+    ethernets:
+      # Intel I219-LM interface that supports vPro/AMT pass-through
+      eno1:
+        dhcp4: false
+        dhcp6: false
+        optional: true
+      # Intel I210-AT standalone gigabit ethernet
+      enp113s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+      wlp4s0:
+        dhcp4: true
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces:
+          - eno1
+        dhcp4: true
+        dhcp6: false
+        accept-ra: false
+        link-local: []
+        parameters:
+          stp: false
+          forward-delay: 0
+  storage:
+    config:
+    - transport: pcie
+      preserve: true
+      id: nvme-controller-nvme2
+      type: nvme_controller
+    - ptable: gpt
+      serial: KINGSTON_SNVS2000G_50026B768596C4FC_1
+      wwn: eui.00000000000000000026b768596c4fc5
+      nvme_controller: nvme-controller-nvme2
+      path: /dev/nvme2n1
+      wipe: superblock
+      preserve: false
+      name: ''
+      grub_device: false
+      id: disk-nvme2n1
+      type: disk
+    - device: disk-nvme2n1
+      size: 1127219200
+      wipe: superblock
+      flag: boot
+      number: 1
+      preserve: false
+      grub_device: true
+      offset: 1048576
+      path: /dev/nvme2n1p1
+      id: partition-0
+      type: partition
+    - fstype: fat32
+      volume: partition-0
+      preserve: false
+      id: format-0
+      type: format
+    - device: disk-nvme2n1
+      size: 1999269527552
+      wipe: superblock
+      number: 2
+      preserve: false
+      grub_device: false
+      offset: 1128267776
+      path: /dev/nvme2n1p2
+      id: partition-1
+      type: partition
+    - fstype: ext4
+      volume: partition-1
+      preserve: false
+      id: format-1
+      type: format
+    - path: /
+      device: format-1
+      id: mount-1
+      type: mount
+    - path: /boot/efi
+      device: format-0
+      id: mount-0
+      type: mount
+  timezone: UTC
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  kernel:
+    flavor: hwe
+  ssh:
+    install-server: true
+    allow-pw: true
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        # http://archive.ubuntu.com/ubntu
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-archive-apt-proxy/ubuntu"
+          arches: [i386, amd64]
+        # http://ports.ubuntu.com/ubuntu-ports
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
+          arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
+  late-commands:
+    # Because we're using preserve_hostname to allow manual setting of the
+    # hostname, set an initial hostname manually - the identity block requires
+    # a username and it doesn't support flexible enough configuration
+    # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
+    # commands within a shell that need redirection.
+    - curtin in-target -- sh -c 'echo pxe > /etc/hostname'
+    # Run updates at our own cadence
+    - curtin in-target -- systemctl disable apt-daily.timer
+    - curtin in-target -- systemctl disable apt-daily-upgrade.timer
+    - curtin in-target -- systemctl mask apt-daily.service
+    - curtin in-target -- systemctl mask apt-daily-upgrade.service
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::Update-Package-Lists.*/APT::Periodic::Update-Package-Lists \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::Unattended-Upgrade.*/APT::Periodic::Unattended-Upgrade \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.Download-Upgradeable-Packages */APT::Periodic::Download-Upgradeable-Packages \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.AutocleanInterval */APT::Periodic::AutocleanInterval \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    # Display grub menu to allow for recovery
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
+    - curtin in-target -- update-grub
+  user-data:  # cloud-init starts here
+    preserve_hostname: true
+    users:
+      - name: autobot
+        uid: 63112
+        primary_group: users
+        groups: users
+        shell: /bin/bash
+        plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash using 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01J$ajF/6iHYX1Ef2pF5mPi..zBFiU4Qzvnif.hT2MB.dZ9mSx6txdPiz..."
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: false
+        ssh_authorized_keys:
+          # taylor
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
+    chpasswd: {expire: false}
+    ssh_pwauth: true
