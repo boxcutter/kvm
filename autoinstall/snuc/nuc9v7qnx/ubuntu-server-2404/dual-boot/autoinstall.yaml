@@ -123,6 +123,17 @@ autoinstall:
     - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::Unattended-Upgrade.*/APT::Periodic::Unattended-Upgrade \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
     - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.Download-Upgradeable-Packages */APT::Periodic::Download-Upgradeable-Packages \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
     - curtin in-target -- sh -c 'sed -i "s/^APT::Periodic::.AutocleanInterval */APT::Periodic::AutocleanInterval \"0\";/g" /etc/apt/apt.conf.d/20auto-upgrades'
+    # Mask some update notices in the motd
+    - curtin in-target -- sh -c 'sed -i 's/ENABLED=1/ENABLED=0/' /etc/default/motd-news'
+    - curtin in-target -- chmod -x /etc/update-motd.d/10-help-text
+    - curtin in-target -- chmod -x /etc/update-motd.d/50-motd-news
+    - curtin in-target -- chmod -x /etc/update-motd.d/90-updates-available
+    - curtin in-target -- chmod -x /etc/update-motd.d/91-contract-ua-esm-status
+    - curtin in-target -- chmod -x /etc/update-motd.d/91-release-upgrade
+    - curtin in-target -- chmod -x /etc/update-motd.d/92-unattended-upgrades
+    - curtin in-target -- chmod -x /etc/update-motd.d/95-hwe-eol
+    - curtin in-target -- chmod -x /etc/update-motd.d/98-reboot-required
+    - curtin in-target -- rm -f /etc/legal
     # Display grub menu to allow for recovery
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
     - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
