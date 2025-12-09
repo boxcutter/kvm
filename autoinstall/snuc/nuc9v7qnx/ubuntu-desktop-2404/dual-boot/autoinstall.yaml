@@ -94,6 +94,7 @@ autoinstall:
     layout: us
   kernel:
     flavor: hwe
+  updates: all
   ssh:
     install-server: true
     allow-pw: true
@@ -107,8 +108,6 @@ autoinstall:
         # http://ports.ubuntu.com/ubuntu-ports
         - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
           arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
-  packages:
-    - openssh-server
   late-commands:
     # Because we're using preserve_hostname to allow manual setting of the
     # hostname, set an initial hostname manually - the identity block requires

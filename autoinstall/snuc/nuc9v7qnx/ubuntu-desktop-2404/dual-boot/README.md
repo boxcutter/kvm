@@ -7,7 +7,7 @@ docker run -it --rm \
   --mount type=bind,source="$(pwd)",target=/data \
   docker.io/boxcutter/ubuntu-autoinstall \
   --source ubuntu-24.04.3-desktop-amd64.iso \
-  --autoinstall autoinstall.yaml \  
+  --autoinstall autoinstall.yaml \
   --destination ubuntu-24.04.3-desktop-amd64-autoinstall.iso \
   --grub grub.cfg \
   --loopback loopback.cfg \
