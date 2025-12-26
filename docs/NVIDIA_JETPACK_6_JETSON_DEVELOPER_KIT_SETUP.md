@@ -300,62 +300,62 @@ and complete the system configuration for Ubuntu.
 
 Accept the license terms:
 
-![Terms and Conditions](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5019.PNG)
+![Terms and Conditions](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2002.PNG)
 
 Choose the language:
 
-![Language](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5020.PNG)
+![Language](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2003.PNG)
 
 Choose the keyboard:
 
-![Keyboard](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5021.PNG)
+![Keyboard](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2004.PNG)
 
 Choose the time zone:
 
-![Time Zone](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5022.PNG)
+![Time Zone](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2005.PNG)
 
 Set up the default user:
 
-![User prompt](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5023.PNG)
+![User prompt](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2006.PNG)
 
 Here's the values we normally use for the user account. We
-use the provisioning user name `automat` and the hostname
-`agx0x1`:
+use the provisioning user name `taylor` and the hostname
+`agx01`:
 
-![automat](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5025.PNG)
+![taylor](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2007.PNG)
 
 Choose whether or not to install the Chromium browser. You'll
 need to make sure there's a working network connection if you
 do choose to install:
 
-![chromium](https://github.com/boxcutter/kvm/blob/a555af83c41a36ee726d1a55dcf59cdaa0973ca1/docs/images/jetpack6/IMG_5026.PNG)
+![chromium](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2008.PNG)
 
 Then the system configuration completes and you'll need to
 go through the standard Ubuntu desktop user setup:
 
 Choose whether or not to connect online accounts:
 
-![online accounts](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5033.PNG)
+![online accounts](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2026.PNG)
 
 Choose whether or not to enable Ubuntu Pro:
 
-![Ubuntu Pro](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5034.PNG)
+![Ubuntu Pro](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2028.PNG)
 
 Choose whether or not to help improve Ubuntu:
 
-![Help improve Ubuntu](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5035.PNG)
+![Help improve Ubuntu](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2029.PNG)
 
 Choose whether or not to enable location services:
 
-![Location services](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5037.PNG)
+![Location services](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2031.PNG)
 
 Click to get past the final step:
 
-![Ready to go](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5038.PNG)
+![Ready to go](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2032.PNG)
 
 And finally you should see the Ubuntu desktop:
 
-![Desktop](https://github.com/boxcutter/kvm/blob/98514b819f2318f22af1734f87cf629718624201/docs/images/jetpack6/IMG_5039.PNG)
+![Desktop](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/IMG_2033.PNG)
 
 ## Install SDK Components
 
