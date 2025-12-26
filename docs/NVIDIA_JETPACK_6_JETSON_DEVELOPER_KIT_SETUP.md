@@ -226,20 +226,20 @@ Connect to the target hardware from your host to the flashing port with a USB-C 
 When you run SDK Manager with `/opt/nvidia/sdkmanager/sdkmanager` it may detect the
 target hardware automatically:
 
-![SDK Manager detected device](https://github.com/boxcutter/kvm/blob/8b5793a6120ba6bda748dbf65c8ea937de4f86fb/docs/images/jetpack6/IMG_4876.PNG)
+![SDK Manager detected device](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-42-17.png)
 
-In Step One - System Configuration, verify that the Host Machine is Ubuntu 20.04
+In Step One - System Configuration, verify that the Host Machine is Ubuntu 22.04
 - x86_64 - if not, make sure you’re running on a machine with this configuration!
 - And then make sure the correct target hardware is configured. Choose the JetPack
 - version to install. Click on the "Continue to Step 02" button.
 
-![Step One](https://github.com/boxcutter/kvm/blob/1eaaaffd694ede36c3ba680bc0e675780010a325/docs/images/jetpack6/IMG_4877.PNG)
+![Step One](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-42-47.png)
 
 Choose the appropriate SDK components in Step Two. You can also choose to download
 now and install later and store the install files on a shared drive. Click on the
 "Continue to Step 03" button.
 
-![Step Two](https://github.com/boxcutter/kvm/blob/8c035a3f137df1e665c5bd3b0b4cf9c94fa90cb7/docs/images/jetpack6/IMG_5006.PNG)
+![Step Two](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-45-20.png)
 
 It will then proceed to download the files for the JetPack version you created -
 will take 15-20 minutes or more depending on the speed of your internet connection:
@@ -271,7 +271,7 @@ recovery mode.
 
 Once the host detects the device in recovery mode, you'll need to choose the
 target device type again:
-![Force Recovery Device Detected](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_4999.PNG)
+![Force Recovery Device Detected](https://github.com/boxcutter/kvm/blob/8c035a3f137df1e665c5bd3b0b4cf9c94fa90cb7/docs/images/jetpack6/2025-12-26_08-58-16.png)
 
 ## Ubuntu Configuration on Target Device 
 
@@ -284,12 +284,12 @@ Choose the NVMe drive as the target storage device and click on the "Flash"
 button to continue:
 https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html
 
-![Runtime configuration](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_5015.PNG)
+![Runtime configuration](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-59-15.png)
 
 SDK Manager will then continue to flash the device and install the Ubuntu
 on the NVMe drive:
 
-![Installing](https://github.com/boxcutter/kvm/blob/d1bc0358ab729c21cbd1bd511ed003ffeed6c071/docs/images/jetpack6/IMG_5017.PNG)
+![Installing](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_09-00-56.png)
 
 After the flashing step finishes and the device reboots, it will again prompt for the device type. Choose accordingly and click on OK.
 
