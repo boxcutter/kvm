@@ -190,7 +190,7 @@ be used as a secondary boot partition for disaster recovery).
 You’ll need a second x86_64 intel PC running [NVIDIA SDK Manager](https://developer.nvidia.com/sdk-manager)
 to flash the device and install JetPack on NVMe drive:
 
-![SDKManager](https://github.com/boxcutter/kvm/blob/86f958179b356a7bf7b73f1fb381fdec8a67b52b/docs/images/jetpack6/Jan2021-developer-sdkm-landing-page-web-diagram.jpg)
+![SDKManager](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_04-59-38.png)
 
 > [!NOTE]  
 > There is a Docker version of SDK Manager, unfortunately it does not
@@ -202,22 +202,22 @@ host system can flash a target NVIDIA device with either JetPack 6.1x or
 JetPack 7.x. We work with both versions of JetPack (even though now we prefer
 JetPack 6.x):
 
-![SDKManager system compatibility matrix](https://github.com/boxcutter/kvm/blob/d21e40166522408f1e5ff2bc73f0e218ea60ed3d/docs/images/jetpack6/Screenshot%202024-05-11%20at%2016.55.34.png)
+![SDKManager system compatibility matrix](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_05-00-14.png)
 
 Go to the Nvidia SDK Manager web site:
 https://developer.nvidia.com/sdk-manager
 
 Choose to download the NVIDIA SDK Manager .deb package:
 
-![Download SDKManager deb](https://github.com/boxcutter/kvm/blob/95f24225a425a77e38073caf3544e9c694b0ef3c/docs/images/jetpack6/IMG_4862.PNG)
+![Download SDKManager deb]](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_04-34-12-1.png)
 
 You’ll need to create an NVDIA account to download:
 
-![Log in or sign up for an NVIDIA account](https://github.com/boxcutter/kvm/blob/2a2647f3636bdeb0dddd626075c43ee745f65d07/docs/images/jetpack6/IMG_4864.PNG)
+![Log in or sign up for an NVIDIA account](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_04-57-14.png)
 
 Install the SDK Manager:
 
-`sudo apt-get install ./sdkmanager_[version]-[build#]_amd64.deb`
+`sudo apt-get install ./sdkmanager_*_amd64.deb`
 
 Then start the SDK Manager with:
 
@@ -225,11 +225,11 @@ Then start the SDK Manager with:
 
 Login with your NVIDIA Developer login again to access the OS boot files:
 
-![NVIDIA Developer Login](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4865.PNG)
+![NVIDIA Developer Login](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_05-24-31.png)
 
 It will pop up a separate web browser for you to login with your account
 
-![NVIDIA login in SDK Manager](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4866.PNG)
+![NVIDIA login in SDK Manager](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack7/2025-12-26_05-30-22.png)
 
 Once you are authenticated, you can close the login window and use SDK
 Manager.
