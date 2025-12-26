@@ -74,52 +74,30 @@ PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-poli
 UBUNTU_CODENAME=jammy
 
 $ cat /etc/nv_tegra_release
-# R36 (release), REVISION: 4.3, GCID: 38968081, BOARD: generic, EABI: aarch64, DATE: Wed Jan  8 01:49:37 UTC 2025
+# R36 (release), REVISION: 4.4, GCID: 41062509, BOARD: generic, EABI: aarch64, DATE: Mon Jun 16 16:07:13 UTC 2025
 # KERNEL_VARIANT: oot
 TARGET_USERSPACE_LIB_DIR=nvidia
 TARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia
 
-$ sudo apt-cache show nvidia-jetpack
-[sudo] password for automat:
-Sorry, try again.
-[sudo] password for automat:
+$ apt-cache show nvidia-jetpack
 Package: nvidia-jetpack
-Source: nvidia-jetpack (6.2)
-Version: 6.2+b77
+Source: nvidia-jetpack (6.2.1)
+Version: 6.2.1+b38
 Architecture: arm64
 Maintainer: NVIDIA Corporation
 Installed-Size: 194
-Depends: nvidia-jetpack-runtime (= 6.2+b77), nvidia-jetpack-dev (= 6.2+b77)
+Depends: nvidia-jetpack-runtime (= 6.2.1+b38), nvidia-jetpack-dev (= 6.2.1+b38)
 Homepage: http://developer.nvidia.com/jetson
 Priority: standard
 Section: metapackages
-Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.2+b77_arm64.deb
-Size: 29298
-SHA256: 70553d4b5a802057f9436677ef8ce255db386fd3b5d24ff2c0a8ec0e485c59cd
-SHA1: 9deab64d12eef0e788471e05856c84bf2a0cf6e6
-MD5sum: 4db65dc36434fe1f84176843384aee23
+Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.2.1+b38_arm64.deb
+Size: 29300
+SHA256: dd9cb893fbe7f80d2c2348b268f17c8140b18b9dbb674fa8d79facfaa2050c53
+SHA1: dc630f213f9afcb6f67c65234df7ad5c019edb9c
+MD5sum: 9c8dc61bdab2b816dcc7cd253bcf6482
 Description: NVIDIA Jetpack Meta Package
 Description-md5: ad1462289bdbc54909ae109d1d32c0a8
 
-Package: nvidia-jetpack
-Source: nvidia-jetpack (6.1)
-Version: 6.1+b123
-Architecture: arm64
-Maintainer: NVIDIA Corporation
-Installed-Size: 194
-Depends: nvidia-jetpack-runtime (= 6.1+b123), nvidia-jetpack-dev (= 6.1+b123)
-Homepage: http://developer.nvidia.com/jetson
-Priority: standard
-Section: metapackages
-Filename: pool/main/n/nvidia-jetpack/nvidia-jetpack_6.1+b123_arm64.deb
-Size: 29312
-SHA256: b6475a6108aeabc5b16af7c102162b7c46c36361239fef6293535d05ee2c2929
-SHA1: f0984a6272c8f3a70ae14cb2ca6716b8c1a09543
-MD5sum: a167745e1d88a8d7597454c8003fa9a4
-Description: NVIDIA Jetpack Meta Package
-Description-md5: ad1462289bdbc54909ae109d1d32c0a8
-
-automat@agx01:~$ sudo apt-cache show nvidia-jetpack
 Package: nvidia-jetpack
 Source: nvidia-jetpack (6.2)
 Version: 6.2+b77
@@ -190,29 +168,28 @@ be used as a secondary boot partition for disaster recovery).
 You’ll need a second x86_64 intel PC running [NVIDIA SDK Manager](https://developer.nvidia.com/sdk-manager)
 to flash the device and install JetPack on NVMe drive:
 
-![SDKManager](https://github.com/boxcutter/kvm/blob/86f958179b356a7bf7b73f1fb381fdec8a67b52b/docs/images/jetpack6/Jan2021-developer-sdkm-landing-page-web-diagram.jpg)
+![SDKManager](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-27-14.png)
 
-The second x86_64 intel PC should be running Ubuntu 20.04. An Ubuntu 20.04
+The second x86_64 intel PC should be running Ubuntu 22.04. An Ubuntu 22.04
 host system can flash a target NVIDIA device with either JetPack 6.x or
-JetPack 5.x. We work with both versions of JetPack (even though now we prefer
-JetPack 6.x):
+JetPack 7.x. For the moment JetPack 7.x isn't supporteded on Orin, so we're
+using JetPack 6.x:
 
-![SDKManager system compatibility matrix](https://github.com/boxcutter/kvm/blob/d21e40166522408f1e5ff2bc73f0e218ea60ed3d/docs/images/jetpack6/Screenshot%202024-05-11%20at%2016.55.34.png)
+![SDKManager system compatibility matrix](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-27-46.png)
 
 Go to the Nvidia SDK Manager web site:
 https://developer.nvidia.com/sdk-manager
 
 Choose to download the NVIDIA SDK Manager .deb package:
 
-![Download SDKManager deb](https://github.com/boxcutter/kvm/blob/95f24225a425a77e38073caf3544e9c694b0ef3c/docs/images/jetpack6/IMG_4862.PNG)
+![Download SDKManager deb](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-25-48-2.png)
 
 You’ll need to create an NVDIA account to download:
 
-![Log in or sign up for an NVIDIA account](https://github.com/boxcutter/kvm/blob/2a2647f3636bdeb0dddd626075c43ee745f65d07/docs/images/jetpack6/IMG_4864.PNG)
-
+![Log in or sign up for an NVIDIA account](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-28-27.png)
 Install the SDK Manager:
 
-`sudo apt-get install ./sdkmanager_[version]-[build#]_amd64.deb`
+`sudo apt-get install ./sdkmanager_*_amd64.deb`
 
 Then start the SDK Manager with:
 
@@ -220,11 +197,12 @@ Then start the SDK Manager with:
 
 Login with your NVIDIA Developer login again to access the OS boot files:
 
-![NVIDIA Developer Login](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4865.PNG)
+![NVIDIA Developer Login](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-33-39.png)
 
 It will pop up a separate web browser for you to login with your account
 
-![NVIDIA login in SDK Manager](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4866.PNG)
+![NVIDIA login in SDK Manager](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-34-39.png)
+
 
 Once you are authenticated, you can close the login window and use SDK
 Manager.
@@ -232,9 +210,9 @@ Manager.
 Over in the SDK Manager app a private notice will be displayed, make a
 selection and click on the "OK" button.
 
-![Privacy Notice](https://github.com/boxcutter/kvm/blob/aa13c8d35dfe10b335796869860adc6871a83ea9/docs/images/jetpack6/IMG_4868.PNG)
+![Privacy Notice](https://github.com/taylorific/nvidia-jetson-training/blob/main/images/jetpack6/2025-12-26_08-35-58.png)
 
-You’ll need to run a USB-C cable from the Ubuntu 20.04 Intel host machine
+You’ll need to run a USB-C cable from the Ubuntu 22.04 Intel host machine
 to the Nvidia Jetson. Connect the USB-C cable for the intel host machine
 to the USB-C port on the side with the 40-pin connector (as it supports
 both upstream and downstream data):
