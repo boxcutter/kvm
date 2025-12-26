@@ -192,6 +192,11 @@ to flash the device and install JetPack on NVMe drive:
 
 ![SDKManager](https://github.com/boxcutter/kvm/blob/86f958179b356a7bf7b73f1fb381fdec8a67b52b/docs/images/jetpack6/Jan2021-developer-sdkm-landing-page-web-diagram.jpg)
 
+> [!NOTE]  
+> There is a Docker version of SDK Manager, unfortunately it does not
+> currently support flashing to NVMe drives (or any external storage).
+> So these instructions just cover installing SDK Manager on the host.
+
 The second x86_64 intel PC should be running Ubuntu 24.04. An Ubuntu 24.04
 host system can flash a target NVIDIA device with either JetPack 6.1x or
 JetPack 7.x. We work with both versions of JetPack (even though now we prefer
