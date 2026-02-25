@@ -29,8 +29,8 @@ virt-install \
 # Choose options
 Serial console=ttyS0,115200n8
 
-virsh destroy nixos-bios
-virsh undefine nixos-bios --remove-all-storage
+virsh destroy nixos
+virsh undefine nixos --remove-all-storage
 ```
 
 ## Minimal ISO image - BIOS
