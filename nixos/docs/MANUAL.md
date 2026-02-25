@@ -1,8 +1,39 @@
 # Manual install NixOS ISO
 
-## Minimal ISO image
+## Minimal ISO image - UEFI
 
+```bash
+mkdir nixos-bios
+cd nixos-bios
+
+curl -LO https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-x86_64-linux.iso
+curl -LO https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-x86_64-linux.iso.sha256
+
+sudo cp latest-nixos-minimal-x86_64-linux.iso \
+  /var/lib/libvirt/iso/latest-nixos-minimal-x86_64-linux.iso
+
+virt-install \
+  --connect qemu:///system \
+  --name nixos \
+  --cdrom /var/lib/libvirt/iso/latest-nixos-minimal-x86_64-linux.iso \
+  --disk pool=default,format=qcow2,bus=virtio,size=60 \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant nixos-25.05 \
+  --network network=host-network,model=virtio \
+  --graphics none \
+  --console pty,target_type=serial
+
+# Hit ESC
+boot-serial
+
+virsh destroy nixos-bios
+virsh undefine nixos-bios --remove-all-storage
 ```
+
+## Minimal ISO image - BIOS
+
+```bash
 mkdir nixos-bios
 cd nixos-bios
 
