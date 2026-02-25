@@ -15,6 +15,8 @@ sudo cp latest-nixos-minimal-x86_64-linux.iso \
 virt-install \
   --connect qemu:///system \
   --name nixos \
+  --boot loader=/usr/share/OVMF/OVMF_CODE_4M.fd,loader.readonly=yes,loader.type=pflash,nvram.template=/usr/share/OVMF/OVMF_VARS_4M.fd \
+  --network network=host-network,model=virtio \
   --cdrom /var/lib/libvirt/iso/latest-nixos-minimal-x86_64-linux.iso \
   --disk pool=default,format=qcow2,bus=virtio,size=60 \
   --memory 4096 \
@@ -24,8 +26,8 @@ virt-install \
   --graphics none \
   --console pty,target_type=serial
 
-# Hit ESC
-boot-serial
+# Choose options
+Serial console=ttyS0,115200n8
 
 virsh destroy nixos-bios
 virsh undefine nixos-bios --remove-all-storage
