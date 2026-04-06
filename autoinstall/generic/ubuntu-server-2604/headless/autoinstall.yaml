@@ -1,0 +1,74 @@
+#cloud-config
+autoinstall:
+  version: 1
+  network:
+    version: 2
+    ethernets:
+      enp1s0:
+        dhcp4: false
+        dhcp6: false
+        optional: true
+    bridges:
+      br0:
+        interfaces: [enp1s0]
+        dhcp4: true
+        dhcp6: false
+        accept-ra: false
+        link-local: []
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+  timezone: UTC
+  keyboard:
+    layout: us
+  apt:
+    preserve_sources_list: false
+    mirror-selection:
+      primary:
+        # http://archive.ubuntu.com/ubntu
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-archive-apt-proxy/ubuntu"
+          arches: [i386, amd64]
+        # http://ports.ubuntu.com/ubuntu-ports
+        - uri: "https://crake-nexus.org.boxcutter.net/repository/ubuntu-ports-proxy/ubuntu-ports"
+          arches: [s390x, arm64, armhf, powerpc, ppc64el, riscv64]
+  packages:
+    - qemu-guest-agent
+  ssh:
+    install-server: yes
+    allow-pw: yes
+  late-commands:
+    # Because we're using preserve_hostname to allow manual setting of the
+    # hostname, set an initial hostname manually - the identity block requires
+    # a username and it doesn't support flexible enough configuration
+    # NOTE: 'curtin in-target' doesn't invoke a shell, so you need to run
+    # commands within a shell that need redirection.
+    - curtin in-target -- sh -c 'echo generic-server > /etc/hostname'
+    # Configure grub to use serial console for display
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=30/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT=countdown/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="console=tty1 console=ttyS0,115200n8 systemd.wants=serial-getty@ttyS0"/' /etc/default/grub
+    - curtin in-target -- sed -ie 's/#GRUB_TERMINAL=.*/GRUB_TERMINAL="console serial"/' /etc/default/grub
+    - curtin in-target -- update-grub
+  user-data: # cloud-init starts here
+    preserve_hostname: true
+    users:
+      # Temporary user for bootstrapping
+      - name: autobot
+        uid: 63112
+        primary_group: users
+        groups: users
+        shell: /bin/bash
+        # Testing with a plaintext password
+        plain_text_passwd: superseekret
+        # Replace with your generated salted SHA-512 hash w/ 'openssl passwd -6'
+        # passwd: "$6$W32sh2s3EDp01Jvnif.hT2MB.dZ9mSx6txdPiz..."
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        lock_passwd: false
+        ssh_authorized_keys:
+          # taylor
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
+    chpasswd:
+      expire: false
+    ssh_pwauth: true
