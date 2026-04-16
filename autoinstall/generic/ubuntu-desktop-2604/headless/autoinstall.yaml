@@ -79,6 +79,20 @@ autoinstall:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEWerEkujoB7ipGnWJwnPGFu3DuUQJtc1zB6YqjGRziE sheila
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINRK4hkcpUiaSkiLEytgwMYcKylBioXPLx1TnwJFrLPl mahowald
     write_files:
+      # Configure system-wide defaults to disable screen blanking
+      - path: /etc/dconf/db/local.d/00-screensaver
+        content: |
+          [org/gnome/desktop/session]
+          idle-delay=uint32 0
+
+          [org/gnome/desktop/screensaver]
+          lock-enabled=false
+          idle-activation-enabled=false
+
+          [org/gnome/settings-daemon/plugins/power]
+          sleep-inactive-ac-type="nothing"
+          sleep-inactive-battery-type="nothing"
+          idle-dim=false
       # Configure system to refer to user settings in ~/.config/dconfig/user
       # database first, then look for system-wide defaults in
       # /etc/dconf/db/local
