@@ -5,6 +5,10 @@
 ```
 $ curl -LO \
     https://releases.ubuntu.com/26.04/ubuntu-26.04-beta-live-server-amd64.iso
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-prox
+y/resolute/SHA256SUMS
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-prox
+y/26.04/SHA256SUMS
 
 docker pull docker.io/boxcutter/ubuntu-autoinstall
 UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-beta-live-server-amd64.iso
