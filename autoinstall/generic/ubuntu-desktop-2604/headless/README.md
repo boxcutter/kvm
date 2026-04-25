@@ -1,23 +1,24 @@
 # Preparing the ISO
 
 ```
-$ curl -LO https://cdimage.ubuntu.com/daily-live/current/resolute-desktop-amd64.iso
-$ curl -LO https://releases.ubuntu.com/26.04/ubuntu-26.04-beta-desktop-amd64.iso
+$ curl -LO https://releases.ubuntu.com/26.04/ubuntu-26.04-desktop-amd64.iso
 
-# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/26.04/SHA256SUMS
-# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/26.04/ubuntu-26.04-beta-desktop-amd64.iso
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/resolute/SHA256SUMS
+# curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/resolute/ubuntu-26.04-desktop-amd64.iso
 
 # curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-proxy/resolute/ubuntu-26.04-beta-desktop-amd64.iso
 
 docker pull docker.io/boxcutter/ubuntu-autoinstall
+UBUNTU_DESKTOP_26_04_ISO=ubuntu-26.04-desktop-amd64.iso
+UBUNTU_DESKTOP_26_04_ISO_AUTOINSTALL=ubuntu-26.04-desktop-amd64-autoinstall.iso
 docker run -it --rm \
   --mount type=bind,source="$(pwd)",target=/data \
   docker.io/boxcutter/ubuntu-autoinstall \
     --autoinstall autoinstall.yaml \
     --grub grub.cfg \
     --config-root \
-    --source ubuntu-26.04-beta-desktop-amd64.iso \
-    --destination ubuntu-26.04-beta-desktop-amd64-autoinstall.iso
+    --source ${UBUNTU_DESKTOP_26_04_ISO} \
+    --destination ${UBUNTU_DESKTOP_26_04_ISO_AUTOINSTALL}
 
 # Verify that /autoinstall.yaml exists
 $ sudo apt-get update
@@ -30,14 +31,14 @@ $ isoinfo -R -i \
 # Testing the autoinstall headlessly in a VM using VNC
 
 ```
-sudo cp  ubuntu-26.04-beta-desktop-amd64-autoinstall.iso \
-  /var/lib/libvirt/iso/ubuntu-26.04-beta-desktop-amd64-autoinstall.iso
+sudo cp ${UBUNTU_DESKTOP_26_04_ISO_AUTOINSTALL} \
+  /var/lib/libvirt/iso/${UBUNTU_DESKTOP_26_04_ISO_AUTOINSTALL}
 
 virt-install \
   --connect qemu:///system \
   --name ubuntu-desktop-2604 \
   --boot uefi \
-  --cdrom /var/lib/libvirt/iso/ubuntu-26.04-beta-desktop-amd64-autoinstall.iso \
+  --cdrom /var/lib/libvirt/iso/${UBUNTU_DESKTOP_26_04_ISO_AUTOINSTALL} \
   --disk pool=default,format=qcow2,bus=virtio,size=60 \
   --memory 4096 \
   --vcpus 2 \

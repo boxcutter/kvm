@@ -1,7 +1,5 @@
-# UBUNTU_DESKTOP_26_04_ISO=ubuntu-26.04-beta-desktop-amd64.iso
-UBUNTU_DESKTOP_26_04_ISO=resolute-desktop-amd64.iso
-# UBUNTU_DESKTOP_26_04_AUTOINSTALL_ISO=ubuntu-26.04-beta-desktop-amd64-autoinstall.iso
-UBUNTU_DESKTOP_26_04_AUTOINSTALL_ISO=resolute-desktop-amd64-autoinstall.iso
+UBUNTU_DESKTOP_26_04_ISO=ubuntu-26.04-desktop-amd64.iso
+UBUNTU_DESKTOP_26_04_AUTOINSTALL_ISO=ubuntu-26.04-desktop-amd64-autoinstall.iso
 
 sudo rm ${UBUNTU_DESKTOP_26_04_AUTOINSTALL_ISO}
 
