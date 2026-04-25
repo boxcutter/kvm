@@ -2,4 +2,5 @@ http/
 output-*/
 boot-*/
 *.iso
+SHA256SUMS
 .DS_Store
