@@ -2,8 +2,8 @@
 
 set -x
 
-UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-beta-live-server-amd64.iso
-UBUNTU_SERVER_26_04_AUTOINSTALL_ISO="${UBUNTU_SERVER_26_04_ISO}-autoinstall.iso"
+UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-live-server-amd64.iso
+UBUNTU_SERVER_26_04_AUTOINSTALL_ISO=ubuntu-26.04-live-server-amd64-autoinstall.iso
 
 sudo rm "${UBUNTU_SERVER_26_04_AUTOINSTALL_ISO}"
 

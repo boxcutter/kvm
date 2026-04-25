@@ -4,14 +4,14 @@
 
 ```
 $ curl -LO \
-    https://releases.ubuntu.com/26.04/ubuntu-26.04-beta-live-server-amd64.iso
+    https://releases.ubuntu.com/26.04/ubuntu-26.04-live-server-amd64.iso
 # curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-prox
 y/resolute/SHA256SUMS
 # curl -LO https://crake-nexus.org.boxcutter.net/repository/ubuntu-releases-prox
-y/26.04/SHA256SUMS
+y/26.04/ubuntu-26.04-live-server-amd64.iso
 
 docker pull docker.io/boxcutter/ubuntu-autoinstall
-UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-beta-live-server-amd64.iso
+UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-live-server-amd64.iso
 docker run -it --rm \
   --mount type=bind,source="$(pwd)",target=/data \
   docker.io/boxcutter/ubuntu-autoinstall \
@@ -30,8 +30,8 @@ $ isoinfo -R -i \
 ## Testing the autoinstall in a VM
 
 ```
-UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-beta-live-server-amd64.iso
-UBUNTU_SERVER_26_04_AUTOINSTALL_ISO=${UBUNTU_SERVER_26_04_ISO}-autoinstall.iso
+UBUNTU_SERVER_26_04_ISO=ubuntu-26.04-live-server-amd64.iso
+UBUNTU_SERVER_26_04_AUTOINSTALL_ISO=ubuntu-26.04-live-server-amd64-autoinstall.iso
 sudo cp ${UBUNTU_SERVER_26_04_AUTOINSTALL_ISO} \
   /var/lib/libvirt/iso/${UBUNTU_SERVER_26_04_AUTOINSTALL_ISO}
 
@@ -71,5 +71,4 @@ virsh snapshot-delete ubuntu-server-2604
 
 virsh shutdown ubuntu-server-2604
 virsh shutdown ubuntu-server-2604
-```
 ```
