@@ -10,27 +10,20 @@ bootstrap an appliance with further automation specific to your use case.
 
 Examples are provided that create virtual machines images for both
 x86_64 and ARM64 processors with hardware acceleration. For x86_64 processors,
-examples are provided images with either the Legacy BIOS firmware or the
-Unified Extensible Firmware Interface (UEFI). Since ARM64 processors don't
-support Legacy BIOS firmware, only UEFI examples are provided for ARM64.
-
-The SeaBIOS open source implementation of a 16-bit X86 BIOS is used for the
-Legacy BIOS firmware in these images. And the TianoCore open source implentation
-is used for images with UEFI firmware.
+examples are provided images with either the Unified Extensible Firmware
+Interface (UEFI) (TianoCore) or Legacy 16-bit X86 BIOS firmware (SeaBIOS).
+Since ARM64 processors don't support Legacy BIOS firmware,
+only UEFI examples are provided for ARM64.
 
 > NOTE: We don't bother creating vagrant boxes compatible with the
 > vagrant-libvirt plugin. There's no ARM64 version of vagrant for Linux.
-> The vagrant-libvirt hasn't been updated in almost a year as of this writing.
-> Troubleshooting all the ruby dependencies for the vagrant-libvirt plugin is
-> so complicated it's easier to run vagrant in a Docker container. And then
-> there are still so many issues troubleshooting the xml output of
-> vagrant-libvirt, it's just easier to avoid using vagrant entirely. By
-> comparison, using libvirt or qemu to work with the qcow2 images directly
-> is easier than trying to use these as vagrant boxes for our use case in
-> robotics.
+> The vagrant-libvirt hasn't been updated in almost a year as of this writing
+> and it's complicated to install and troubleshoot issues.
+> It's just easier to avoid using vagrant entirely and use libvirt or qemu
+> to work with the qcow2 images directly.
 
-> run vagrant in 
-
+For more information on using libvirt or qemu to work with qcow2
+images directly, refer to https://taylorific.github.io/kvm-training
 
 ## Building the images
 
