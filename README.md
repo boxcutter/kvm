@@ -17,7 +17,7 @@ only UEFI examples are provided for ARM64.
 
 > NOTE: We don't bother creating vagrant boxes compatible with the
 > vagrant-libvirt plugin. There's no ARM64 version of vagrant for Linux.
-> The vagrant-libvirt hasn't been updated in almost a year as of this writing
+> The vagrant-libvirt hasn't been updated in almost a year, as of this writing,
 > and it's complicated to install and troubleshoot issues.
 > It's just easier to avoid using vagrant entirely and use libvirt or qemu
 > to work with the qcow2 images directly.
