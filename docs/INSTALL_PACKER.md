@@ -1,4 +1,4 @@
-# Install Hashicorp Packer on Ubuntu 24.04
+# Install Hashicorp Packer on Ubuntu 26.04
 
 ```
 # Add Hashicorp's official GPG key
@@ -19,7 +19,7 @@ sudo apt install packer
 
 # Verify the install
 $ packer --version
-Packer v1.12.0
+Packer v1.15.3
 
 # Install dependencies for generating cloud-init images
 sudo apt-get update
