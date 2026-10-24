@@ -18,10 +18,11 @@ autoinstall:
         dhcp4: true
         dhcp6: false
         optional: true
-      wlp4s0:
-        dhcp4: true
-        dhcp6: false
-        optional: true
+    # Wi-Fi (wlp4s0) is left out so NetworkManager manages it: under
+    # ethernets netplan gives it a wired profile that can never connect,
+    # and it can't join br0 because an access point only accepts frames
+    # from the MAC address that associated with it. To set it up here,
+    # use wifis: with access-points instead.
     bridges:
       br0:
         interfaces:

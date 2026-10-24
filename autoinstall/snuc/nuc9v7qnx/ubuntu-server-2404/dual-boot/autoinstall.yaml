@@ -17,10 +17,11 @@ autoinstall:
         dhcp4: true
         dhcp6: false
         optional: true
-      wlp4s0:
-        dhcp4: true
-        dhcp6: false
-        optional: true
+    # Wi-Fi (wlp4s0) is left out: under ethernets netplan never
+    # associates it with an access point, and it can't join br0 because
+    # an access point only accepts frames from the MAC address that
+    # associated with it. To use it, add it under wifis: with
+    # access-points.
     bridges:
       br0:
         interfaces:
