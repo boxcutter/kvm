@@ -1,5 +1,102 @@
 # Ubuntu x86_64 cloud images
 
+## Ubuntu 26.04 UEFI virtual firmware
+
+```
+cd ubuntu/cloud/x86_64
+packer init .
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-26.04-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+```
+
+```
+$ sudo qemu-img convert \
+    -f qcow2 \
+    -O qcow2 \
+    output-ubuntu-26.04-x86_64/ubuntu-26.04-x86_64.qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2604.qcow2
+$ sudo qemu-img resize \
+    -f qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2604.qcow2 \
+    32G
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2604 \
+  --boot uefi \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu-lts-latest \
+  --disk /var/lib/libvirt/images/ubuntu-server-2604.qcow2,bus=virtio \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2604
+
+# login with packer user
+```
+
+```
+$ virsh shutdown ubuntu-server-2604
+$ virsh undefine ubuntu-server-2604 --nvram --remove-all-storage
+```
+
+libosinfo has no Ubuntu 26.04 entry yet, so use `ubuntu-lts-latest`; on an Ubuntu 26.04 host it still resolves to `ubuntu24.04`.
+
+## Ubuntu 26.04 BIOS virtual firmware
+
+```
+cd ubuntu/cloud/x86_64
+packer init .
+PACKER_LOG=1 packer build \
+  -var-file ubuntu-26.04-bios-x86_64.pkrvars.hcl \
+  ubuntu.pkr.hcl
+```
+
+```
+$ sudo qemu-img convert \
+    -f qcow2 \
+    -O qcow2 \
+    output-ubuntu-26.04-bios-x86_64/ubuntu-26.04-bios-x86_64.qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2604-bios.qcow2
+$ sudo qemu-img resize \
+    -f qcow2 \
+    /var/lib/libvirt/images/ubuntu-server-2604-bios.qcow2 \
+    32G
+```
+
+```
+virt-install \
+  --connect qemu:///system \
+  --name ubuntu-server-2604-bios \
+  --memory 4096 \
+  --vcpus 2 \
+  --os-variant ubuntu-lts-latest \
+  --disk /var/lib/libvirt/images/ubuntu-server-2604-bios.qcow2,bus=virtio \
+  --network network=default,model=virtio \
+  --graphics spice \
+  --noautoconsole \
+  --console pty,target_type=serial \
+  --import \
+  --debug
+
+virsh console ubuntu-server-2604-bios
+
+# login with packer user
+```
+
+```
+$ virsh shutdown ubuntu-server-2604-bios
+$ virsh undefine ubuntu-server-2604-bios --nvram --remove-all-storage
+```
+
 ## Ubuntu 24.04 UEFI virtual firmware
 
 ```
